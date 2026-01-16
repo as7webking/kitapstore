@@ -14,6 +14,11 @@ const book = new mongoose.Schema(
             type: String,
             required: true,
         },
+        slug: {
+            type: String,
+            unique: true,
+            lowercase: true,
+        },
         price: {
             type: Number,
             required: true,
@@ -29,5 +34,12 @@ const book = new mongoose.Schema(
     },
     { timestamps: true }
 );
+
+book.pre('save', function(next) {
+  if (!this.isModified('title')) return next();
+  
+  this.slug = slugify(this.title, { lower: true, strict: true });
+  next();
+});
 
 module.exports = mongoose.model("books", book);
