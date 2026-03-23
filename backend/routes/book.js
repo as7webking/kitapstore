@@ -1,7 +1,8 @@
+const express = require("express");
 const router = require("express").Router();
 const User = require("../models/user");
 const jwt = require("jsonwebtoken");
-const Book = require("../models/book")
+const Book = require("../models/book");
 const { authentificateToken } = require("./userAuth");
 
 //add book --admin
@@ -10,17 +11,17 @@ router.post("/add-book", authentificateToken, async (req, res) => {
     const { id } = req.headers;
     const user = await User.findById(id);
     if (user.role !== "admin") {
-        return res
-            .status(400)
-            .json({ message: "You are not having access to perform admin work" });
+      return res
+        .status(400)
+        .json({ message: "You are not having access to perform admin work" });
     }
     const book = new Book({
-        url: req.body.url,
-        title: req.body.title,
-        author: req.body.author,
-        price: req.body.price,
-        desc: req.body.desc,
-        language: req.body.language,
+      url: req.body.url,
+      title: req.body.title,
+      author: req.body.author,
+      price: req.body.price,
+      desc: req.body.desc,
+      language: req.body.language,
     });
     await book.save();
     res.status(200).json({ message: "Book added successfully" });
@@ -34,16 +35,16 @@ router.put("/update-book", authentificateToken, async (req, res) => {
   try {
     const { bookid } = req.headers;
     await Book.findByIdAndUpdate(bookid, {
-        url: req.body.url,
-        title: req.body.title,
-        author: req.body.author,
-        price: req.body.price,
-        desc: req.body.desc,
-        language: req.body.language,
+      url: req.body.url,
+      title: req.body.title,
+      author: req.body.author,
+      price: req.body.price,
+      desc: req.body.desc,
+      language: req.body.language,
     });
-    
+
     return res.status(200).json({
-        message: "Book Updated successfully!",
+      message: "Book Updated successfully!",
     });
   } catch (error) {
     res.status(500).json({ message: "An error occured" });
@@ -54,9 +55,9 @@ router.put("/update-book", authentificateToken, async (req, res) => {
 router.delete("/delete-book", authentificateToken, async (req, res) => {
   try {
     const { bookid } = req.headers;
-    await Book.findByIdAndDelete(bookid);
+    await Book.findByIdAndUpdate(bookid, { isDeleted: true });
     return res.status(200).json({
-        message: "Book deleted successfully!",
+      message: "Book deleted successfully!",
     });
   } catch (error) {
     res.status(500).json({ message: "An error occured" });
@@ -68,8 +69,8 @@ router.get("/get-all-books", async (req, res) => {
   try {
     const books = await Book.find().sort({ createdAt: -1 });
     return res.json({
-        status: "Success",
-        data: books,
+      status: "Success",
+      data: books,
     });
   } catch (error) {
     res.status(500).json({ message: "An error occured" });
@@ -77,15 +78,26 @@ router.get("/get-all-books", async (req, res) => {
 });
 
 //get recently added books - limit 7
-router.get("/get-recent-books", async (req, res) => {
+router.get("/get-recent-books/", async (req, res) => {
   try {
     const books = await Book.find().sort({ createdAt: -1 }).limit(4);
     return res.json({
-        status: "Success",
-        data: books,
+      status: "Success",
+      data: books,
     });
   } catch (error) {
     console.log(error);
+    res.status(500).json({ message: "An error occured" });
+  }
+});
+
+// get popular books
+router.get("/get-popular-books", async (req, res) => {
+  try {
+    const books = await Book.find().sort({ views: -1, createdAt: -1 }).limit(6);
+
+    res.json({ status: "Success", data: books });
+  } catch (error) {
     res.status(500).json({ message: "An error occured" });
   }
 });
@@ -96,12 +108,27 @@ router.get("/get-book-by-id/:id", async (req, res) => {
     const { id } = req.params;
     const books = await Book.findById(id);
     return res.json({
-        status: "Success",
-        data: books,
+      status: "Success",
+      data: books,
     });
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: "An error occured" });
   }
 });
+
+//get book by slug
+router.get("/get-book-by-slug/:slug", async (req, res) => {
+  try {
+    // Searching in database slug, not ID
+    const { slug } = req.params;
+    const book = await Book.findOne({ slug: slug });
+
+    if (!book) return res.status(404).send("Book not found");
+    return res.json(book);
+  } catch (err) {
+    res.status(500).send("Server error");
+  }
+});
+
 module.exports = router;
