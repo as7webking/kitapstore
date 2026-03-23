@@ -47,6 +47,13 @@ const user = new mongoose.Schema(
             ref: "order",
         },
     ],
+
+    // If google / FB
+    authProvider: {
+      type: String,
+      enum: ["local", "google", "facebook"],
+      default: "local",
+    },
 },
     { timestamps: true }
 );
