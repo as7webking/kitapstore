@@ -22,16 +22,18 @@ const Login = () => {
         return alert("All fields are required");
       } else {
         const response = await axios.post(
-          "http://localhost:1001/api/v1/sign-in",
-          Values
+          "http://localhost:1001/api/v1/user/sign-in",
+          Values,
         );
 
-        dispatch(authActions.login());
-        dispatch(authActions.changeRole(response.data.role));
         localStorage.setItem("token", response.data.token);
         localStorage.setItem("id", response.data.id);
         localStorage.setItem("role", response.data.role);
-        navigate("/profile");
+
+        dispatch(authActions.login());
+        dispatch(authActions.changeRole(response.data.role));
+        
+        navigate("/profile", { replace: true });
       }
     } catch (error) {
       alert(error.response.data.message);
@@ -39,7 +41,7 @@ const Login = () => {
   };
 
   return (
-    <div className="h-auto bg-zinc-700 px-12 py-8 flex items-center justify-center">
+    <div className="h-[90vh] bg-zinc-700 px-12 py-8 flex items-center justify-center">
       <div className="bg-gray-700 rounded-lg px-8 py-5 w-full md:2-3/6 lg:w-2/6">
         <p className="text-zinc-100 text-xl">Login</p>
         <div className="mt-4">
@@ -79,6 +81,20 @@ const Login = () => {
           >
             Log In
           </button>
+        </div>
+        <div className="flex gap-4 mt-4">
+          <a
+            href="http://localhost:1001/api/v1/auth/google"
+            className="w-1/2 bg-red-500 text-white py-2 rounded flex items-center justify-center hover:bg-red-600 transition"
+          >
+            Login with Google
+          </a>
+          <a
+            href="http://localhost:1001/api/v1/auth/facebook"
+            className="w-1/2 bg-blue-700 text-white py-2 rounded flex items-center justify-center hover:bg-blue-800 transition"
+          >
+            Login with Facebook
+          </a>
         </div>
         <p className="flex mt-4 items-center justify-center text-zinc-200 font-semibold">
           Or

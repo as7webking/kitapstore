@@ -25,7 +25,7 @@ const SignUp = () => {
         alert("All fields are required");
       } else {
         const response = await axios.post(
-          "http://localhost:1001/api/v1/sign-up",
+          "http://localhost:1001/api/v1/user/sign-up",
           Values
         );
         alert(response.data.message);

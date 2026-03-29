@@ -21,7 +21,7 @@ const AllOrders = () => {
       try {
         const response = await axios.get(
           "http://localhost:1001/api/v1/get-all-orders",
-          { headers }
+          { headers },
         );
         setAllOrders(response.data.data);
       } catch (error) {
@@ -33,8 +33,8 @@ const AllOrders = () => {
 
   return (
     <>
-      {!AllOrders && (
-        <div className="h-[199%] flex items-center justify-center">
+      {AllOrders.length === 0 && (
+        <div className="flex justify-center">
           <Loader />
         </div>
       )}
@@ -65,7 +65,7 @@ const AllOrders = () => {
                 <div className="w-[3%] text-center text-zinc-400">{i + 1}</div>
                 <div className="w-[22%]">
                   <Link
-                    to={`/view-book-details/${items.book.slug}`}
+                    to={`/view-book-details/${items.book.slug || items.book._id}`}
                     className="hover:text-blue-400 font-medium line-clamp-2"
                   >
                     {items.book.title}
@@ -73,8 +73,8 @@ const AllOrders = () => {
                 </div>
                 <div className="w-[45%] hidden md:block text-sm text-zinc-400">
                   {/* Using a fallback description */}
-                  {items.book.description
-                    ? items.book.description.substring(0, 100) + "..."
+                  {items.book.desc
+                    ? items.book.desc.substring(0, 100) + "..."
                     : "Описание отсутствует."}
                 </div>
                 <div className="w-[9%] text-right font-bold text-lg">

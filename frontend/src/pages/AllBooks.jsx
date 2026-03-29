@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import Loader from "../components/Loader/Loader";
 import BookCard from "../components/BookCard/BookCard";
+import SearchBooks from "../components/SearchBooks/SearchBooks";
 import { Link } from "react-router-dom";
 
 const AllBooks = () => {
@@ -21,13 +22,14 @@ const AllBooks = () => {
       <h4 className="text-3xl text-gray-400">All books</h4>
       {!Data && (
         <div className="w-full h-screen flex items-center justify-center">
-          <Loader />
+          No matched books
         </div>
       )}
       <div className="my-8 grid grid-cols-1 sm:grid-cols-3 md:grid-cols-4 gap-8">
         {Data &&
           Data.map((item, i) => (
             <div key={i}>
+              <SearchBooks />
               <BookCard data={item} />
             </div>
           ))}
@@ -36,7 +38,7 @@ const AllBooks = () => {
       {/* If no books */}
       {Data && Data.length === 0 && (
         <div className="text-zinc-400 text-center w-full py-10">
-          На данный момент книг нет.
+          No books now.
         </div>
       )}
     </div>

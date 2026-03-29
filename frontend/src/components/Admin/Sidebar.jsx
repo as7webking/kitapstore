@@ -11,7 +11,13 @@ const Sidebar = ({ data, deleteAccount }) => {
   return (
     <div className="bg-zinc-700 p-4 rounded flex flex-col items-center justify-between h-auto lg:h-[100]">
       <div className="flex items-center flex-col justify-center">
-        <img src={data.avatar} alt="Avatar" className="h-[12vh]" />
+        {data.avatar ? (
+          <img src={data.avatar} alt="" className="h-[12vh]" />
+        ) : (
+          <div className="h-[12vh] w-[12vh] rounded-full bg-zinc-600">
+            Profile 777
+          </div>
+        )}
         <p className="mt-3 text-xl text-zinc-100 font-semibold">
           {data.username}
         </p>
@@ -49,10 +55,10 @@ const Sidebar = ({ data, deleteAccount }) => {
             All Orders
           </Link>
           <Link
-            to="/profile/add-book"
+            to="/profile/add-blog"
             className="text-zinc-100 font-semibold w-full py-2 mt-4 text-center hover:bg-zinc-700 rounded transition-all duration-200"
           >
-            Add Book
+            Add Blog
           </Link>
         </div>
       )}

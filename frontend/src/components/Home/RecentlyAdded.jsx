@@ -7,7 +7,7 @@ const RecentlyAdded = () => {
   useEffect(() => {
     const fetch = async () => {
       const response = await axios.get(
-        "http://localhost:1001/api/v1/get-recent-books"
+        "http://localhost:1001/api/v1/get-recent-books",
       );
       setData(response.data.data);
     };
@@ -15,22 +15,26 @@ const RecentlyAdded = () => {
   }, []);
 
   return (
-    <div className="mt-8 px-4">
-      <h4 className="text-3xl text-gray-400">Recently added books</h4>
-      {!Data && (
-        <div className="flex items-center justify-center my-8">
-          <Loader />
-        </div>
-      )}
-      <div className="my-8 grid grid-cols-1 sm:grid-cols-3 md:grid-cols-4 gap-4">
-        {Data &&
-          Data.map((items, i) => (
-            <div key={i}>
-              <BookCard data={items} />
+    <section className="bg-zinc-700">
+      <div className="container w-[90%] max-w-[1200px] mx-auto px-6 py-8">
+        <div className="mt-8 px-4">
+          <h4 className="text-3xl text-gray-400">Recently added books</h4>
+          {!Data && (
+            <div className="flex items-center justify-center my-8">
+              <Loader />
             </div>
-          ))}
+          )}
+          <div className="my-8 grid grid-cols-1 sm:grid-cols-3 md:grid-cols-4 gap-4">
+            {Data &&
+              Data.map((items, i) => (
+                <div key={i}>
+                  <BookCard data={items} />
+                </div>
+              ))}
+          </div>
+        </div>
       </div>
-    </div>
+    </section>
   );
 };
 

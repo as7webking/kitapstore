@@ -5,7 +5,7 @@ import { useDispatch, useSelector } from "react-redux";
 import axios from "axios";
 import Loader from "../components/Loader/Loader";
 import MobileNav from "../components/Profile/MobileNav";
-const Profile = () => {
+const Admin = () => {
   //const isLoggedIn = useSelector((state) => state.auth.isLoggedIn);
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -59,6 +59,7 @@ const Profile = () => {
 
   return (
     <section className="bg-zinc-700">
+      <h1>Admin Profile</h1>
       <div className="w-[90%] max-w-[1200px] mx-auto px-2 md:px-12 flex flex-col md:flex-row py-8 gap-4 text-zinc-100">
         {!Profile && (
           <div className="h-[100%] flex items-center justify-center  w-[90%] max-w-[1200px] mx-auto ">
@@ -81,4 +82,4 @@ const Profile = () => {
   );
 };
 
-export default Profile;
+export default Admin;

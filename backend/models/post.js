@@ -1,21 +1,14 @@
 const mongoose = require("mongoose");
 const slugify = require("slugify");
 
-const bookSchema = new mongoose.Schema(
+const postSchema = new mongoose.Schema(
   {
-    // Image URL or base64
-    url: {
+    coverImage: {
       type: String,
-      required: true,
+      default: "",
     },
 
     title: {
-      type: String,
-      required: true,
-      trim: true,
-    },
-
-    author: {
       type: String,
       required: true,
       trim: true,
@@ -25,49 +18,31 @@ const bookSchema = new mongoose.Schema(
       type: String,
       unique: true,
       lowercase: true,
+      trim: true,
     },
 
-    price: {
-      type: Number,
-      required: true,
-      min: 0,
+    excerpt: {
+      type: String,
+      default: "",
+      trim: true,
     },
 
-    desc: {
+    content: {
       type: String,
       required: true,
+      trim: true,
     },
 
-    language: {
+    author: {
       type: String,
-      required: true,
+      default: "Admin",
+      trim: true,
     },
 
-    // 🔥 Book type
-    type: {
+    status: {
       type: String,
-      enum: ["physical", "digital"],
-      required: true,
-    },
-
-    // 🔥 Digital only
-    pdf: {
-      type: String, // base64 or file URL
-    },
-
-    // 🔥 Physical only
-    shippingPrice: {
-      type: Number,
-      min: 0,
-    },
-
-    views: {
-      type: Number,
-      default: 0,
-    },
-    isDeleted: {
-      type: Boolean,
-      default: false,
+      enum: ["draft", "published"],
+      default: "published",
     },
   },
   { timestamps: true },
@@ -76,13 +51,13 @@ const bookSchema = new mongoose.Schema(
 //
 // 🔐 BUSINESS VALIDATION
 //
-bookSchema.pre("validate", function (next) {
-  if (this.type === "digital" && !this.pdf) {
-    return next(new Error("Digital book must have a PDF file"));
+postSchema.pre("validate", function (next) {
+  if (!this.slug && this.title) {
+    this.slug = slugify(this.title, { lower: true, strict: true, trim: true });
   }
 
-  if (this.type === "physical" && this.shippingPrice == null) {
-    return next(new Error("Physical book must have shipping price"));
+  if (!this.excerpt && this.content) {
+    this.excerpt = this.content.slice(0, 180);
   }
 
   next();
@@ -91,11 +66,11 @@ bookSchema.pre("validate", function (next) {
 //
 // 🔗 SLUG GENERATION
 //
-bookSchema.pre("save", function (next) {
-  if (!this.isModified("title")) return next();
+postSchema.pre("save", function (next) {
+  if (!this.isModified("title") || this.slug) return next();
 
-  this.slug = slugify(this.title, { lower: true, strict: true });
+  this.slug = slugify(this.title, { lower: true, strict: true, trim: true });
   next();
 });
 
-module.exports = mongoose.model("Book", bookSchema);
+module.exports = mongoose.model("Post", postSchema);

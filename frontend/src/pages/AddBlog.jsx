@@ -6,10 +6,7 @@ const AddBlog = () => {
     coverImage: "",
     title: "",
     slug: "",
-    author: "",
-    excerpt: "",
     content: "",
-    status: "draft",
   });
 
   const headers = {
@@ -69,10 +66,7 @@ const AddBlog = () => {
         coverImage: "",
         title: "",
         slug: "",
-        author: "",
-        excerpt: "",
         content: "",
-        status: "draft",
       });
     } catch (error) {
       alert(error.response?.data?.message || "Error occurred");
@@ -86,7 +80,15 @@ const AddBlog = () => {
       </h1>
 
       <div className="p-4 bg-zinc-700 rounded">
-        <label className="text-zinc-400">Cover Image</label>
+        <div className="mt-4">
+          <label className="text-zinc-400">Cover Image</label>
+          <input
+            type="file"
+            accept="image/*"
+            onChange={handleImageUpload}
+            className="w-full mt-2 text-zinc-100"
+          />
+        </div>
 
         <div className="mt-4">
           <label className="text-zinc-400">Title</label>
@@ -112,18 +114,6 @@ const AddBlog = () => {
           />
         </div>
 
-        {/* <div className="mt-4">
-          <label className="text-zinc-400">Author</label>
-          <input
-            type="text"
-            name="author"
-            value={data.author}
-            onChange={change}
-            className="w-full mt-2 bg-zinc-800 text-zinc-100 p-2 outline-none"
-            placeholder="Author name"
-          />
-        </div> */}
-
         <div className="mt-4">
           <label className="text-zinc-400">Content</label>
           <textarea
@@ -135,19 +125,6 @@ const AddBlog = () => {
             placeholder="Write blog content here"
           />
         </div>
-
-        {/* <div className="mt-4">
-          <label className="text-zinc-400">Status</label>
-          <select
-            name="status"
-            value={data.status}
-            onChange={change}
-            className="w-full mt-2 bg-zinc-800 text-zinc-100 p-2 outline-none"
-          >
-            <option value="draft">Draft</option>
-            <option value="published">Published</option>
-          </select>
-        </div> */}
 
         <button
           onClick={submit}

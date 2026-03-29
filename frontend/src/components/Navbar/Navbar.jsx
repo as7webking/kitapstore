@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from "react";
-import { Link, useNavigate, useLocation } from "react-router-dom";
+import React, { useEffect, useMemo, useState } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { FaSearch, FaHeart, FaUserCircle, FaBars, FaTimes } from "react-icons/fa";
 import { useDispatch, useSelector } from "react-redux";
 import { authActions } from "../../store/auth";
@@ -15,19 +15,75 @@ const Navbar = () => {
   const token = localStorage.getItem("token");
 
   const [profileOpen, setProfileOpen] = useState(false);
-  const [favouritesOpen, setFavouritesOpen] = useState(false);
+  const [favOpen, setFavOpen] = useState(false);
   const [favourites, setFavourites] = useState([]);
 
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-
-  // SEARCH: slide-out
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
 
-  // navbar bg
   const [scrolled, setScrolled] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
   const isHome = location.pathname === "/";
-  const navbarBg = () => (!isHome ? "bg-zinc-700" : scrolled ? "bg-zinc-700" : "bg-transparent");
+  const navbarBg = useMemo(() => {
+    if (!isHome) return "bg-zinc-700 border-b border-white";
+    return scrolled ? "bg-zinc-700 border-b border-white" : "bg-transparent";
+  }, [isHome, scrolled]);
+
+  const closeAll = () => {
+    setProfileOpen(false);
+    setFavOpen(false);
+    setSearchOpen(false);
+    setMobileMenuOpen(false);
+  };
+
+  const toggleProfile = () => {
+    setProfileOpen((v) => {
+      const next = !v;
+      if (next) {
+        setFavOpen(false);
+        setSearchOpen(false);
+        setMobileMenuOpen(false);
+      }
+      return next;
+    });
+  };
+
+  const toggleFav = () => {
+    setFavOpen((v) => {
+      const next = !v;
+      if (next) {
+        setProfileOpen(false);
+        setSearchOpen(false);
+        setMobileMenuOpen(false);
+      }
+      return next;
+    });
+  };
+
+  const toggleSearchDesktop = () => {
+    setSearchOpen((v) => {
+      const next = !v;
+      if (next) {
+        setProfileOpen(false);
+        setFavOpen(false);
+        setMobileMenuOpen(false);
+      }
+      return next;
+    });
+  };
+
+  const toggleMobileMenu = () => {
+    setMobileMenuOpen((v) => {
+      const next = !v;
+      if (next) {
+        setProfileOpen(false);
+        setFavOpen(false);
+        setSearchOpen(false);
+      }
+      return next;
+    });
+  };
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 10);
@@ -35,51 +91,32 @@ const Navbar = () => {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  // close on route change
   useEffect(() => {
-    setProfileOpen(false);
-    setFavouritesOpen(false);
-    setMobileMenuOpen(false);
-    setSearchOpen(false);
+    closeAll();
   }, [location.pathname]);
 
-  // ESC closes
   useEffect(() => {
-    const onKey = (e) => {
-      if (e.key === "Escape") {
-        setProfileOpen(false);
-        setFavouritesOpen(false);
-        setMobileMenuOpen(false);
-        setSearchOpen(false);
-      }
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, []);
-
-  // fetch favourites
-  useEffect(() => {
-    if (!isLoggedIn || !user?.id) return;
+    if (!isLoggedIn || user?.role === "admin") return;
 
     const fetchFavourites = async () => {
       try {
         const res = await axios.get(
-          "http://localhost:1001/api/v1/favourite/get-favourite-books",
+          "http://localhost:1001/api/v1/favourites/get-favourite-books",
           {
             headers: {
               Authorization: `Bearer ${token}`,
-              id: user.id,
+              id: user?.id || localStorage.getItem("id"),
             },
           }
         );
-        setFavourites(res.data?.data || []);
+        setFavourites(res.data.data || []);
       } catch {
         setFavourites([]);
       }
     };
 
     fetchFavourites();
-  }, [isLoggedIn, user?.id]);
+  }, [isLoggedIn, user?.role]);
 
   const favouritesCount = favourites.length;
 
@@ -91,185 +128,304 @@ const Navbar = () => {
 
   const handleSearchSubmit = (e) => {
     e.preventDefault();
-    if (!searchQuery.trim()) return;
-    navigate(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
+    const q = searchQuery.trim();
+    if (!q) return;
+    navigate(`/search?q=${encodeURIComponent(q)}`);
     setSearchQuery("");
     setSearchOpen(false);
   };
 
-  const onHeartClick = () => {
-    // сердечко всегда одного цвета → не меняем цвет, просто логика клика:
-    if (!isLoggedIn) {
-      setFavouritesOpen(false);
-      navigate("/login");
+  const onFavClickDesktop = () => {
+    if (!isLoggedIn || user?.role === "admin" || favouritesCount === 0) {
+      toggleFav();
       return;
     }
-    if (favouritesCount === 0) {
-      setFavouritesOpen((p) => !p); // покажем “No favourites”
+    closeAll();
+    navigate("/favourites");
+  };
+
+  const onFavClickMobile = () => {
+    if (!isLoggedIn || user?.role === "admin" || favouritesCount === 0) {
+      toggleFav();
       return;
     }
-    navigate("/favourites"); // если есть — сразу на страницу
+    closeAll();
+    navigate("/favourites");
   };
 
   return (
-    <nav className={`fixed top-0 left-0 w-full h-[75px] text-white z-50 transition-colors duration-300 ${navbarBg()}`}>
-      <div className="max-w-[1200px] h-full mx-auto flex items-center justify-between px-4 md:px-6 relative">
-        {/* LEFT: Burger (mobile) + Logo */}
-        <div className="flex items-center gap-3">
-          {/* Burger only on mobile */}
-          <button
-            className="md:hidden p-2"
-            onClick={() => setMobileMenuOpen((p) => !p)}
-            aria-label="Menu"
-          >
-            {mobileMenuOpen ? <FaTimes size={18} /> : <FaBars size={18} />}
-          </button>
+    <nav
+      className={`fixed top-0 left-0 w-full h-[75px] text-white z-50 transition-colors duration-300 ${navbarBg} `}
+    >
+      <div className="max-w-[1200px] h-full mx-auto px-6 flex items-center justify-between">
+        <Link to="/" className="flex items-center shrink-0">
+          <img src="/src/assets/logo.png" alt="logo" className="h-10 object-contain" />
+        </Link>
 
-          <Link to="/" className="flex items-center">
-            <img src="/src/assets/logo.png" alt="logo" className="h-10 object-contain" />
-          </Link>
+        <div className="hidden md:flex items-center justify-center gap-8 text-sm font-medium flex-1">
+          <Link to="/" className="hover:text-blue-300">Home</Link>
+          <Link to="/all-books" className="hover:text-blue-300">Books</Link>
+          <Link to="/blog" className="hover:text-blue-300">Blog</Link>
+          <Link to="/contact" className="hover:text-blue-300">Contact</Link>
         </div>
 
-        {/* CENTER: Menu (tablet/desktop) */}
-        <div className="hidden md:flex gap-6 lg:gap-8 text-sm font-medium">
-          <Link to="/" className="hover:text-blue-400">Home</Link>
-          <Link to="/all-books" className="hover:text-blue-400">Books</Link>
-          <Link to="/blog" className="hover:text-blue-400">Blog</Link>
-          <Link to="/contact" className="hover:text-blue-400">Contact</Link>
-        </div>
-
-        {/* RIGHT: Icons (mobile like app) */}
-        <div className="flex items-center gap-4 md:gap-5 relative">
-          {/* SEARCH ICON */}
-          <button
-            onClick={() => setSearchOpen((p) => !p)}
-            className="p-2"
-            aria-label="Search"
-          >
-            <FaSearch size={18} />
-          </button>
-
-          {/* HEART (always same color) */}
-          <div className="relative">
+        <div className="flex items-center justify-center gap-4 shrink-0 relative">
+          {/* Desktop / Tablet */}
+          <div className="hidden md:flex items-center gap-4 relative">
             <button
-              onClick={onHeartClick}
-              className="p-2 text-white" // всегда одинаковый цвет
-              aria-label="Favourites"
+              type="button"
+              onClick={toggleSearchDesktop}
+              className="text-white"
+              aria-label="Search"
             >
-              <FaHeart size={18} />
-              {isLoggedIn && favouritesCount > 0 && (
-                <span className="absolute -top-1 -right-1 bg-red-500 text-[10px] rounded-full px-1 leading-4">
-                  {favouritesCount}
-                </span>
-              )}
+              <FaSearch size={18} />
             </button>
 
-            {/* If 0 favourites: show message dropdown (like profile) */}
-            {favouritesOpen && isLoggedIn && favouritesCount === 0 && (
-              <div className="absolute right-0 mt-2 w-52 bg-zinc-700 rounded shadow-lg overflow-hidden">
-                <div className="px-4 py-3 text-sm text-zinc-200">
-                  No favourite books
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* PROFILE */}
-          <div className="relative">
-            <button
-              onClick={() => setProfileOpen((p) => !p)}
-              className="flex items-center gap-2 p-2"
-              aria-label="Profile"
-            >
-              <FaUserCircle size={22} />
-              {/* username only on tablet/desktop to keep mobile clean */}
-              {isLoggedIn && (
-                <span className="hidden md:inline text-sm">{user?.name}</span>
-              )}
-            </button>
-
-            {profileOpen && (
-              <div className="absolute right-0 mt-2 w-44 bg-zinc-700 rounded shadow-lg overflow-hidden">
-                {!isLoggedIn ? (
-                  <button
-                    onClick={() => navigate("/login")}
-                    className="w-full px-4 py-2 text-left hover:bg-zinc-600"
-                  >
-                    Log in
-                  </button>
-                ) : (
-                  <>
-                    <Link to="/profile" className="block px-4 py-2 hover:bg-zinc-600">
-                      Profile
-                    </Link>
-                    <button
-                      onClick={handleLogout}
-                      className="w-full px-4 py-2 text-left hover:bg-zinc-600 text-red-300"
-                    >
-                      Logout
-                    </button>
-                  </>
+            <div className="relative">
+              <button
+                type="button"
+                onClick={onFavClickDesktop}
+                className="text-white relative"
+                aria-label="Favourites"
+              >
+                <FaHeart size={18} />
+                {favouritesCount > 0 && (
+                  <span className="absolute -top-2 -right-2 bg-red-500 text-xs rounded-full px-1">
+                    {favouritesCount}
+                  </span>
                 )}
-              </div>
-            )}
-          </div>
+              </button>
 
-          {/* SLIDE-OUT SEARCH PANEL
-              - mobile: opens to LEFT (covers towards left)
-              - desktop: opens to RIGHT (covers heart area visually because it expands from right side)
-          */}
-          <div
-            className={`
-              absolute top-1/2 -translate-y-1/2
-              ${/* mobile: anchor to right and expand LEFT */""}
-              right-0 md:right-auto
-              ${/* desktop: anchor to right of icons */""}
-              md:left-auto md:right-0
-              transition-all duration-300
-              ${searchOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"}
-            `}
-          >
+              {favOpen && (
+                <div className="absolute right-0 mt-3 w-56 bg-zinc-800 rounded shadow-lg px-4 py-3 text-sm text-zinc-200">
+                  {user?.role === "admin"
+                    ? "Admins cannot use favourites"
+                    : !isLoggedIn
+                      ? "Log in to use favourites"
+                      : favouritesCount === 0
+                        ? "No favourite books"
+                        : null}
+                </div>
+              )}
+            </div>
+
+            <div className="relative">
+              <button
+                type="button"
+                onClick={toggleProfile}
+                className="text-white"
+                aria-label="Profile"
+              >
+                <FaUserCircle size={22} />
+              </button>
+
+              {profileOpen && (
+                <div className="absolute right-0 mt-3 w-40 bg-zinc-800 rounded shadow-lg overflow-hidden">
+                  {!isLoggedIn ? (
+                    <button
+                      onClick={() => {
+                        closeAll();
+                        navigate("/login");
+                      }}
+                      className="w-full px-4 py-2 text-left hover:bg-zinc-700"
+                    >
+                      Log in
+                    </button>
+                  ) : (
+                    <>
+                      <Link
+                        to="/profile"
+                        onClick={closeAll}
+                        className="block px-4 py-2 hover:bg-zinc-700"
+                      >
+                        Profile
+                      </Link>
+                      <button
+                        onClick={() => {
+                          closeAll();
+                          handleLogout();
+                        }}
+                        className="w-full px-4 py-2 text-left hover:bg-zinc-700 text-red-300"
+                      >
+                        Logout
+                      </button>
+                    </>
+                  )}
+                </div>
+              )}
+            </div>
+
             <form
               onSubmit={handleSearchSubmit}
-              className={`
-                flex items-center gap-2 bg-zinc-700 rounded-full shadow-lg px-3 py-2
-                ${/* widths: mobile smaller, tablet medium, desktop bigger */""}
-                w-[240px] md:w-[320px] lg:w-[380px]
-              `}
+              className={`absolute right-0 top-1/2 -translate-y-1/2 flex items-center gap-2 overflow-hidden
+              bg-zinc-700 rounded transition-all duration-300
+              ${searchOpen ? "w-[420px] px-3 py-2" : "w-0 px-0 py-0"}`}
+              style={{ zIndex: 60 }}
             >
               <input
-                autoFocus
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
+                className={`bg-transparent outline-none text-sm w-full ${
+                  searchOpen ? "opacity-100" : "opacity-0"
+                } transition-opacity duration-200`}
                 placeholder="Search books..."
-                className="w-full bg-transparent outline-none text-sm text-white placeholder:text-zinc-300"
               />
-              <button type="submit" className="hover:text-blue-400">
+              <button
+                type="submit"
+                className={`${
+                  searchOpen ? "opacity-100" : "opacity-0"
+                } transition-opacity duration-200`}
+                aria-label="Submit search"
+              >
                 <FaSearch size={16} />
               </button>
               <button
                 type="button"
                 onClick={() => setSearchOpen(false)}
-                className="text-zinc-300 hover:text-white"
+                className={`${
+                  searchOpen ? "opacity-100" : "opacity-0"
+                } transition-opacity duration-200`}
                 aria-label="Close search"
               >
-                <FaTimes size={14} />
+                <FaTimes size={16} />
               </button>
             </form>
           </div>
-        </div>
 
-        {/* MOBILE MENU DRAWER (under navbar) */}
-        {mobileMenuOpen && (
-          <div className="md:hidden absolute left-0 top-[75px] w-full bg-zinc-800/95 backdrop-blur-sm border-t border-zinc-700">
-            <div className="px-6 py-4 flex flex-col gap-4 text-sm">
-              <Link to="/" className="hover:text-blue-400">Home</Link>
-              <Link to="/all-books" className="hover:text-blue-400">Books</Link>
-              <Link to="/blog" className="hover:text-blue-400">Blog</Link>
-              <Link to="/contact" className="hover:text-blue-400">Contact</Link>
+          {/* Mobile */}
+          <div className="md:hidden flex items-center gap-4 relative">
+            <div className="relative flex items-center gap-4">
+              <button
+                type="button"
+                onClick={onFavClickMobile}
+                className="text-white relative"
+                aria-label="Favourites"
+              >
+                <FaHeart size={18} />
+                {favouritesCount > 0 && (
+                  <span className="absolute -top-2 -right-2 bg-red-500 text-xs rounded-full px-1">
+                    {favouritesCount}
+                  </span>
+                )}
+              </button>
+
+              <button
+                type="button"
+                onClick={toggleProfile}
+                className="text-white"
+                aria-label="Profile"
+              >
+                <FaUserCircle size={22} />
+              </button>
+
+              {favOpen && (
+                <div className="absolute left-0 mt-12 w-56 bg-zinc-800 rounded shadow-lg px-4 py-3 text-sm text-zinc-200">
+                  {user?.role === "admin"
+                    ? "Admins cannot use favourites"
+                    : !isLoggedIn
+                      ? "Log in to use favourites"
+                      : favouritesCount === 0
+                        ? "No favourite books"
+                        : null}
+                </div>
+              )}
+
+              {profileOpen && (
+                <div className="absolute left-12 mt-12 w-40 bg-zinc-800 rounded shadow-lg overflow-hidden">
+                  {!isLoggedIn ? (
+                    <button
+                      onClick={() => {
+                        closeAll();
+                        navigate("/login");
+                      }}
+                      className="w-full px-4 py-2 text-left hover:bg-zinc-700"
+                    >
+                      Log in
+                    </button>
+                  ) : (
+                    <>
+                      <Link
+                        to="/profile"
+                        onClick={closeAll}
+                        className="block px-4 py-2 hover:bg-zinc-700"
+                      >
+                        Profile
+                      </Link>
+                      <button
+                        onClick={() => {
+                          closeAll();
+                          handleLogout();
+                        }}
+                        className="w-full px-4 py-2 text-left hover:bg-zinc-700 text-red-300"
+                      >
+                        Logout
+                      </button>
+                    </>
+                  )}
+                </div>
+              )}
             </div>
+
+            <div className="relative">
+              <button
+                type="button"
+                onClick={toggleSearchDesktop}
+                className="text-white"
+                aria-label="Search"
+              >
+                <FaSearch size={18} />
+              </button>
+
+              <form
+                onSubmit={handleSearchSubmit}
+                className={`absolute right-full mr-3 top-1/2 -translate-y-1/2 flex items-center gap-2 overflow-hidden
+                bg-zinc-800 rounded transition-all duration-300
+                ${searchOpen ? "w-[240px] px-3 py-2" : "w-0 px-0 py-0"}`}
+                style={{ zIndex: 60 }}
+              >
+                <input
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className={`bg-transparent outline-none text-sm w-full ${
+                    searchOpen ? "opacity-100" : "opacity-0"
+                  } transition-opacity duration-200`}
+                  placeholder="Search..."
+                />
+                <button
+                  type="submit"
+                  className={`${
+                    searchOpen ? "opacity-100" : "opacity-0"
+                  } transition-opacity duration-200`}
+                  aria-label="Submit search"
+                >
+                  <FaSearch size={16} />
+                </button>
+              </form>
+            </div>
+
+            <button
+              type="button"
+              className="text-white"
+              onClick={toggleMobileMenu}
+              aria-label="Menu"
+            >
+              <FaBars size={18} />
+            </button>
           </div>
-        )}
+        </div>
+      </div>
+
+      <div
+        className={`md:hidden bg-zinc-800 overflow-hidden transition-all duration-300 ${
+          mobileMenuOpen ? "max-h-64" : "max-h-0"
+        }`}
+      >
+        <div className="px-6 py-4 flex flex-col items-center gap-3 text-sm">
+          <Link to="/" className="hover:text-blue-300">Home</Link>
+          <Link to="/all-books" className="hover:text-blue-300">Books</Link>
+          <Link to="/blog" className="hover:text-blue-300">Blog</Link>
+          <Link to="/contact" className="hover:text-blue-300">Contact</Link>
+        </div>
       </div>
     </nav>
   );

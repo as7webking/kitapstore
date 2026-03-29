@@ -65,7 +65,7 @@ const Cart = () => {
             <h1 className="text-5xl lg:text-6xl font-semibold text-zinc-400">
               Empty Cart
             </h1>
-            <img src="" alt="empty-cart" className="lg:h-[50vh]" />
+            <img src="fa-regular fa-cart-shopping" alt="empty-cart" className="lg:h-[50vh]" />
           </div>
         </div>
       )}

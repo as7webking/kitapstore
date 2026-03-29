@@ -1,9 +1,15 @@
+console.log("📚 bookRoutes file loaded");
+
 const express = require("express");
 const router = require("express").Router();
 const User = require("../models/user");
 const jwt = require("jsonwebtoken");
 const Book = require("../models/book");
 const { authentificateToken } = require("./userAuth");
+
+function escapeRegex(text) {
+  return text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
 
 //add book --admin
 router.post("/add-book", authentificateToken, async (req, res) => {
@@ -128,6 +134,32 @@ router.get("/get-book-by-slug/:slug", async (req, res) => {
     return res.json(book);
   } catch (err) {
     res.status(500).send("Server error");
+  }
+});
+
+//book searching
+router.get("/search", async (req, res) => {
+  try {
+    const q = req.query.q?.trim();
+
+    if (!q) {
+      return res.status(200).json([]);
+    }
+
+    const safeQuery = escapeRegex(q);
+
+    const books = await Book.find({
+      $or: [
+        { title: { $regex: safeQuery, $options: "i" } },
+        { authortitle: { $regex: safeQuery, $options: "i" } },
+        { category: { $regex: safeQuery, $options: "i" } },
+      ],
+    }).limit(20);
+
+    res.status(200).json(books);
+  } catch (error) {
+    console.error("Search error:", error);
+    res.status(500).json({ message: "Server error" });
   }
 });
 

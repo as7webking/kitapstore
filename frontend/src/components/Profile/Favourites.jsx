@@ -10,7 +10,7 @@ const Favourites = () => {
   useEffect(() => {
     const fetch = async () => {
       const response = await axios.get(
-        "http://localhost:1001/api/v1/get-favourite-books",
+        "http://localhost:1001/api/v1/favourites/get-favourite-books",
         { headers }
       );
       setFavouriteBooks(response.data.data);

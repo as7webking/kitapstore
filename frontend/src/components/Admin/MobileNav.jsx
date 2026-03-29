@@ -41,12 +41,6 @@ const MobileNav = () => {
           >
             Add Book
           </Link>
-          <Link
-            to="/profile/add-blog"
-            className="text-zinc-100 font-semibold w-full py-2 mt-4 text-center hover:bg-zinc-700 rounded transition-all duration-200"
-          >
-            Add Blog
-          </Link>
         </div>
       )}
     </>

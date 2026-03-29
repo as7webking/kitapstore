@@ -15,7 +15,7 @@ export default function Contact() {
       setStatus("Message sent ✅");
       setForm({ name: "", email: "", message: "" });
     } catch {
-      setStatus("Error ❌");
+      setStatus("Ошибка ❌");
     }
   };
 

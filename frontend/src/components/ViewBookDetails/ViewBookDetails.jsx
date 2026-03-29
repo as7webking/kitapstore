@@ -105,13 +105,13 @@ const ViewBookDetails = () => {
                 <div className="flex flex-col sm:flex-row gap-3">
                   <Link
                     to={`/update-book/${Data._id}`}
-                    className="bg-white rounded lg:rounded-full text-3xl md:p-3 flex items-center justify-center"
+                    className="flex-1 bg-zinc-100 text-zinc-700 px-6 py-4 rounded-sm font-bold hover:bg-zinc-200 transition flex items-center justify-center gap-2 uppercase text-xs tracking-widest"
                   >
                     <FaEdit />
                     <span className="ms-4 block lg:hidden">Edit Book</span>
                   </Link>
                   <button
-                    className="bg-red-400 rounded lg:rounded-full text-3xl p-3 mt-8 md:mt-0 lg:mt-8 text-white flex items-center justify-center"
+                    className="flex-1 bg-red-50 text-red-600 px-6 py-4 rounded-sm font-bold hover:bg-red-100 transition flex items-center justify-center gap-2 uppercase text-xs tracking-widest"
                     onClick={deleteBook}
                   >
                     <MdOutlineDelete />

@@ -1,5 +1,6 @@
 require("dotenv").config();
 const express = require("express");
+const mongoose = require("mongoose");
 const cors = require("cors");
 const passport = require("passport");
 
@@ -15,6 +16,7 @@ app.use(express.urlencoded({ extended: true }));
 // routes
 const bookRoutes = require("./routes/book");
 const userRoutes = require("./routes/user");
+const blogRoutes = require("./routes/blog");
 const favouriteRoutes = require("./routes/favourite");
 const cartRoutes = require("./routes/cart");
 const orderRoutes = require("./routes/order");
@@ -23,15 +25,16 @@ const orderRoutes = require("./routes/order");
 require("./config/passport");
 app.use(passport.initialize());
 
-// 🔥 ВАЖНО — КНИГИ ДВАЖДЫ
-app.use("/api/v1", bookRoutes);        // ✅ старый фронт
-app.use("/api/v1/books", bookRoutes);  // ✅ новая структура
+// 🔥 two book routes
+app.use("/api/v1", bookRoutes);        // ✅ old structure
+app.use("/api/v1/books", bookRoutes);  // ✅ new structure
 
-// остальные
+// rest
 app.use("/api/v1/user", userRoutes);
 app.use("/api/v1/favourites", favouriteRoutes);
 app.use("/api/v1/cart", cartRoutes);
 app.use("/api/v1/orders", orderRoutes);
+app.use("/api/v1/blog", blogRoutes);
 
 //contacct
 app.use("/api/contact", contactRoutes);
