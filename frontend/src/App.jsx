@@ -5,7 +5,6 @@ import Footer from "./components/Footer/Footer";
 import { Routes, Route } from "react-router-dom";
 import AllBooks from "./pages/AllBooks";
 import AddBook from "./pages/AddBook";
-import AddBlog from "./pages/AddBlog";
 import Login from "./pages/Login";
 import SignUp from "./pages/SignUp";
 import Cart from "./pages/Cart";
@@ -24,6 +23,7 @@ import Blog from "./pages/Blog";
 import BlogDetails from "./pages/BlogDetails";
 import AddBlog from "./pages/AddBlog";
 import Contact from "./pages/Contact";
+import SearchResults from "./pages/SearchResults";
 import { useLocation } from "react-router-dom";
 
 const App = () => {
@@ -54,6 +54,7 @@ const App = () => {
           <Route path="/blog" element={<Blog />} />
           <Route path="/blog/:slug" element={<BlogDetails />} />
           <Route path="/profile" element={<Profile />}>
+        <Route path="/search" element={<SearchResults />} /> ̰
             {role === "user" ? (
               <Route index element={<Favourites />} />
             ) : (
