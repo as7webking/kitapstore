@@ -8,7 +8,7 @@ const authentificateToken = (req, res, next) => {
         return res.status(401).json({ message: "Authentification token required"});
     }
 
-    jwt.verify(token, "bookStore123", (err, user) => {
+    jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
         if (err) {
             return res
                 .status(403)

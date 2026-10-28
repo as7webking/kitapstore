@@ -10,6 +10,14 @@ const { authentificateToken } = require("./userAuth");
 const sendEmail = require("../utils/mailer");
 const ADMIN_EMAIL = "admin@ahmedsultanline.com";
 
+const requireOAuthProvider = (provider) => (req, res, next) => {
+  const prefix = provider.toUpperCase();
+  if (!process.env[`${prefix}_CLIENT_ID`] || !process.env[`${prefix}_CLIENT_SECRET`]) {
+    return res.status(503).json({ message: `${provider} login is not configured` });
+  }
+  next();
+};
+
 //JWT Helper
 const createToken = (user) => {
   return jwt.sign(
@@ -90,7 +98,7 @@ router.post("/sign-in", async (req, res) => {
         { name: existingUser.username },
         { role: existingUser.role },
       ];
-      const token = jwt.sign({ authClaims }, "bookStore123", {
+      const token = jwt.sign({ authClaims }, process.env.JWT_SECRET, {
         expiresIn: "90d",
       });
 
@@ -110,11 +118,13 @@ router.post("/sign-in", async (req, res) => {
 // --- GOOGLE AUTH ---
 router.get(
   "/auth/google",
+  requireOAuthProvider("google"),
   passport.authenticate("google", { scope: ["profile", "email"] })
 );
 
 router.get(
   "/auth/google/callback",
+  requireOAuthProvider("google"),
   passport.authenticate("google", { session: false }),
   /* (req, res) => {
     const token = createToken(req.user);
