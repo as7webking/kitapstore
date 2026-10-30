@@ -11,7 +11,7 @@ exports.sendContact = async (req, res) => {
     await sendEmail({ name, email, message });
     res.status(200).json({ success: true });
   } catch (err) {
-    console.error(err);
+    console.error("Contact email could not be sent");
     res.status(500).json({ error: "Mail send failed" });
   }
 };

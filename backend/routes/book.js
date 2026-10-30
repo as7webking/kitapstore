@@ -3,7 +3,6 @@ console.log("📚 bookRoutes file loaded");
 const express = require("express");
 const router = require("express").Router();
 const User = require("../models/user");
-const jwt = require("jsonwebtoken");
 const Book = require("../models/book");
 const { authentificateToken } = require("./userAuth");
 
@@ -28,6 +27,9 @@ router.post("/add-book", authentificateToken, async (req, res) => {
       price: req.body.price,
       desc: req.body.desc,
       language: req.body.language,
+      type: req.body.type,
+      pdf: req.body.pdf,
+      shippingPrice: req.body.shippingPrice,
     });
     await book.save();
     res.status(200).json({ message: "Book added successfully" });
@@ -47,6 +49,9 @@ router.put("/update-book", authentificateToken, async (req, res) => {
       price: req.body.price,
       desc: req.body.desc,
       language: req.body.language,
+      type: req.body.type,
+      pdf: req.body.pdf,
+      shippingPrice: req.body.shippingPrice,
     });
 
     return res.status(200).json({

@@ -12,13 +12,14 @@ const user = new mongoose.Schema(
         required: true,
         unique: true,
     },
+    googleId: { type: String, unique: true, sparse: true },
     password: {
         type: String,
-        required: true,
+        required: function () { return this.authProvider === "local"; },
     },
     address: {
         type: String,
-        required: true,
+        required: function () { return this.authProvider === "local"; },
     },
     avatar: {
         type: String,
@@ -32,13 +33,13 @@ const user = new mongoose.Schema(
     favourites: [
         {
             type: mongoose.Types.ObjectId,
-            ref: "books",
+            ref: "Book",
         },
     ],
     cart: [
         {
             type: mongoose.Types.ObjectId,
-            ref: "books",
+            ref: "Book",
         },
     ],
     orders: [

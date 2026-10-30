@@ -51,7 +51,7 @@ const postSchema = new mongoose.Schema(
 //
 // 🔐 BUSINESS VALIDATION
 //
-postSchema.pre("validate", function (next) {
+postSchema.pre("validate", function () {
   if (!this.slug && this.title) {
     this.slug = slugify(this.title, { lower: true, strict: true, trim: true });
   }
@@ -60,17 +60,15 @@ postSchema.pre("validate", function (next) {
     this.excerpt = this.content.slice(0, 180);
   }
 
-  next();
 });
 
 //
 // 🔗 SLUG GENERATION
 //
-postSchema.pre("save", function (next) {
-  if (!this.isModified("title") || this.slug) return next();
+postSchema.pre("save", function () {
+  if (!this.isModified("title") || this.slug) return;
 
   this.slug = slugify(this.title, { lower: true, strict: true, trim: true });
-  next();
 });
 
 module.exports = mongoose.model("Post", postSchema);

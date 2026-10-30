@@ -7,6 +7,7 @@ const createToken = (user) => {
       id: user._id,
       role: user.role,
       email: user.email,
+      username: user.username,
     },
     process.env.JWT_SECRET,
     { expiresIn: "7d" }
@@ -23,7 +24,15 @@ const verifyToken = (req, res, next) => {
     }
 
     const token = authHeader.split(" ")[1];
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const decoded = jwt.verify(token, process.env.JWT_SECRET, { algorithms: ["HS256"] });
+    if (!decoded.id || typeof decoded.id !== "string") {
+      return res.status(401).json({ message: "Please sign in again" });
+    }
+    if (req.headers.id && req.headers.id !== decoded.id) {
+      return res.status(403).json({ message: "User does not match the session" });
+    }
+    // Older handlers read this header; never trust a client-supplied identity.
+    req.headers.id = decoded.id;
     req.user = decoded; // attach user to request
     next();
   } catch (err) {

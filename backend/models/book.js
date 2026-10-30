@@ -76,26 +76,24 @@ const bookSchema = new mongoose.Schema(
 //
 // 🔐 BUSINESS VALIDATION
 //
-bookSchema.pre("validate", function (next) {
+bookSchema.pre("validate", function () {
   if (this.type === "digital" && !this.pdf) {
-    return next(new Error("Digital book must have a PDF file"));
+    throw new Error("Digital book must have a PDF file");
   }
 
   if (this.type === "physical" && this.shippingPrice == null) {
-    return next(new Error("Physical book must have shipping price"));
+    throw new Error("Physical book must have shipping price");
   }
 
-  next();
 });
 
 //
 // 🔗 SLUG GENERATION
 //
-bookSchema.pre("save", function (next) {
-  if (!this.isModified("title")) return next();
+bookSchema.pre("save", function () {
+  if (!this.isModified("title")) return;
 
   this.slug = slugify(this.title, { lower: true, strict: true });
-  next();
 });
 
 module.exports = mongoose.model("Book", bookSchema);

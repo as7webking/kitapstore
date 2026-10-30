@@ -4,31 +4,16 @@ const passport = require("passport");
 const { googleCallback } = require("../controllers/authController");
 const User = require("../models/user");
 const bcrypt = require("bcryptjs");
-const jwt = require("jsonwebtoken");
+const { createToken } = require("../utils/jwt");
 const crypto = require("crypto");
 const { authentificateToken } = require("./userAuth");
 const sendEmail = require("../utils/mailer");
-const ADMIN_EMAIL = "admin@ahmedsultanline.com";
 
 const requireOAuthProvider = (provider) => (req, res, next) => {
-  const prefix = provider.toUpperCase();
-  if (!process.env[`${prefix}_CLIENT_ID`] || !process.env[`${prefix}_CLIENT_SECRET`]) {
+  if (!passport._strategy(provider)) {
     return res.status(503).json({ message: `${provider} login is not configured` });
   }
   next();
-};
-
-//JWT Helper
-const createToken = (user) => {
-  return jwt.sign(
-    {
-      id: user._id,
-      role: user.role,
-      username: user.username,
-    },
-    process.env.JWT_SECRET,
-    { expiresIn: "90d" }
-  );
 };
 
 // --- SIGN UP ---
@@ -37,7 +22,7 @@ router.post("/sign-up", async (req, res) => {
     const { username, email, password, address } = req.body;
 
     // Validation: Username length
-    if (username.length < 4) {
+    if (typeof username !== "string" || username.length < 4) {
       return res
         .status(400)
         .json({ message: "Username should be > 3 characters" });
@@ -52,7 +37,7 @@ router.post("/sign-up", async (req, res) => {
     }
 
     // Password validation and hashing
-    if (password.length < 7) {
+    if (typeof password !== "string" || password.length < 7) {
       return res
         .status(400)
         .json({ message: "Password should be > 6 characters" });
@@ -62,18 +47,17 @@ router.post("/sign-up", async (req, res) => {
     const newUser = new User({ username, email, password: hashPass, address });
     await newUser.save();
 
-    // Send Welcome Email
-    await sendEmail(
-      email,
-      "Welcome to KitapStore",
-      `Hi ${username}, your account was created!`
-    );
-
-    await sendEmail(
-      ADMIN_EMAIL,
-      "New User Registered",
-      `New user alert!\nUsername: ${username}\nEmail: ${email}`
-    );
+    // Notification failures must not turn a saved registration into an error.
+    if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
+      try {
+        await sendEmail(email, "Welcome to KitapStore", `Hi ${username}, your account was created!`);
+        if (process.env.EMAIL_TO) {
+          await sendEmail(process.env.EMAIL_TO, "New User Registered", `New user: ${username}`);
+        }
+      } catch {
+        console.warn("Registration notification could not be sent");
+      }
+    }
 
     return res.status(200).json({ message: "SignUp Successfully" });
   } catch (error) {
@@ -94,13 +78,7 @@ router.post("/sign-in", async (req, res) => {
     // Compare hashed password
     const isMatch = await bcrypt.compare(password, existingUser.password);
     if (isMatch) {
-      const authClaims = [
-        { name: existingUser.username },
-        { role: existingUser.role },
-      ];
-      const token = jwt.sign({ authClaims }, process.env.JWT_SECRET, {
-        expiresIn: "90d",
-      });
+      const token = createToken(existingUser);
 
       return res.status(200).json({
         id: existingUser._id,
@@ -126,30 +104,25 @@ router.get(
   "/auth/google/callback",
   requireOAuthProvider("google"),
   passport.authenticate("google", { session: false }),
-  /* (req, res) => {
-    const token = createToken(req.user);
-
-    res.redirect(
-      `http://localhost:5173/profile?token=${token}&id=${req.user._id}&role=${req.user.role}`
-    );
-  }, */
   googleCallback
 );
 
 // --- FACEBOOK AUTH ---
 router.get(
   "/auth/facebook",
+  requireOAuthProvider("facebook"),
   passport.authenticate("facebook", { scope: ["email"] })
 );
 
 router.get(
   "/auth/facebook/callback",
+  requireOAuthProvider("facebook"),
   passport.authenticate("facebook", { session: false }),
   (req, res) => {
     const token = createToken(req.user);
 
     res.redirect(
-      `http://localhost:5173/profile?token=${token}&id=${req.user._id}&role=${req.user.role}`
+      `${process.env.FRONTEND_URL || "http://localhost:5173"}/profile?token=${token}&id=${req.user._id}&role=${req.user.role}`
     );
   }
 );
