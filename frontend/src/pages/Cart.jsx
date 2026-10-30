@@ -1,3 +1,4 @@
+import { API_BASE_URL } from "../config/api.js";
 import React, { useEffect, useState } from "react";
 import Loader from "../components/Loader/Loader";
 import axios from "axios";
@@ -6,7 +7,7 @@ import { useNavigate } from "react-router-dom";
 const Cart = () => {
   const navigate = useNavigate();
   const [cart, setCart] = useState([]);
-  const [Total, setTotal] = useState(0);
+  const Total = cart.reduce((total, book) => total + book.price, 0);
   const headers = {
     id: localStorage.getItem("id"),
     authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -14,7 +15,7 @@ const Cart = () => {
   useEffect(() => {
     const fetchCart = async () => {
       const res = await axios.get(
-        "http://localhost:1001/api/v1/get-user-cart",
+        `${API_BASE_URL}/api/v1/get-user-cart`,
         { headers }
       );
       setCart(res.data.data);
@@ -23,26 +24,17 @@ const Cart = () => {
   }, []);
   const deleteItem = async (bookid) => {
     const response = await axios.put(
-      `http://localhost:1001/api/v1/remove-from-cart/${bookid}`,
+      `${API_BASE_URL}/api/v1/remove-from-cart/${bookid}`,
       {},
       { headers }
     );
+    setCart((current) => current.filter((book) => book._id !== bookid));
     alert(response.data.message);
   };
-  useEffect(() => {
-    if (cart && cart.length > 0) {
-      let total = 0;
-      cart.map((items) => {
-        total += items.price;
-      });
-      setTotal(total);
-      total = 0;
-    }
-  }, []);
   const PlaceOrder = async () => {
     try {
       const response = await axios.post(
-        `http://localhost:1001/api/v1/place-order`,
+        `${API_BASE_URL}/api/v1/place-order`,
         { order: cart },
         { headers }
       );

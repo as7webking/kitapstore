@@ -1,7 +1,9 @@
+import { authActions } from "../store/auth";
+import { API_BASE_URL } from "../config/api.js";
 import React, { useEffect, useState } from "react";
 import Sidebar from "../components/Profile/Sidebar";
 import { Outlet, useNavigate } from "react-router-dom";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import axios from "axios";
 import Loader from "../components/Loader/Loader";
 import MobileNav from "../components/Profile/MobileNav";
@@ -25,7 +27,7 @@ const Admin = () => {
     ) {
       try {
         const response = await axios.delete(
-          "http://localhost:1001/api/v1/user/delete-account",
+          `${API_BASE_URL}/api/v1/user/delete-account`,
           { headers },
         );
         alert(response.data.message);
@@ -46,7 +48,7 @@ const Admin = () => {
     const fetch = async () => {
       try {
         const response = await axios.get(
-          "http://localhost:1001/api/v1/user/get-user-information",
+          `${API_BASE_URL}/api/v1/user/get-user-information`,
           { headers },
         );
         setProfile(response.data);

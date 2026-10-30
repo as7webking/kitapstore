@@ -1,3 +1,4 @@
+import { API_BASE_URL } from "../config/api.js";
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { Link } from "react-router-dom";
@@ -9,7 +10,7 @@ const Blog = () => {
   useEffect(() => {
     const fetchBlogs = async () => {
       try {
-        const res = await axios.get("http://localhost:1001/api/v1/blog/get-all-blogs");
+        const res = await axios.get(`${API_BASE_URL}/api/v1/blog/get-all-blogs`);
         setBlogs(res.data.data || []);
       } catch {
         setBlogs([]);

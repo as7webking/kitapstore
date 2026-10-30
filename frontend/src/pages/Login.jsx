@@ -1,3 +1,4 @@
+import { API_BASE_URL } from "../config/api.js";
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { authActions } from "../store/auth";
@@ -22,7 +23,7 @@ const Login = () => {
         return alert("All fields are required");
       } else {
         const response = await axios.post(
-          "http://localhost:1001/api/v1/user/sign-in",
+          `${API_BASE_URL}/api/v1/user/sign-in`,
           Values,
         );
 
@@ -84,13 +85,13 @@ const Login = () => {
         </div>
         <div className="flex gap-4 mt-4">
           <a
-            href="http://localhost:1001/api/v1/auth/google"
+            href={`${API_BASE_URL}/api/v1/user/auth/google`}
             className="w-1/2 bg-red-500 text-white py-2 rounded flex items-center justify-center hover:bg-red-600 transition"
           >
             Login with Google
           </a>
           <a
-            href="http://localhost:1001/api/v1/auth/facebook"
+            href={`${API_BASE_URL}/api/v1/user/auth/facebook`}
             className="w-1/2 bg-blue-700 text-white py-2 rounded flex items-center justify-center hover:bg-blue-800 transition"
           >
             Login with Facebook

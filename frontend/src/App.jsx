@@ -70,6 +70,7 @@ const App = () => {
             <Route path="orderHistory" element={<UserOrderHistory />} />
             <Route path="settings" element={<Settings />} />
           </Route>
+          {role === "admin" && <Route path="/update-book/:id" element={<UpdateBook />} />}
           <Route path="/signup" element={<SignUp />} />
           <Route path="/login" element={<Login />} />
           <Route path="/contact" element={<Contact />} />

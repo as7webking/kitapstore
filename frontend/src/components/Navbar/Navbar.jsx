@@ -1,3 +1,4 @@
+import { API_BASE_URL } from "../../config/api.js";
 import React, { useEffect, useMemo, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { FaSearch, FaHeart, FaUserCircle, FaBars, FaTimes } from "react-icons/fa";
@@ -92,16 +93,12 @@ const Navbar = () => {
   }, []);
 
   useEffect(() => {
-    closeAll();
-  }, [location.pathname]);
-
-  useEffect(() => {
     if (!isLoggedIn || user?.role === "admin") return;
 
     const fetchFavourites = async () => {
       try {
         const res = await axios.get(
-          "http://localhost:1001/api/v1/favourites/get-favourite-books",
+          `${API_BASE_URL}/api/v1/favourites/get-favourite-books`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -431,4 +428,9 @@ const Navbar = () => {
   );
 };
 
-export default Navbar;
+const NavbarForRoute = () => {
+  const location = useLocation();
+  return <Navbar key={location.pathname} />;
+};
+
+export default NavbarForRoute;

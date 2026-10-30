@@ -1,3 +1,4 @@
+import { API_BASE_URL } from "../config/api.js";
 import React, { useState } from "react";
 import axios from "axios";
 
@@ -66,7 +67,7 @@ const AddBook = () => {
 
     try {
       const response = await axios.post(
-        "http://localhost:1001/api/v1/add-book",
+        `${API_BASE_URL}/api/v1/add-book`,
         Data,
         { headers },
       );

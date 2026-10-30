@@ -1,3 +1,4 @@
+import { API_BASE_URL } from "../config/api.js";
 import { useState } from "react";
 import axios from "axios";
 
@@ -11,7 +12,7 @@ export default function Contact() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await axios.post("http://localhost:1001/api/contact", form);
+      await axios.post(`${API_BASE_URL}/api/contact`, form);
       setStatus("Message sent ✅");
       setForm({ name: "", email: "", message: "" });
     } catch {

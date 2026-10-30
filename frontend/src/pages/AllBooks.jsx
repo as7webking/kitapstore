@@ -1,3 +1,4 @@
+import { API_BASE_URL } from "../config/api.js";
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import Loader from "../components/Loader/Loader";
@@ -10,7 +11,7 @@ const AllBooks = () => {
   useEffect(() => {
     const fetch = async () => {
       const response = await axios.get(
-        "http://localhost:1001/api/v1/get-all-books"
+        `${API_BASE_URL}/api/v1/get-all-books`
       );
       setData(response.data.data);
     };

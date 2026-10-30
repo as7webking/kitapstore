@@ -1,7 +1,9 @@
+import { authActions } from "../store/auth";
+import { API_BASE_URL } from "../config/api.js";
 import React, { useEffect, useState } from "react";
 import Sidebar from "../components/Profile/Sidebar";
 import { Outlet, useNavigate } from "react-router-dom";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import axios from "axios";
 import Loader from "../components/Loader/Loader";
 import MobileNav from "../components/Profile/MobileNav";
@@ -25,7 +27,7 @@ const Profile = () => {
     ) {
       try {
         const response = await axios.delete(
-          "http://localhost:1001/api/v1/user/delete-account",
+          `${API_BASE_URL}/api/v1/user/delete-account`,
           { headers },
         );
         alert(response.data.message);
@@ -43,19 +45,37 @@ const Profile = () => {
   };
 
   useEffect(() => {
-    const fetch = async () => {
+    const fetchProfile = async () => {
+      const params = new URLSearchParams(window.location.search);
+      const callbackToken = params.get("token");
+      const token = callbackToken || localStorage.getItem("token");
+      if (!token) {
+        navigate("/login", { replace: true });
+        return;
+      }
       try {
         const response = await axios.get(
-          "http://localhost:1001/api/v1/user/get-user-information",
-          { headers },
+          `${API_BASE_URL}/api/v1/user/get-user-information`,
+          { headers: { authorization: `Bearer ${token}` } },
         );
+        if (callbackToken) {
+          localStorage.setItem("token", callbackToken);
+          localStorage.setItem("id", response.data._id);
+          localStorage.setItem("role", response.data.role);
+          dispatch(authActions.login());
+          dispatch(authActions.changeRole(response.data.role));
+          navigate(window.location.pathname, { replace: true });
+        }
         setProfile(response.data);
       } catch (error) {
-        console.error("Error fetching user data:", error);
+        console.error("Error fetching user data");
+        if (error.response?.status === 401 || error.response?.status === 403) {
+          navigate("/login", { replace: true });
+        }
       }
     };
-    fetch();
-  }, []);
+    fetchProfile();
+  }, [dispatch, navigate]);
 
   return (
     <section className="bg-zinc-700">

@@ -1,3 +1,4 @@
+import { API_BASE_URL } from "../../config/api.js";
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import Loader from "../Loader/Loader";
@@ -41,7 +42,7 @@ const ViewBookDetails = () => {
     const fetchBook = async () => {
       try {
         const response = await axios.get(
-          `http://localhost:1001/api/v1/get-book-by-slug/${slug}`,
+          `${API_BASE_URL}/api/v1/get-book-by-slug/${slug}`,
         );
         setData(response.data);
       } catch (error) {
@@ -57,13 +58,7 @@ const ViewBookDetails = () => {
     bookid: Data ? Data._id : "",
   };
 
-  const imageSrc = useMemo(() => {
-    if (!Data?.url) return "";
-    if (Data.url.startsWith("http://localhost:1001") && typeof window !== "undefined") {
-      return Data.url.replace("http://localhost:1001", `http://${window.location.hostname}:1001`);
-    }
-    return Data.url;
-  }, [Data?.url]);
+  const imageSrc = Data?.url || "";
 
   const handleFavourite = async () => {
     if (!Data) return;
@@ -87,7 +82,7 @@ const ViewBookDetails = () => {
     }
 
     const response = await axios.put(
-      "http://localhost:1001/api/v1/add-to-favourite",
+      `${API_BASE_URL}/api/v1/favourites/add-book-to-favourite`,
       {},
       { headers },
     );
@@ -96,7 +91,7 @@ const ViewBookDetails = () => {
 
   const handleCart = async () => {
     const response = await axios.put(
-      "http://localhost:1001/api/v1/add-to-cart",
+      `${API_BASE_URL}/api/v1/add-to-cart`,
       {},
       { headers },
     );
@@ -104,7 +99,7 @@ const ViewBookDetails = () => {
   };
 
   const deleteBook = async () => {
-    const response = await axios.delete("http://localhost:1001/api/v1/delete-book", { headers });
+    const response = await axios.delete(`${API_BASE_URL}/api/v1/delete-book`, { headers });
     alert(response.data.message);
     navigate("/all-books");
   };

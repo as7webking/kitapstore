@@ -1,3 +1,4 @@
+import { API_BASE_URL } from "../config/api.js";
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useParams, useNavigate } from "react-router-dom";
@@ -15,11 +16,12 @@ const UpdateBook = () => {
   const navigate = useNavigate();
   const headers = {
     id: localStorage.getItem("id"),
+    bookid: id,
     authorization: `Bearer ${localStorage.getItem("token")}`,
   };
   const change = (e) => {
     const { name, value } = e.target;
-    setValues({ ...Values, [name]: value });
+    setData({ ...Data, [name]: value });
   };
   const submit = async () => {
     try {
@@ -34,7 +36,7 @@ const UpdateBook = () => {
         alert("All fields are required");
       } else {
         const response = await axios.put(
-          "http://localhost:1001/api/v1/update-book",
+          `${API_BASE_URL}/api/v1/update-book`,
           Data,
           { headers }
         );
@@ -47,7 +49,7 @@ const UpdateBook = () => {
           language: "",
         });
         alert(response.data.message);
-        navigate(`/view-book-details/${id}`);
+        navigate(`/view-book-details/${Data.slug || id}`);
       }
     } catch (error) {
       alert(error.response.data.message);
@@ -56,7 +58,7 @@ const UpdateBook = () => {
   useEffect(() => {
     const fetch = async () => {
       const response = await axios.get(
-        "http://localhost:1001/api/v1/get-book-by-id"
+        `${API_BASE_URL}/api/v1/get-book-by-id/${id}`
       );
       setData(response.data.data);
     };
@@ -148,7 +150,7 @@ const UpdateBook = () => {
             className="w-full mt-2 bg-zinc-700 text-zinc-100 p-2 outline-none"
             rows="5"
             placeholder="author of book"
-            name="author"
+            name="desc"
             required
             value={Data.desc}
             onChange={change}

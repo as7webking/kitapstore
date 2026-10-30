@@ -1,3 +1,4 @@
+import { API_BASE_URL } from "../../config/api.js";
 import React, { useEffect, useState } from "react"; // ADDED: useState import
 import axios from "axios";
 import { Link, useNavigate } from "react-router-dom"; // ADDED: useNavigate for redirecting
@@ -31,7 +32,7 @@ const UserOrderHistory = () => {
     const fetchOrderHistory = async () => {
       try {
         const response = await axios.get(
-          "http://localhost:1001/api/v1/get-order-history",
+          `${API_BASE_URL}/api/v1/get-order-history`,
           { headers }
         );
         // Assuming data is located in response.data.data

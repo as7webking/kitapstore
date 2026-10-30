@@ -1,3 +1,4 @@
+import { API_BASE_URL } from "../config/api.js";
 import React, { useEffect, useMemo, useState } from "react";
 import axios from "axios";
 import { Link, useLocation } from "react-router-dom";
@@ -21,8 +22,8 @@ const SearchResults = () => {
       setLoading(true);
       try {
         const [booksRes, blogsRes] = await Promise.all([
-          axios.get("http://localhost:1001/api/v1/get-all-books"),
-          axios.get("http://localhost:1001/api/v1/blog/get-all-blogs"),
+          axios.get(`${API_BASE_URL}/api/v1/get-all-books`),
+          axios.get(`${API_BASE_URL}/api/v1/blog/get-all-blogs`),
         ]);
 
         const q = query.toLowerCase();

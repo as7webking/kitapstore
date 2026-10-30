@@ -1,3 +1,4 @@
+import { API_BASE_URL } from "../../config/api.js";
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import BookCard from "../BookCard/BookCard";
@@ -11,7 +12,7 @@ const Popular = () => {
     const fetchPopular = async () => {
       try {
         const res = await axios.get(
-          "http://localhost:1001/api/v1/get-popular-books"
+          `${API_BASE_URL}/api/v1/get-popular-books`
         );
         setBooks(res.data.data);
       } catch (error) {

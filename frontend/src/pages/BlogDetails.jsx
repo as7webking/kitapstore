@@ -1,3 +1,4 @@
+import { API_BASE_URL } from "../config/api.js";
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { Link, useParams } from "react-router-dom";
@@ -13,7 +14,7 @@ const BlogDetails = () => {
       setLoading(true);
       try {
         const res = await axios.get(
-          `http://localhost:1001/api/v1/blog/get-blog-by-slug/${slug}`,
+          `${API_BASE_URL}/api/v1/blog/get-blog-by-slug/${slug}`,
         );
 
         setBlog(res.data.data || null);

@@ -1,3 +1,4 @@
+import { API_BASE_URL } from "../config/api.js";
 import React, { useState } from "react";
 import axios from "axios";
 
@@ -55,7 +56,7 @@ const AddBlog = () => {
 
     try {
       const response = await axios.post(
-        "http://localhost:1001/api/v1/blog/add-blog",
+        `${API_BASE_URL}/api/v1/blog/add-blog`,
         payload,
         { headers }
       );

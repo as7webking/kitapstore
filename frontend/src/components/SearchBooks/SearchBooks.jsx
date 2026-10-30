@@ -1,3 +1,4 @@
+import { API_BASE_URL } from "../../config/api.js";
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import BookCard from "../BookCard/BookCard";
@@ -15,7 +16,7 @@ const SearchBooks = () => {
 
       try {
         const res = await axios.get(
-          `http://localhost:5173/api/books/search?q=${query}`
+          `${API_BASE_URL}/api/v1/books/search?q=${encodeURIComponent(query)}`
         );
         setResults(res.data);
       } catch (error) {

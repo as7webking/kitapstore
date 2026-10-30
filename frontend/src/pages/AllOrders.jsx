@@ -1,3 +1,4 @@
+import { API_BASE_URL } from "../config/api.js";
 import React, { useState, useEffect } from "react";
 import Loader from "../components/Loader/Loader";
 import { FaUserLarge } from "react-icons/fa6";
@@ -8,10 +9,10 @@ import { FaCheck } from "react-icons/fa6";
 import SeeUserData from "./SeeUserData";
 const AllOrders = () => {
   const [AllOrders, setAllOrders] = useState([]);
-  const [Options, setOptions] = useState(-1);
-  const [Values, setValues] = useState({ status: "" });
+  const [Options] = useState(-1);
+  const [Values] = useState({ status: "" });
   const [userDiv, setuserDiv] = useState("hidden");
-  const [userDivData, setuserDivData] = useState();
+  const [userDivData] = useState();
   const headers = {
     id: localStorage.getItem("id"),
     authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -20,7 +21,7 @@ const AllOrders = () => {
     const fetchOrders = async () => {
       try {
         const response = await axios.get(
-          "http://localhost:1001/api/v1/get-all-orders",
+          `${API_BASE_URL}/api/v1/get-all-orders`,
           { headers },
         );
         setAllOrders(response.data.data);
