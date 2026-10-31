@@ -6,6 +6,8 @@ import { Routes, Route } from "react-router-dom";
 import AllBooks from "./pages/AllBooks";
 import AddBook from "./pages/AddBook";
 import Login from "./pages/Login";
+import ForgotPassword from "./pages/ForgotPassword";
+import ResetPassword from "./pages/ResetPassword";
 import SignUp from "./pages/SignUp";
 import Cart from "./pages/Cart";
 import Profile from "./pages/Profile";
@@ -66,6 +68,8 @@ const App = () => {
           <Route path="/search" element={<SearchResults />} />
           <Route path="/signup" element={<SignUp />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/contact" element={<Contact />} />
           <Route
             path="/view-book-details/:slug"

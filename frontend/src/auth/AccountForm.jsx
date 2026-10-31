@@ -19,7 +19,7 @@ export default function AccountForm({ fields, submitLabel, pendingLabel, onSubmi
       const value = values[field.name];
       if (!value.trim()) nextErrors[field.name] = `${field.label} is required.`;
       else if (field.validate) {
-        const error = field.validate(value);
+        const error = field.validate(value, values);
         if (error) nextErrors[field.name] = error;
       }
     }

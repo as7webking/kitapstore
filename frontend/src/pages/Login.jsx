@@ -22,6 +22,7 @@ export default function Login() {
         <AccountForm fields={fields} submitLabel="Log In" pendingLabel="Logging in…"
           initialMessage={location.state?.message || message}
           onSubmit={async (values) => { if (await login(values)) navigate(destination, { replace: true }); }} />
+        <p className="mt-4 text-right"><Link to="/forgot-password" className="text-zinc-300 underline hover:text-blue-400 focus-visible:outline-2">Забыли пароль?</Link></p>
         <div className="mt-4 flex flex-col gap-3 sm:flex-row">
           <a href={`${API_BASE_URL}/api/v1/user/auth/google`} className="flex min-h-11 flex-1 items-center justify-center rounded bg-red-500 px-3 py-2 text-white hover:bg-red-600 focus-visible:outline-2">Login with Google</a>
           <a href={`${API_BASE_URL}/api/v1/user/auth/facebook`} className="flex min-h-11 flex-1 items-center justify-center rounded bg-blue-700 px-3 py-2 text-white hover:bg-blue-800 focus-visible:outline-2">Login with Facebook</a>
