@@ -1,16 +1,14 @@
-import { authActions } from "../store/auth";
+import { clearSession } from "../auth/session.js";
 import { API_BASE_URL } from "../config/api.js";
 import React, { useEffect, useState } from "react";
 import Sidebar from "../components/Profile/Sidebar";
 import { Outlet, useNavigate } from "react-router-dom";
-import { useDispatch } from "react-redux";
 import axios from "axios";
 import Loader from "../components/Loader/Loader";
 import MobileNav from "../components/Profile/MobileNav";
 const Admin = () => {
   //const isLoggedIn = useSelector((state) => state.auth.isLoggedIn);
   const navigate = useNavigate();
-  const dispatch = useDispatch();
   const [Profile, setProfile] = useState();
   const headers = {
     id: localStorage.getItem("id"),
@@ -33,9 +31,7 @@ const Admin = () => {
         alert(response.data.message);
 
         // Log out the user after successful deletion
-        dispatch(authActions.logout());
-        dispatch(authActions.changeRole("user"));
-        localStorage.clear();
+        clearSession();
         navigate("/");
       } catch (error) {
         console.error("Error deleting account:", error);

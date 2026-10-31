@@ -10,8 +10,9 @@ import SignUp from "./pages/SignUp";
 import Cart from "./pages/Cart";
 import Profile from "./pages/Profile";
 import ViewBookDetails from "./components/ViewBookDetails/ViewBookDetails";
-import { authActions } from "./store/auth";
-import { useDispatch, useSelector } from "react-redux";
+import { startSessionLifecycle } from "./auth/session.js";
+import RequireAuth from "./auth/RequireAuth.jsx";
+import { useSelector } from "react-redux";
 import Favourites from "./components/Profile/Favourites";
 import UserOrderHistory from "./components/Profile/UserOrderHistory";
 import Settings from "./components/Profile/Settings";
@@ -28,18 +29,8 @@ import { useLocation } from "react-router-dom";
 
 const App = () => {
   const location = useLocation();
-  const dispatch = useDispatch();
   const role = useSelector((state) => state.auth.role);
-  useEffect(() => {
-    if (
-      localStorage.getItem("id") &&
-      localStorage.getItem("token") &&
-      localStorage.getItem("role")
-    ) {
-      dispatch(authActions.login());
-      dispatch(authActions.changeRole(localStorage.getItem("role")));
-    }
-  }, [dispatch]);
+  useEffect(startSessionLifecycle, []);
   return (
     <div className=" min-h-screen flex flex-col">
       <Navbar />
@@ -50,27 +41,29 @@ const App = () => {
           <Route path="/" element={<Home />} />
           <Route path="/all-books" element={<AllBooks />} />
           <Route path="/popular-books" element={<Popular />} />
-          <Route path="/cart" element={<Cart />} />
+          <Route element={<RequireAuth />}><Route path="/cart" element={<Cart />} /></Route>
           <Route path="/blog" element={<Blog />} />
           <Route path="/blog/:slug" element={<BlogDetails />} />
+          <Route element={<RequireAuth />}>
           <Route path="/profile" element={<Profile />}>
-        <Route path="/search" element={<SearchResults />} /> ̰
             {role === "user" ? (
               <Route index element={<Favourites />} />
             ) : (
               <Route index element={<AllOrders />} />
             )}
-            {role === "admin" && (
-              <>
-                <Route path="add-book" element={<AddBook />} />
-                <Route path="add-blog" element={<AddBlog />} />
-                <Route path="update-book/:id" element={<UpdateBook />} />
-              </>
-            )}
+            <Route element={<RequireAuth admin />}>
+              <Route path="add-book" element={<AddBook />} />
+              <Route path="add-blog" element={<AddBlog />} />
+              <Route path="update-book/:id" element={<UpdateBook />} />
+            </Route>
             <Route path="orderHistory" element={<UserOrderHistory />} />
-            <Route path="settings" element={<Settings />} />
+            <Route path="/profile/favourites" element={<Favourites />} />
+            <Route path="/profile/order-history" element={<UserOrderHistory />} />
+            <Route path="/profile/settings" element={<Settings />} />
           </Route>
-          {role === "admin" && <Route path="/update-book/:id" element={<UpdateBook />} />}
+          </Route>
+          <Route element={<RequireAuth admin />}><Route path="/update-book/:id" element={<UpdateBook />} /></Route>
+          <Route path="/search" element={<SearchResults />} />
           <Route path="/signup" element={<SignUp />} />
           <Route path="/login" element={<Login />} />
           <Route path="/contact" element={<Contact />} />

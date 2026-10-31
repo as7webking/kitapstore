@@ -1,11 +1,10 @@
 import React from "react";
 import { FaArrowRight } from "react-icons/fa";
-import { useDispatch, useSelector } from "react-redux";
+import { useSelector } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
-import { authActions } from "../../store/auth";
+import { logout } from "../../auth/session.js";
 import { FaTrash } from "react-icons/fa6";
 const Sidebar = ({ data, deleteAccount }) => {
-  const dispatch = useDispatch();
   const history = useNavigate();
   const role = useSelector((state) => state.auth.role);
   return (
@@ -72,13 +71,9 @@ const Sidebar = ({ data, deleteAccount }) => {
       {/* Login-Logout Button */}
       <button
         className="bg-zinc-700 text-white font-semibold flex items-center justify-center py-2 rounded hover:bg-white hover:text-zinc-700 transition-all duration-400"
-        onClick={() => {
-          dispatch(authActions.logout());
-          dispatch(authActions.changeRole("user"));
-          localStorage.clear("id");
-          localStorage.clear("token");
-          localStorage.clear("role");
-          history("/");
+        onClick={async () => {
+          try { await logout(); history("/login"); }
+          catch { alert("Could not log out. Check your connection and try again."); }
         }}
       >
         Log Out <FaArrowRight className="ms-4" />

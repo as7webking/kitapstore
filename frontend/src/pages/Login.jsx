@@ -1,114 +1,33 @@
-import { API_BASE_URL } from "../config/api.js";
-import React, { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { authActions } from "../store/auth";
-import { useDispatch } from "react-redux";
-import axios from "axios";
+import { API_BASE_URL } from '../config/api.js';
+import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom';
+import { useSelector } from 'react-redux';
+import AccountForm from '../auth/AccountForm.jsx';
+import { login } from '../auth/session.js';
 
-const Login = () => {
-  const [Values, setValues] = useState({
-    username: "",
-    password: "",
-  });
+const fields = [
+  { name: 'username', label: 'Username or email', autoComplete: 'username', maxLength: 254 },
+  { name: 'password', label: 'Password', type: 'password', autoComplete: 'current-password', maxLength: 1024 },
+];
+export default function Login() {
   const navigate = useNavigate();
-  const dispatch = useDispatch();
-  const change = (e) => {
-    const { name, value } = e.target;
-    setValues({ ...Values, [name]: value });
-  };
-  const submit = async (e) => {
-    e.preventDefault();
-    try {
-      if (Values.username === "" || Values.password === "") {
-        return alert("All fields are required");
-      } else {
-        const response = await axios.post(
-          `${API_BASE_URL}/api/v1/user/sign-in`,
-          Values,
-        );
-
-        localStorage.setItem("token", response.data.token);
-        localStorage.setItem("id", response.data.id);
-        localStorage.setItem("role", response.data.role);
-
-        dispatch(authActions.login());
-        dispatch(authActions.changeRole(response.data.role));
-        
-        navigate("/profile", { replace: true });
-      }
-    } catch (error) {
-      alert(error.response.data.message);
-    }
-  };
-
+  const location = useLocation();
+  const { isLoggedIn, message } = useSelector((state) => state.auth);
+  const requested = location.state?.from;
+  const destination = typeof requested === 'string' && requested.startsWith('/') && !requested.startsWith('//') && !/^\/(login|signup)(?:[/?]|$)/i.test(requested) ? requested : '/profile';
+  if (isLoggedIn) return <Navigate to={destination} replace />;
   return (
-    <div className="h-[90vh] bg-zinc-700 px-12 py-8 flex items-center justify-center">
-      <div className="bg-gray-700 rounded-lg px-8 py-5 w-full md:2-3/6 lg:w-2/6">
-        <p className="text-zinc-100 text-xl">Login</p>
-        <div className="mt-4">
-          <div>
-            <label htmlFor="" className="text-zinc-400">
-              Username
-            </label>
-            <input
-              type="text"
-              className="w-full mt-2 bg-zinc-700 text-zinc-100 p-2 outline-none"
-              placeholder="username"
-              name="username"
-              required
-              value={Values.username}
-              onChange={change}
-            />
-          </div>
+    <section className="flex min-h-[80vh] items-center justify-center bg-zinc-700 px-4 py-8 sm:px-8">
+      <div className="w-full max-w-md rounded-lg bg-gray-700 px-5 py-6 sm:px-8">
+        <h1 className="text-xl text-zinc-100">Login</h1>
+        <AccountForm fields={fields} submitLabel="Log In" pendingLabel="Logging in…"
+          initialMessage={location.state?.message || message}
+          onSubmit={async (values) => { if (await login(values)) navigate(destination, { replace: true }); }} />
+        <div className="mt-4 flex flex-col gap-3 sm:flex-row">
+          <a href={`${API_BASE_URL}/api/v1/user/auth/google`} className="flex min-h-11 flex-1 items-center justify-center rounded bg-red-500 px-3 py-2 text-white hover:bg-red-600 focus-visible:outline-2">Login with Google</a>
+          <a href={`${API_BASE_URL}/api/v1/user/auth/facebook`} className="flex min-h-11 flex-1 items-center justify-center rounded bg-blue-700 px-3 py-2 text-white hover:bg-blue-800 focus-visible:outline-2">Login with Facebook</a>
         </div>
-        <div className="mt-4">
-          <label htmlFor="" className="text-zinc-400">
-            Password
-          </label>
-          <input
-            type="password"
-            className="w-full mt-2 bg-zinc-700 text-zinc-100 p-2 outline-none"
-            placeholder="password"
-            name="password"
-            required
-            value={Values.password}
-            onChange={change}
-          />
-        </div>
-        <div className="mt-4">
-          <button
-            className="w-full bg-blue-400 text-white font-semibold py-2 rounded hover:bg-blue-700 transition-all duration-200"
-            onClick={submit}
-          >
-            Log In
-          </button>
-        </div>
-        <div className="flex gap-4 mt-4">
-          <a
-            href={`${API_BASE_URL}/api/v1/user/auth/google`}
-            className="w-1/2 bg-red-500 text-white py-2 rounded flex items-center justify-center hover:bg-red-600 transition"
-          >
-            Login with Google
-          </a>
-          <a
-            href={`${API_BASE_URL}/api/v1/user/auth/facebook`}
-            className="w-1/2 bg-blue-700 text-white py-2 rounded flex items-center justify-center hover:bg-blue-800 transition"
-          >
-            Login with Facebook
-          </a>
-        </div>
-        <p className="flex mt-4 items-center justify-center text-zinc-200 font-semibold">
-          Or
-        </p>
-        <p className="flex mt-4 items-center justify-center text-zinc-400 font-semibold">
-          Don't have an account? &nbsp;
-          <Link to="/signup" className="hover:text-blue-400">
-            <u>Sign up</u>
-          </Link>
-        </p>
+        <p className="mt-5 text-center text-zinc-300">Don&apos;t have an account? <Link to="/signup" className="underline hover:text-blue-400">Sign up</Link></p>
       </div>
-    </div>
+    </section>
   );
-};
-
-export default Login;
+}

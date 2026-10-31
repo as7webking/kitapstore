@@ -1,7 +1,7 @@
 import { API_BASE_URL } from "../../config/api.js";
 import React, { useEffect, useState } from "react"; // ADDED: useState import
 import axios from "axios";
-import { Link, useNavigate } from "react-router-dom"; // ADDED: useNavigate for redirecting
+import { Link } from "react-router-dom"; // ADDED: useNavigate for redirecting
 // FIXED: Removed problematic relative import and defined Loader locally for compilation
 // import Loader from "../Loader/Loader"; 
 
@@ -15,7 +15,6 @@ const Loader = () => (
 
 const UserOrderHistory = () => {
   const [orderHistory, setOrderHistory] = useState(null); // RENAMED: to camelCase, initialized to null
-  const navigate = useNavigate();
 
   const headers = {
     id: localStorage.getItem("id"),
@@ -23,12 +22,6 @@ const UserOrderHistory = () => {
   };
 
   useEffect(() => {
-    // Check for tokens before attempting to fetch
-    if (!localStorage.getItem("token") || !localStorage.getItem("id")) {
-      navigate("/Login");
-      return;
-    }
-
     const fetchOrderHistory = async () => {
       try {
         const response = await axios.get(
@@ -40,20 +33,12 @@ const UserOrderHistory = () => {
       } catch (error) {
         console.error("Error fetching order history:", error);
         
-        // ERROR HANDLING: Handle 403 (Forbidden) or 401 (Unauthorized) errors
-        if (error.response && (error.response.status === 401 || error.response.status === 403)) {
-          // If token is invalid/expired, clear storage and redirect
-          localStorage.removeItem("id");
-          localStorage.removeItem("token");
-          localStorage.removeItem("role");
-          console.error("Session expired. Redirecting to login."); 
-          navigate("/Login");
-        }
+        // Session failures are handled by the shared Axios interceptor and route guard.
         setOrderHistory([]); // Set to empty array on general failure to stop the Loader
       }
     };
     fetchOrderHistory();
-  }, [navigate]); // Added navigate dependency
+  }, []);
 
   // Show Loader while fetching data
   if (orderHistory === null) {

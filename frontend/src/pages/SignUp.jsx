@@ -1,124 +1,33 @@
-import { API_BASE_URL } from "../config/api.js";
-import React, { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import axios from "axios";
+import { API_BASE_URL } from '../config/api.js';
+import { Link, Navigate, useNavigate } from 'react-router-dom';
+import { useSelector } from 'react-redux';
+import axios from 'axios';
+import AccountForm from '../auth/AccountForm.jsx';
 
-const SignUp = () => {
-  const [Values, setValues] = useState({
-    username: "",
-    email: "",
-    password: "",
-    address: "",
-  });
+const fields = [
+  { name: 'username', label: 'Username', autoComplete: 'username', maxLength: 50,
+    validate: (v) => v.trim().length < 4 || !/^[\p{L}\p{N}_. -]+$/u.test(v.trim()) ? 'Use 4–50 letters, numbers, spaces, dots, dashes or underscores.' : '' },
+  { name: 'email', label: 'Email', type: 'email', autoComplete: 'email', maxLength: 254,
+    validate: (v) => !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim()) ? 'Enter a valid email address.' : '' },
+  { name: 'password', label: 'Password', type: 'password', autoComplete: 'new-password',
+    hint: 'At least 8 characters; up to 72 UTF-8 bytes.',
+    validate: (v) => v.length < 8 || new TextEncoder().encode(v).length > 72 ? 'Use at least 8 characters and at most 72 UTF-8 bytes.' : '' },
+  { name: 'address', label: 'Address', autoComplete: 'street-address', maxLength: 500 },
+];
+export default function SignUp() {
   const navigate = useNavigate();
-  const change = (e) => {
-    const { name, value } = e.target;
-    setValues({ ...Values, [name]: value });
-  };
-  const submit = async () => {
-    try {
-      if (
-        Values.username === "" ||
-        Values.email === "" ||
-        Values.password === "" ||
-        Values.address === ""
-      ) {
-        alert("All fields are required");
-      } else {
-        const response = await axios.post(
-          `${API_BASE_URL}/api/v1/user/sign-up`,
-          Values
-        );
-        alert(response.data.message);
-        navigate("/Login");
-      }
-    } catch (error) {
-      alert(error.response.data.message);
-    }
-  };
+  const isLoggedIn = useSelector((state) => state.auth.isLoggedIn);
+  if (isLoggedIn) return <Navigate to="/profile" replace />;
   return (
-    <div className="h-auto bg-zinc-700 px-12 py-8 flex items-center justify-center">
-      <div className="bg-gray-700 rounded-lg px-8 py-5 w-full md:2-3/6 lg:w-2/6">
-        <p className="text-zinc-100 text-xl">Sign Up</p>
-        <div className="mt-4">
-          <div>
-            <label htmlFor="" className="text-zinc-400">
-              Username
-            </label>
-            <input
-              type="text"
-              className="w-full mt-2 bg-zinc-700 text-zinc-100 p-2 outline-none"
-              placeholder="username"
-              name="username"
-              required
-              value={Values.username}
-              onChange={change}
-            />
-          </div>
-          <div className="mt-4">
-            <label htmlFor="" className="text-zinc-400">
-              Email
-            </label>
-            <input
-              type="text"
-              className="w-full mt-2 bg-zinc-700 text-zinc-100 p-2 outline-none"
-              placeholder="admin@example.com"
-              name="email"
-              required
-              value={Values.email}
-              onChange={change}
-            />
-          </div>
-          <div className="mt-4">
-            <label htmlFor="" className="text-zinc-400">
-              Password
-            </label>
-            <input
-              type="password"
-              className="w-full mt-2 bg-zinc-700 text-zinc-100 p-2 outline-none"
-              placeholder="password"
-              name="password"
-              required
-              value={Values.password}
-              onChange={change}
-            />
-          </div>
-          <div className="mt-4">
-            <label htmlFor="" className="text-zinc-400">
-              Address
-            </label>
-            <input
-              type="text"
-              className="w-full mt-2 bg-zinc-700 text-zinc-100 p-2 outline-none"
-              rows="5"
-              placeholder="Address"
-              name="address"
-              required
-              value={Values.address}
-              onChange={change}
-            />
-          </div>
-          <div className="mt-4">
-            <button
-              className="w-full bg-blue-400 text-white font-semibold py-2 rounded hover:bg-blue-700 transition-all duration-200"
-              onClick={submit}
-            >
-              Sign Up
-            </button>
-          </div>
-          <p className="flex mt-4 items-center justify-center text-zinc-200 font-semibold">
-            Or
-          </p>
-          <p className="flex mt-4 items-center justify-center text-zinc-400 font-semibold">
-            Already have an account? &nbsp;
-            <Link to="/login" className="hover:text-blue-400">
-              <u>Login</u>
-            </Link>
-          </p>
-        </div>
+    <section className="flex min-h-[80vh] items-center justify-center bg-zinc-700 px-4 py-8 sm:px-8">
+      <div className="w-full max-w-md rounded-lg bg-gray-700 px-5 py-6 sm:px-8">
+        <h1 className="text-xl text-zinc-100">Sign Up</h1>
+        <AccountForm fields={fields} submitLabel="Sign Up" pendingLabel="Creating account…" onSubmit={async (values) => {
+          await axios.post(`${API_BASE_URL}/api/v1/user/sign-up`, values);
+          navigate('/login', { replace: true, state: { message: 'Account created. You can now log in.' } });
+        }} />
+        <p className="mt-5 text-center text-zinc-300">Already have an account? <Link to="/login" className="underline hover:text-blue-400">Login</Link></p>
       </div>
-    </div>
+    </section>
   );
-};
-
-export default SignUp;
+}

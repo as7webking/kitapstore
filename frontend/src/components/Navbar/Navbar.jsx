@@ -2,12 +2,11 @@ import { API_BASE_URL } from "../../config/api.js";
 import React, { useEffect, useMemo, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { FaSearch, FaHeart, FaUserCircle, FaBars, FaTimes } from "react-icons/fa";
-import { useDispatch, useSelector } from "react-redux";
-import { authActions } from "../../store/auth";
+import { useSelector } from "react-redux";
+import { logout } from "../../auth/session.js";
 import axios from "axios";
 
 const Navbar = () => {
-  const dispatch = useDispatch();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -113,14 +112,13 @@ const Navbar = () => {
     };
 
     fetchFavourites();
-  }, [isLoggedIn, user?.role]);
+  }, [isLoggedIn, user?.role, user?.id, token]);
 
-  const favouritesCount = favourites.length;
+  const favouritesCount = isLoggedIn && user?.role !== "admin" ? favourites.length : 0;
 
-  const handleLogout = () => {
-    localStorage.clear();
-    dispatch(authActions.logout());
-    navigate("/login");
+  const handleLogout = async () => {
+    try { await logout(); navigate("/login"); }
+    catch { alert("Could not log out. Check your connection and try again."); }
   };
 
   const handleSearchSubmit = (e) => {
@@ -138,7 +136,7 @@ const Navbar = () => {
       return;
     }
     closeAll();
-    navigate("/favourites");
+    navigate("/profile/favourites");
   };
 
   const onFavClickMobile = () => {
@@ -147,7 +145,7 @@ const Navbar = () => {
       return;
     }
     closeAll();
-    navigate("/favourites");
+    navigate("/profile/favourites");
   };
 
   return (
