@@ -50,6 +50,15 @@ app.use("/api/v1", favouriteRoutes);
 app.use("/api/v1", cartRoutes);
 app.use("/api/v1", orderRoutes);
 
+// Do not let Express log parser errors containing recovery request bodies.
+app.use((error, req, res, next) => {
+  if (!/^\/api\/v1\/user\/(?:forgot-password|reset-password)(?:\/|$)/.test(req.path)) return next(error);
+  const status = [400, 413].includes(error.status) ? error.status : 503;
+  return res.status(status).set('Cache-Control', 'no-store').json({
+    message: status === 413 ? 'Request is too large.' : status === 400 ? 'Invalid request.' : 'Password recovery is unavailable. Please try again later.',
+  });
+});
+
 async function start() {
   const { port } = validateEnv();
   try {

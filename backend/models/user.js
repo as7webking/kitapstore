@@ -12,6 +12,8 @@ const user = new mongoose.Schema(
         required: true,
         unique: true,
     },
+    resetPasswordTokenHash: { type: String, select: false, index: true },
+    resetPasswordExpires: { type: Date, select: false },
     sessionVersion: { type: Number, default: 0, select: false },
     googleId: { type: String, unique: true, sparse: true },
     password: {

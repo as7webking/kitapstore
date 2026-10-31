@@ -9,7 +9,9 @@ const { registration, escapeRegex } = require("../utils/accountValidation");
 const { createAuthLimiter } = require("../middleware/authRateLimit");
 const signupLimit = createAuthLimiter({ limit: 5, windowMs: 60 * 60 * 1000 });
 const signinLimit = createAuthLimiter({ limit: 15, windowMs: 15 * 60 * 1000 });
-const crypto = require("crypto");
+const { forgotPassword, resetPassword } = require("../controllers/passwordResetController");
+const recoveryLimit = createAuthLimiter({ limit: 5, windowMs: 15 * 60 * 1000 });
+const resetLimit = createAuthLimiter({ limit: 10, windowMs: 15 * 60 * 1000 });
 const { authentificateToken } = require("./userAuth");
 const sendEmail = require("../utils/mailer");
 
@@ -123,61 +125,9 @@ router.get("/get-user-information", authentificateToken, (req, res) => {
   return res.json({ _id, username, email, address, avatar, role });
 });
 
-// --- FORGOT PASSWORD (Generate Token) ---
-router.post("/forgot-password", async (req, res) => {
-  try {
-    const { email } = req.body;
-    const user = await User.findOne({ email });
-    if (!user) return res.status(404).json({ message: "Email not found" });
-
-    // Generate a secure random reset token
-    const resetToken = crypto.randomBytes(20).toString("hex");
-
-    // Save token and expiration (valid for 1 hour) to the database
-    user.resetPasswordToken = resetToken;
-    user.resetPasswordExpires = Date.now() + 3600000;
-    await user.save();
-
-    // Link for the Frontend
-    const resetUrl = `/reset-password/${resetToken}`;
-    await sendEmail(
-      email,
-      "Password Reset Request",
-      `Click the link to reset your password: ${resetUrl}`
-    );
-
-    res.status(200).json({ message: "Reset link sent to your email" });
-  } catch (error) {
-    res.status(500).json({ message: "Error in forgot-password" });
-  }
-});
-
-// --- RESET PASSWORD (Update Password with Token) ---
-router.post("/reset-password/:token", async (req, res) => {
-  try {
-    const { password } = req.body;
-    // Find user with valid token and check if token hasn't expired
-    const user = await User.findOne({
-      resetPasswordToken: req.params.token,
-      resetPasswordExpires: { $gt: Date.now() },
-    });
-
-    if (!user)
-      return res
-        .status(400)
-        .json({ message: "Token is invalid or has expired" });
-
-    // Hash new password and clear reset fields
-    user.password = await bcrypt.hash(password, 10);
-    user.resetPasswordToken = undefined;
-    user.resetPasswordExpires = undefined;
-    await user.save();
-
-    res.status(200).json({ message: "Password updated successfully" });
-  } catch (error) {
-    res.status(500).json({ message: "Error in reset-password" });
-  }
-});
+// Tokens are sent in the request body, never in API URLs.
+router.post("/forgot-password", recoveryLimit, forgotPassword);
+router.post("/reset-password", resetLimit, resetPassword);
 
 // --- DELETE ACCOUNT ---
 router.delete("/delete-account", authentificateToken, async (req, res) => {
