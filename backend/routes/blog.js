@@ -1,10 +1,11 @@
+const { requireAdmin } = require("../utils/jwt");
 const router = require("express").Router();
 const User = require("../models/user");
 const Post = require("../models/post");
 const { authentificateToken } = require("./userAuth");
 const slugify = require("slugify");
 
-router.post("/add-blog", authentificateToken, async (req, res) => {
+router.post("/add-blog", authentificateToken, requireAdmin, async (req, res) => {
   try {
     const { id } = req.headers;
     const user = await User.findById(id);

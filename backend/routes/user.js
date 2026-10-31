@@ -5,6 +5,10 @@ const { googleCallback } = require("../controllers/authController");
 const User = require("../models/user");
 const bcrypt = require("bcryptjs");
 const { createToken } = require("../utils/jwt");
+const { registration, escapeRegex } = require("../utils/accountValidation");
+const { createAuthLimiter } = require("../middleware/authRateLimit");
+const signupLimit = createAuthLimiter({ limit: 5, windowMs: 60 * 60 * 1000 });
+const signinLimit = createAuthLimiter({ limit: 15, windowMs: 15 * 60 * 1000 });
 const crypto = require("crypto");
 const { authentificateToken } = require("./userAuth");
 const sendEmail = require("../utils/mailer");
@@ -17,79 +21,64 @@ const requireOAuthProvider = (provider) => (req, res, next) => {
 };
 
 // --- SIGN UP ---
-router.post("/sign-up", async (req, res) => {
+router.post("/sign-up", signupLimit, async (req, res) => {
+  const { errors, values } = registration(req.body);
+  if (Object.keys(errors).length) return res.status(400).json({ message: "Check the highlighted fields.", errors });
+  const { username, email, password, address } = values;
   try {
-    const { username, email, password, address } = req.body;
-
-    // Validation: Username length
-    if (typeof username !== "string" || username.length < 4) {
-      return res
-        .status(400)
-        .json({ message: "Username should be > 3 characters" });
-    }
-
-    // Check if user already exists
-    const existingUser = await User.findOne({ $or: [{ username }, { email }] });
+    // Match legacy mixed-case addresses without rewriting existing accounts.
+    const existingUser = await User.findOne({ $or: [{ username }, { email: { $regex: `^${escapeRegex(email)}$`, $options: "i" } }] });
     if (existingUser) {
-      return res
-        .status(400)
-        .json({ message: "Username or Email already exists" });
+      const duplicates = {};
+      if (existingUser.username === username) duplicates.username = "This username is already registered.";
+      if (existingUser.email.toLowerCase() === email) duplicates.email = "This email is already registered.";
+      return res.status(409).json({ message: "Username or email is already registered.", errors: duplicates });
     }
-
-    // Password validation and hashing
-    if (typeof password !== "string" || password.length < 7) {
-      return res
-        .status(400)
-        .json({ message: "Password should be > 6 characters" });
-    }
-    const hashPass = await bcrypt.hash(password, 10);
-
-    const newUser = new User({ username, email, password: hashPass, address });
-    await newUser.save();
-
-    // Notification failures must not turn a saved registration into an error.
+    await User.create({ username, email, address, password: await bcrypt.hash(password, 12), role: "user", authProvider: "local" });
+    // Notifications are best-effort and do not delay account creation.
     if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
-      try {
-        await sendEmail(email, "Welcome to KitapStore", `Hi ${username}, your account was created!`);
-        if (process.env.EMAIL_TO) {
-          await sendEmail(process.env.EMAIL_TO, "New User Registered", `New user: ${username}`);
-        }
-      } catch {
-        console.warn("Registration notification could not be sent");
-      }
+      sendEmail(email, "Welcome to KitapStore", `Hi ${username}, your account was created!`)
+        .catch(() => console.warn("Registration notification could not be sent"));
     }
-
-    return res.status(200).json({ message: "SignUp Successfully" });
+    return res.status(201).json({ message: "Account created. You can now log in." });
   } catch (error) {
-    res.status(500).json({ message: "Internal server error" });
+    if (error.code === 11000) {
+      const keys = Object.keys(error.keyPattern || error.keyValue || {}).filter((key) => ["username", "email"].includes(key));
+      const duplicates = Object.fromEntries((keys.length ? keys : ["username", "email"]).map((key) => [key, "This username or email is already registered."]));
+      return res.status(409).json({ message: "Username or email is already registered.", errors: duplicates });
+    }
+    return res.status(500).json({ message: "Could not create your account. Please try again." });
   }
 });
 
 // --- SIGN IN ---
-router.post("/sign-in", async (req, res) => {
+router.post("/sign-in", signinLimit, async (req, res) => {
+  const { username, password } = req.body || {};
+  const errors = {};
+  if (typeof username !== "string" || !username.trim() || username.length > 254) errors.username = "Enter your username or email.";
+  if (typeof password !== "string" || !password || password.length > 1024) errors.password = "Enter your password.";
+  if (Object.keys(errors).length) return res.status(400).json({ message: "Check the highlighted fields.", errors });
   try {
-    const { username, password } = req.body;
+    const identifier = username.trim();
+    const query = identifier.includes("@") ? { email: { $regex: `^${escapeRegex(identifier.toLowerCase())}$`, $options: "i" } } : { username: identifier };
+    const user = await User.findOne(query).select("+sessionVersion");
+    // Compare a real bcrypt hash for absent accounts too, avoiding a fast failure path.
+    const fallbackHash = "$2b$12$R9h/cIPz0gi.URNNX3kh2OPST9/PgBkqquzi.Ss7KIUgO2t0jWMUW";
+    const matches = await bcrypt.compare(password, user?.password || fallbackHash);
+    if (!user?.password || !matches) return res.status(401).json({ message: "Incorrect username/email or password." });
+    const token = createToken(user);
+    return res.json({ id: user._id, role: user.role, token });
+  } catch {
+    return res.status(503).json({ message: "Login is unavailable. Please try again." });
+  }
+});
 
-    const existingUser = await User.findOne({ username });
-    if (!existingUser) {
-      return res.status(400).json({ message: "Invalid credentials" });
-    }
-
-    // Compare hashed password
-    const isMatch = await bcrypt.compare(password, existingUser.password);
-    if (isMatch) {
-      const token = createToken(existingUser);
-
-      return res.status(200).json({
-        id: existingUser._id,
-        role: existingUser.role,
-        token: token,
-      });
-    } else {
-      return res.status(400).json({ message: "Invalid credentials" });
-    }
-  } catch (error) {
-    res.status(500).json({ message: "Internal server error" });
+router.post("/sign-out", authentificateToken, async (req, res) => {
+  try {
+    await User.updateOne({ _id: req.user.id }, { $inc: { sessionVersion: 1 } });
+    return res.json({ message: "Signed out on all devices." });
+  } catch {
+    return res.status(503).json({ message: "Could not end your session. Please try again." });
   }
 });
 
@@ -129,14 +118,9 @@ router.get(
 
 
 // --- GET USER INFO ---
-router.get("/get-user-information", authentificateToken, async (req, res) => {
-  try {
-    const { id } = req.headers;
-    const data = await User.findById(id).select("-password"); // Find user, exclude password field
-    return res.status(200).json(data);
-  } catch (error) {
-    res.status(500).json({ message: "Internal server error" });
-  }
+router.get("/get-user-information", authentificateToken, (req, res) => {
+  const { _id, username, email, address, avatar, role } = req.authUser;
+  return res.json({ _id, username, email, address, avatar, role });
 });
 
 // --- FORGOT PASSWORD (Generate Token) ---

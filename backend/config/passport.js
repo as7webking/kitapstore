@@ -9,7 +9,7 @@ if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
     callbackURL: process.env.GOOGLE_CALLBACK_URL || "http://localhost:1001/api/v1/user/auth/google/callback",
   }, async (_accessToken, _refreshToken, profile, done) => {
     try {
-      let user = await User.findOne({ googleId: profile.id });
+      let user = await User.findOne({ googleId: profile.id }).select("+sessionVersion");
       if (!user) {
         const email = profile.emails?.[0]?.value;
         if (!email || await User.exists({ email })) {

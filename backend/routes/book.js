@@ -1,3 +1,4 @@
+const { requireAdmin } = require("../utils/jwt");
 console.log("📚 bookRoutes file loaded");
 
 const express = require("express");
@@ -11,7 +12,7 @@ function escapeRegex(text) {
 }
 
 //add book --admin
-router.post("/add-book", authentificateToken, async (req, res) => {
+router.post("/add-book", authentificateToken, requireAdmin, async (req, res) => {
   try {
     const { id } = req.headers;
     const user = await User.findById(id);
@@ -39,7 +40,7 @@ router.post("/add-book", authentificateToken, async (req, res) => {
 });
 
 //update book
-router.put("/update-book", authentificateToken, async (req, res) => {
+router.put("/update-book", authentificateToken, requireAdmin, async (req, res) => {
   try {
     const { bookid } = req.headers;
     await Book.findByIdAndUpdate(bookid, {
@@ -63,7 +64,7 @@ router.put("/update-book", authentificateToken, async (req, res) => {
 });
 
 //delete book
-router.delete("/delete-book", authentificateToken, async (req, res) => {
+router.delete("/delete-book", authentificateToken, requireAdmin, async (req, res) => {
   try {
     const { bookid } = req.headers;
     await Book.findByIdAndUpdate(bookid, { isDeleted: true });

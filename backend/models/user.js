@@ -12,6 +12,7 @@ const user = new mongoose.Schema(
         required: true,
         unique: true,
     },
+    sessionVersion: { type: Number, default: 0, select: false },
     googleId: { type: String, unique: true, sparse: true },
     password: {
         type: String,

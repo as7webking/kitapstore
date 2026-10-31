@@ -1,3 +1,4 @@
+const { requireAdmin } = require("../utils/jwt");
 const router = require("express").Router();
 const { authentificateToken } = require("./userAuth");
 const Book = require("../models/book");
@@ -53,7 +54,7 @@ router.get("/get-order-history", authentificateToken, async (req, res) => {
 });
 
 //get-all-orders --admin
-router.get("/get-all-orders", authentificateToken, async (req, res) => {
+router.get("/get-all-orders", authentificateToken, requireAdmin, async (req, res) => {
   try {
     const userData = await Order.find()
     .populate({
@@ -74,7 +75,7 @@ router.get("/get-all-orders", authentificateToken, async (req, res) => {
 });
 
 //update order --admin
-router.put("/update-status/:id", authentificateToken, async (req, res) => {
+router.put("/update-status/:id", authentificateToken, requireAdmin, async (req, res) => {
   try {
     const { id } = req.params;
     await Order.findByIdAndUpdate(id, { status: req.body.status });
