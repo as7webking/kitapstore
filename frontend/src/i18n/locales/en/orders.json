@@ -1,0 +1,19 @@
+{
+  "loading": "Loading...",
+  "no_order_history": "No order history",
+  "you_have_not_placed_any_orders_yet": "You have not placed any orders yet.",
+  "no_orders": "No orders",
+  "browse_books": "Browse books",
+  "all_orders": "All Orders",
+  "books": "Books",
+  "description": "Description",
+  "price": "Price",
+  "status": "Status",
+  "method": "Method",
+  "no_description_available": "No description available.",
+  "n_a": "N/A",
+  "placed": "Order Placed",
+  "out_for_delivery": "Out for delivery",
+  "delivered": "Delivered",
+  "canceled": "Canceled"
+}

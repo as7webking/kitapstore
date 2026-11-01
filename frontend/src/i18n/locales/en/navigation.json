@@ -1,0 +1,21 @@
+{
+  "could_not_log_out_check_your_connection_and_try_again": "Could not log out. Check your connection and try again.",
+  "logo": "logo",
+  "home": "Home",
+  "books": "Books",
+  "blog": "Blog",
+  "contact": "Contact",
+  "search": "Search",
+  "favourites": "Favourites",
+  "admins_cannot_use_favourites": "Admins cannot use favourites",
+  "log_in_to_use_favourites": "Log in to use favourites",
+  "no_favourite_books": "No favourite books",
+  "profile": "Profile",
+  "log_in": "Log in",
+  "logout": "Logout",
+  "search_books": "Search books...",
+  "submit_search": "Submit search",
+  "close_search": "Close search",
+  "search_2": "Search...",
+  "menu": "Menu"
+}

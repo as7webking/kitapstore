@@ -1,0 +1,21 @@
+{
+  "title_and_content_are_required": "Title and content are required",
+  "error_occurred": "Error occurred",
+  "add_blog": "Add Blog",
+  "cover_image": "Cover Image",
+  "title": "Title",
+  "blog_title": "Blog title",
+  "slug_optional": "Slug (optional)",
+  "custom_blog_link": "custom-blog-link",
+  "content": "Content",
+  "write_blog_content_here": "Write blog content here",
+  "blog": "Blog",
+  "loading": "Loading...",
+  "no_blog_posts_yet": "No blog posts yet.",
+  "read_more": "Read more →",
+  "blog_not_found": "Blog not found",
+  "back_to_all_posts": "← Back to all posts",
+  "related_articles": "Related articles",
+  "no_related_articles_yet": "No related articles yet.",
+  "posts_count": "Blog posts ({{count}})"
+}
