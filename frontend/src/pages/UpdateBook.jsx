@@ -1,3 +1,4 @@
+import { t, translateMessage } from '../i18n/index.js';
 import { API_BASE_URL } from "../config/api.js";
 import React, { useState, useEffect } from "react";
 import axios from "axios";
@@ -33,7 +34,7 @@ const UpdateBook = () => {
         Data.desc === "" ||
         Data.language === ""
       ) {
-        alert("All fields are required");
+        alert(t("catalog:all_fields_are_required"));
       } else {
         const response = await axios.put(
           `${API_BASE_URL}/api/v1/update-book`,
@@ -48,11 +49,11 @@ const UpdateBook = () => {
           desc: "",
           language: "",
         });
-        alert(response.data.message);
+        alert(translateMessage(response.data.message));
         navigate(`/view-book-details/${Data.slug || id}`);
       }
     } catch (error) {
-      alert(error.response.data.message);
+      alert(translateMessage(error.response.data.message));
     }
   };
   useEffect(() => {
@@ -66,18 +67,14 @@ const UpdateBook = () => {
   }, []);
   return (
     <div className="bg-zinc-700 h-[100%] p-0 md:p-4">
-      <h1 className="text-3xl md:text-5xl font-semibold text-zinc-400 mb-8">
-        Update Book
-      </h1>
+      <h1 className="text-3xl md:text-5xl font-semibold text-zinc-400 mb-8">{t("catalog:update_book")}</h1>
       <div className="p-4 bg-zinc-700 rounded">
         <div>
-          <label htmlFor="" className="text-zinc-400">
-            Image
-          </label>
+          <label htmlFor="" className="text-zinc-400">{t("catalog:image")}</label>
           <input
             type="text"
             className="w-full mt-2 bg-zinc-700 text-zinc-100 p-2 outline-none"
-            placeholder="url of image"
+            placeholder={t("catalog:url_of_image")}
             name="url"
             required
             value={Data.url}
@@ -85,13 +82,11 @@ const UpdateBook = () => {
           />
         </div>
         <div className="mt-4">
-          <label htmlFor="" className="text-zinc-400">
-            Title of book
-          </label>
+          <label htmlFor="" className="text-zinc-400">{t("catalog:title_of_book")}</label>
           <input
             type="text"
             className="w-full mt-2 bg-zinc-700 text-zinc-100 p-2 outline-none"
-            placeholder="title of book"
+            placeholder={t("catalog:title_of_book_2")}
             name="title"
             required
             value={Data.title}
@@ -99,13 +94,11 @@ const UpdateBook = () => {
           />
         </div>
         <div className="mt-4">
-          <label htmlFor="" className="text-zinc-400">
-            Name of book
-          </label>
+          <label htmlFor="" className="text-zinc-400">{t("catalog:author")}</label>
           <input
             type="text"
             className="w-full mt-2 bg-zinc-700 text-zinc-100 p-2 outline-none"
-            placeholder="author of book"
+            placeholder={t("catalog:author_of_book")}
             name="author"
             required
             value={Data.author}
@@ -114,13 +107,11 @@ const UpdateBook = () => {
         </div>
         <div className="mt-4 flex gap-4">
           <div className="w-3/6">
-            <label htmlFor="" className="text-zinc-400">
-              Language
-            </label>
+            <label htmlFor="" className="text-zinc-400">{t("catalog:language")}</label>
             <input
               type="text"
               className="w-full mt-2 bg-zinc-700 text-zinc-100 p-2 outline-none"
-              placeholder="language of book"
+              placeholder={t("catalog:language_of_book")}
               name="language"
               required
               value={Data.language}
@@ -128,13 +119,11 @@ const UpdateBook = () => {
             />
           </div>
           <div className="w-3/6">
-            <label htmlFor="" className="text-zinc-400">
-              Price
-            </label>
+            <label htmlFor="" className="text-zinc-400">{t("catalog:price")}</label>
             <input
               type="number"
               className="w-full mt-2 bg-zinc-700 text-zinc-100 p-2 outline-none"
-              placeholder="price of book"
+              placeholder={t("catalog:price_of_book")}
               name="price"
               required
               value={Data.price}
@@ -143,13 +132,11 @@ const UpdateBook = () => {
           </div>
         </div>
         <div className="mt-4">
-          <label htmlFor="" className="text-zinc-400">
-            Description of book
-          </label>
+          <label htmlFor="" className="text-zinc-400">{t("catalog:description_of_book")}</label>
           <textarea
             className="w-full mt-2 bg-zinc-700 text-zinc-100 p-2 outline-none"
             rows="5"
-            placeholder="author of book"
+            placeholder={t("catalog:author_of_book")}
             name="desc"
             required
             value={Data.desc}
@@ -160,9 +147,7 @@ const UpdateBook = () => {
         <button
           className="w-full bg-blue-400 text-white font-semibold py-2 rounded hover:bg-blue-700 transition-all duration-200"
           onClick={submit}
-        >
-          Update Book
-        </button>
+        >{t("catalog:update_book")}</button>
       </div>
     </div>
   );

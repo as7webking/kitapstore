@@ -1,3 +1,4 @@
+import { t } from '../i18n/index.js';
 import { API_BASE_URL } from "../config/api.js";
 import React, { useEffect, useMemo, useState } from "react";
 import axios from "axios";
@@ -55,19 +56,18 @@ const SearchResults = () => {
 
   return (
     <div className="bg-white text-gray-700 min-h-screen w-[90%] max-w-[1200px] mx-auto px-6 py-8">
-      <h1 className="text-3xl font-bold">Search</h1>
-      <p className="text-gray-500 mt-2">
-        Query: <span className="font-semibold">{query || "—"}</span>
+      <h1 className="text-3xl font-bold">{t("catalog:search")}</h1>
+      <p className="text-gray-500 mt-2">{t("catalog:query")} <span className="font-semibold">{query || t("catalog:text")}</span>
       </p>
 
       {loading ? (
-        <p className="mt-6">Loading...</p>
+        <p className="mt-6">{t("catalog:loading")}</p>
       ) : (
         <>
           <section className="mt-8">
-            <h2 className="text-2xl font-semibold">Books ({books.length})</h2>
+            <h2 className="text-2xl font-semibold">{t("catalog:books_count", { count: books.length })}</h2>
             {books.length === 0 ? (
-              <p className="text-gray-500 mt-2">No books found.</p>
+              <p className="text-gray-500 mt-2">{t("catalog:no_books_found_2")}</p>
             ) : (
               <div className="grid md:grid-cols-2 gap-4 mt-4">
                 {books.map((book) => (
@@ -87,9 +87,9 @@ const SearchResults = () => {
           </section>
 
           <section className="mt-10">
-            <h2 className="text-2xl font-semibold">Blog posts ({blogs.length})</h2>
+            <h2 className="text-2xl font-semibold">{t("blog:posts_count", { count: blogs.length })}</h2>
             {blogs.length === 0 ? (
-              <p className="text-gray-500 mt-2">No articles found.</p>
+              <p className="text-gray-500 mt-2">{t("catalog:no_articles_found")}</p>
             ) : (
               <div className="grid md:grid-cols-2 gap-4 mt-4">
                 {blogs.map((blog) => (

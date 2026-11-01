@@ -1,3 +1,5 @@
+import LanguageSwitcher from '../../i18n/LanguageSwitcher.jsx';
+import { t } from '../../i18n/index.js';
 import { API_BASE_URL } from "../../config/api.js";
 import React, { useEffect, useMemo, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
@@ -118,7 +120,7 @@ const Navbar = () => {
 
   const handleLogout = async () => {
     try { await logout(); navigate("/login"); }
-    catch { alert("Could not log out. Check your connection and try again."); }
+    catch { alert(t("navigation:could_not_log_out_check_your_connection_and_try_again")); }
   };
 
   const handleSearchSubmit = (e) => {
@@ -152,26 +154,27 @@ const Navbar = () => {
     <nav
       className={`fixed top-0 left-0 w-full h-[75px] text-white z-50 transition-colors duration-300 ${navbarBg} `}
     >
-      <div className="max-w-[1200px] h-full mx-auto px-6 flex items-center justify-between">
+      <div className="max-w-[1200px] h-full mx-auto px-3 sm:px-6 flex items-center justify-between">
         <Link to="/" className="flex items-center shrink-0">
-          <img src="/src/assets/logo.png" alt="logo" className="h-10 object-contain" />
+          <img src="/src/assets/logo.png" alt={t("navigation:logo")} className="h-10 object-contain" />
         </Link>
 
         <div className="hidden md:flex items-center justify-center gap-8 text-sm font-medium flex-1">
-          <Link to="/" className="hover:text-blue-300">Home</Link>
-          <Link to="/all-books" className="hover:text-blue-300">Books</Link>
-          <Link to="/blog" className="hover:text-blue-300">Blog</Link>
-          <Link to="/contact" className="hover:text-blue-300">Contact</Link>
+          <Link to="/" className="hover:text-blue-300">{t("navigation:home")}</Link>
+          <Link to="/all-books" className="hover:text-blue-300">{t("navigation:books")}</Link>
+          <Link to="/blog" className="hover:text-blue-300">{t("navigation:blog")}</Link>
+          <Link to="/contact" className="hover:text-blue-300">{t("navigation:contact")}</Link>
         </div>
 
-        <div className="flex items-center justify-center gap-4 shrink-0 relative">
+        <div className="flex items-center justify-center gap-2 sm:gap-4 shrink-0 relative">
+          <LanguageSwitcher />
           {/* Desktop / Tablet */}
           <div className="hidden md:flex items-center gap-4 relative">
             <button
               type="button"
               onClick={toggleSearchDesktop}
               className="text-white"
-              aria-label="Search"
+              aria-label={t("navigation:search")}
             >
               <FaSearch size={18} />
             </button>
@@ -181,7 +184,7 @@ const Navbar = () => {
                 type="button"
                 onClick={onFavClickDesktop}
                 className="text-white relative"
-                aria-label="Favourites"
+                aria-label={t("navigation:favourites")}
               >
                 <FaHeart size={18} />
                 {favouritesCount > 0 && (
@@ -194,11 +197,11 @@ const Navbar = () => {
               {favOpen && (
                 <div className="absolute right-0 mt-3 w-56 bg-zinc-800 rounded shadow-lg px-4 py-3 text-sm text-zinc-200">
                   {user?.role === "admin"
-                    ? "Admins cannot use favourites"
+                    ? t("navigation:admins_cannot_use_favourites")
                     : !isLoggedIn
-                      ? "Log in to use favourites"
+                      ? t("navigation:log_in_to_use_favourites")
                       : favouritesCount === 0
-                        ? "No favourite books"
+                        ? t("navigation:no_favourite_books")
                         : null}
                 </div>
               )}
@@ -209,7 +212,7 @@ const Navbar = () => {
                 type="button"
                 onClick={toggleProfile}
                 className="text-white"
-                aria-label="Profile"
+                aria-label={t("navigation:profile")}
               >
                 <FaUserCircle size={22} />
               </button>
@@ -223,27 +226,21 @@ const Navbar = () => {
                         navigate("/login");
                       }}
                       className="w-full px-4 py-2 text-left hover:bg-zinc-700"
-                    >
-                      Log in
-                    </button>
+                    >{t("navigation:log_in")}</button>
                   ) : (
                     <>
                       <Link
                         to="/profile"
                         onClick={closeAll}
                         className="block px-4 py-2 hover:bg-zinc-700"
-                      >
-                        Profile
-                      </Link>
+                      >{t("navigation:profile")}</Link>
                       <button
                         onClick={() => {
                           closeAll();
                           handleLogout();
                         }}
                         className="w-full px-4 py-2 text-left hover:bg-zinc-700 text-red-300"
-                      >
-                        Logout
-                      </button>
+                      >{t("navigation:logout")}</button>
                     </>
                   )}
                 </div>
@@ -263,14 +260,14 @@ const Navbar = () => {
                 className={`bg-transparent outline-none text-sm w-full ${
                   searchOpen ? "opacity-100" : "opacity-0"
                 } transition-opacity duration-200`}
-                placeholder="Search books..."
+                placeholder={t("navigation:search_books")}
               />
               <button
                 type="submit"
                 className={`${
                   searchOpen ? "opacity-100" : "opacity-0"
                 } transition-opacity duration-200`}
-                aria-label="Submit search"
+                aria-label={t("navigation:submit_search")}
               >
                 <FaSearch size={16} />
               </button>
@@ -280,7 +277,7 @@ const Navbar = () => {
                 className={`${
                   searchOpen ? "opacity-100" : "opacity-0"
                 } transition-opacity duration-200`}
-                aria-label="Close search"
+                aria-label={t("navigation:close_search")}
               >
                 <FaTimes size={16} />
               </button>
@@ -288,13 +285,13 @@ const Navbar = () => {
           </div>
 
           {/* Mobile */}
-          <div className="md:hidden flex items-center gap-4 relative">
-            <div className="relative flex items-center gap-4">
+          <div className="md:hidden flex items-center gap-2 sm:gap-4 relative">
+            <div className="relative flex items-center gap-2 sm:gap-4">
               <button
                 type="button"
                 onClick={onFavClickMobile}
                 className="text-white relative"
-                aria-label="Favourites"
+                aria-label={t("navigation:favourites")}
               >
                 <FaHeart size={18} />
                 {favouritesCount > 0 && (
@@ -308,7 +305,7 @@ const Navbar = () => {
                 type="button"
                 onClick={toggleProfile}
                 className="text-white"
-                aria-label="Profile"
+                aria-label={t("navigation:profile")}
               >
                 <FaUserCircle size={22} />
               </button>
@@ -316,11 +313,11 @@ const Navbar = () => {
               {favOpen && (
                 <div className="absolute left-0 mt-12 w-56 bg-zinc-800 rounded shadow-lg px-4 py-3 text-sm text-zinc-200">
                   {user?.role === "admin"
-                    ? "Admins cannot use favourites"
+                    ? t("navigation:admins_cannot_use_favourites")
                     : !isLoggedIn
-                      ? "Log in to use favourites"
+                      ? t("navigation:log_in_to_use_favourites")
                       : favouritesCount === 0
-                        ? "No favourite books"
+                        ? t("navigation:no_favourite_books")
                         : null}
                 </div>
               )}
@@ -334,27 +331,21 @@ const Navbar = () => {
                         navigate("/login");
                       }}
                       className="w-full px-4 py-2 text-left hover:bg-zinc-700"
-                    >
-                      Log in
-                    </button>
+                    >{t("navigation:log_in")}</button>
                   ) : (
                     <>
                       <Link
                         to="/profile"
                         onClick={closeAll}
                         className="block px-4 py-2 hover:bg-zinc-700"
-                      >
-                        Profile
-                      </Link>
+                      >{t("navigation:profile")}</Link>
                       <button
                         onClick={() => {
                           closeAll();
                           handleLogout();
                         }}
                         className="w-full px-4 py-2 text-left hover:bg-zinc-700 text-red-300"
-                      >
-                        Logout
-                      </button>
+                      >{t("navigation:logout")}</button>
                     </>
                   )}
                 </div>
@@ -366,7 +357,7 @@ const Navbar = () => {
                 type="button"
                 onClick={toggleSearchDesktop}
                 className="text-white"
-                aria-label="Search"
+                aria-label={t("navigation:search")}
               >
                 <FaSearch size={18} />
               </button>
@@ -384,14 +375,14 @@ const Navbar = () => {
                   className={`bg-transparent outline-none text-sm w-full ${
                     searchOpen ? "opacity-100" : "opacity-0"
                   } transition-opacity duration-200`}
-                  placeholder="Search..."
+                  placeholder={t("navigation:search_2")}
                 />
                 <button
                   type="submit"
                   className={`${
                     searchOpen ? "opacity-100" : "opacity-0"
                   } transition-opacity duration-200`}
-                  aria-label="Submit search"
+                  aria-label={t("navigation:submit_search")}
                 >
                   <FaSearch size={16} />
                 </button>
@@ -402,7 +393,7 @@ const Navbar = () => {
               type="button"
               className="text-white"
               onClick={toggleMobileMenu}
-              aria-label="Menu"
+              aria-label={t("navigation:menu")}
             >
               <FaBars size={18} />
             </button>
@@ -416,10 +407,10 @@ const Navbar = () => {
         }`}
       >
         <div className="px-6 py-4 flex flex-col items-center gap-3 text-sm">
-          <Link to="/" className="hover:text-blue-300">Home</Link>
-          <Link to="/all-books" className="hover:text-blue-300">Books</Link>
-          <Link to="/blog" className="hover:text-blue-300">Blog</Link>
-          <Link to="/contact" className="hover:text-blue-300">Contact</Link>
+          <Link to="/" className="hover:text-blue-300">{t("navigation:home")}</Link>
+          <Link to="/all-books" className="hover:text-blue-300">{t("navigation:books")}</Link>
+          <Link to="/blog" className="hover:text-blue-300">{t("navigation:blog")}</Link>
+          <Link to="/contact" className="hover:text-blue-300">{t("navigation:contact")}</Link>
         </div>
       </div>
     </nav>

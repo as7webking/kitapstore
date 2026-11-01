@@ -1,3 +1,4 @@
+import { t } from '../../i18n/index.js';
 import { API_BASE_URL } from "../../config/api.js";
 import React, { useEffect, useState } from "react";
 import axios from "axios";
@@ -28,15 +29,11 @@ const Popular = () => {
     <section className="py-20 bg-gray-50">
       <div className="container mx-auto max-w-[1200px] px-6">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-10">
-          <h2 className="text-3xl md:text-4xl font-semibold">
-            Popular Books
-          </h2>
+          <h2 className="text-3xl md:text-4xl font-semibold">{t("home:popular_books")}</h2>
           <Link
             to="/all-books"
             className="mt-4 md:mt-0 text-gray-600 hover:text-black transition"
-          >
-            View all →
-          </Link>
+          >{t("home:view_all")}</Link>
         </div>
 
         {!books && (
@@ -46,9 +43,7 @@ const Popular = () => {
         )}
 
         {books && books.length === 0 && (
-          <p className="text-center text-gray-500">
-            No popular books available.
-          </p>
+          <p className="text-center text-gray-500">{t("home:no_popular_books_available")}</p>
         )}
 
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">

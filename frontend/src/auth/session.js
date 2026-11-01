@@ -20,9 +20,9 @@ export function clearSession(message = '') {
 function scheduleExpiry(token) {
   clearTimeout(expiryTimer);
   const remaining = tokenExpiry(token) - Date.now();
-  if (remaining <= 0) return clearSession('Your session expired. Please log in again.');
+  if (remaining <= 0) return clearSession("auth:your_session_expired_please_log_in_again");
   expiryTimer = setTimeout(() => {
-    if (localStorage.getItem('token') === token) clearSession('Your session expired. Please log in again.');
+    if (localStorage.getItem('token') === token) clearSession("auth:your_session_expired_please_log_in_again");
   }, Math.min(remaining, 2147483647));
 }
 function saveSession(token, user) {
@@ -53,7 +53,7 @@ axios.interceptors.response.use((response) => response, (error) => {
   if (config && isOurApi(config) && error.response?.status === 401 &&
       !config.url.endsWith('/sign-in') && config.sentSessionToken &&
       config.sentSessionToken === localStorage.getItem('token')) {
-    clearSession('Your session expired. Please log in again.');
+    clearSession("auth:your_session_expired_please_log_in_again");
   }
   return Promise.reject(error);
 });
@@ -62,14 +62,14 @@ export async function restoreSession() {
   const version = ++generation;
   const token = localStorage.getItem('token');
   if (!token) return clearSession();
-  if (tokenExpiry(token) <= Date.now()) return clearSession('Your session expired. Please log in again.');
+  if (tokenExpiry(token) <= Date.now()) return clearSession("auth:your_session_expired_please_log_in_again");
   store.dispatch(authActions.checking());
   try {
     const { data } = await axios.get(`${API_BASE_URL}/api/v1/user/get-user-information`, { sessionToken: token });
     if (version === generation && token === localStorage.getItem('token')) saveSession(token, data);
   } catch (error) {
     if (version !== generation) return;
-    if (error.response?.status === 401) clearSession('Please log in again.');
+    if (error.response?.status === 401) clearSession("auth:please_log_in_again");
     else store.dispatch(authActions.unavailable());
   }
 }
@@ -108,12 +108,12 @@ export function startSessionLifecycle() {
           window.history.replaceState(null, '', window.location.pathname);
         }
       })
-      .catch(() => { if (version === generation) clearSession('Please log in again.'); });
+      .catch(() => { if (version === generation) clearSession("auth:please_log_in_again"); });
   } else restoreSession();
   const onStorage = (event) => { if (event.key === 'token' || event.key === null) restoreSession(); };
   const onFocus = () => {
     const token = localStorage.getItem('token');
-    if (token && tokenExpiry(token) <= Date.now()) clearSession('Your session expired. Please log in again.');
+    if (token && tokenExpiry(token) <= Date.now()) clearSession("auth:your_session_expired_please_log_in_again");
   };
   window.addEventListener('storage', onStorage);
   window.addEventListener('focus', onFocus);

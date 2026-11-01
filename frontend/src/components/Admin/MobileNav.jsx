@@ -1,3 +1,4 @@
+import { t } from '../../i18n/index.js';
 import React from "react";
 import { Link } from "react-router-dom";
 import { useSelector } from "react-redux";
@@ -10,21 +11,15 @@ const MobileNav = () => {
           <Link
             to="/profile"
             className="text-zinc-100 font-semibold w-full text-center hover:bg-zinc-700 rounded transition-all duration-200"
-          >
-            Favourites
-          </Link>
+          >{t("profile:favourites")}</Link>
           <Link
             to="/profile/orderHistory"
             className="text-zinc-100 font-semibold w-full text-center hover:bg-zinc-700 rounded transition-all duration-200"
-          >
-            Order History
-          </Link>
+          >{t("profile:order_history")}</Link>
           <Link
             to="/profile/settings"
             className="text-zinc-100 font-semibold w-full text-center hover:bg-zinc-700 rounded transition-all duration-200"
-          >
-            Settings
-          </Link>
+          >{t("profile:settings")}</Link>
         </div>
       )}
       {role === "admin" && (
@@ -32,15 +27,11 @@ const MobileNav = () => {
           <Link
             to="/profile"
             className="text-zinc-100 font-semibold w-full py-2 text-center hover:bg-zinc-700 rounded transition-all duration-200"
-          >
-            All Orders
-          </Link>
+          >{t("profile:all_orders")}</Link>
           <Link
             to="/profile/add-book"
             className="text-zinc-100 font-semibold w-full py-2 mt-4 text-center hover:bg-zinc-700 rounded transition-all duration-200"
-          >
-            Add Book
-          </Link>
+          >{t("profile:add_book")}</Link>
         </div>
       )}
     </>

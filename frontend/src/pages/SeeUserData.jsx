@@ -1,3 +1,4 @@
+import { t } from '../i18n/index.js';
 import React from 'react'
 import { RxCross1 } from "react-icons/rx";
 
@@ -43,11 +44,11 @@ const SeeUserData = ({ user, setSeeUserData }) => {
           
           {/* Кнопка закрытия */}
           <div className="flex items-center justify-between mb-4 border-b pb-2">
-            <h1 className="text-2xl font-bold text-zinc-700">User Information</h1>
+            <h1 className="text-2xl font-bold text-zinc-700">{t("profile:user_information")}</h1>
             <button 
               onClick={() => setSeeUserData("hidden")}
               className="text-zinc-500 hover:text-red-500 transition-colors"
-              title="Close"
+              title={t("profile:close")}
             >
               <CrossIcon />
             </button>
@@ -56,19 +57,19 @@ const SeeUserData = ({ user, setSeeUserData }) => {
           {/* Данные пользователя */}
           <div className="space-y-4">
             <div className="flex flex-col">
-              <label className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Username</label>
+              <label className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">{t("profile:username")}</label>
               <span className="text-lg font-medium">{user.username}</span>
             </div>
 
             <div className="flex flex-col">
-              <label className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Email</label>
+              <label className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">{t("profile:email")}</label>
               <span className="text-lg font-medium">{user.email}</span>
             </div>
 
             <div className="flex flex-col">
-              <label className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Address</label>
+              <label className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">{t("profile:address")}</label>
               <span className="text-lg font-medium leading-relaxed">
-                {user.address || "No address provided"}
+                {user.address || t("profile:no_address_provided")}
               </span>
             </div>
           </div>
@@ -78,9 +79,7 @@ const SeeUserData = ({ user, setSeeUserData }) => {
             <button 
               onClick={() => setSeeUserData("hidden")}
               className="bg-zinc-800 text-white px-6 py-2 rounded hover:bg-zinc-700 transition-all font-semibold"
-            >
-              Close
-            </button>
+            >{t("profile:close")}</button>
           </div>
         </div>
       </div>

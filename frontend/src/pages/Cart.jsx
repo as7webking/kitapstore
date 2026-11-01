@@ -1,9 +1,12 @@
+import { t, translateMessage } from '../i18n/index.js';
 import { API_BASE_URL } from "../config/api.js";
 import React, { useEffect, useState } from "react";
 import Loader from "../components/Loader/Loader";
 import axios from "axios";
 import { AiFillDelete } from "react-icons/ai";
 import { useNavigate } from "react-router-dom";
+// Currency is a domain value, not a translatable label.
+const currency = 'EUR';
 const Cart = () => {
   const navigate = useNavigate();
   const [cart, setCart] = useState([]);
@@ -29,7 +32,7 @@ const Cart = () => {
       { headers }
     );
     setCart((current) => current.filter((book) => book._id !== bookid));
-    alert(response.data.message);
+    alert(translateMessage(response.data.message));
   };
   const PlaceOrder = async () => {
     try {
@@ -38,7 +41,7 @@ const Cart = () => {
         { order: cart },
         { headers }
       );
-      alert(response.data.message);
+      alert(translateMessage(response.data.message));
       navigate("/profile/orderHistory");
     } catch (error) {
       console.log(error);
@@ -54,18 +57,14 @@ const Cart = () => {
       {cart && cart.length === 0 && (
         <div className="h-screen">
           <div className="h-[100%] flex items-center justify-center flex-col">
-            <h1 className="text-5xl lg:text-6xl font-semibold text-zinc-400">
-              Empty Cart
-            </h1>
-            <img src="fa-regular fa-cart-shopping" alt="empty-cart" className="lg:h-[50vh]" />
+            <h1 className="text-5xl lg:text-6xl font-semibold text-zinc-400">{t("cart:empty_cart")}</h1>
+            <img src="fa-regular fa-cart-shopping" alt={t("cart:empty_cart")} className="lg:h-[50vh]" />
           </div>
         </div>
       )}
       {cart && cart.length > 0 && (
         <>
-          <h1 className="text-5xl font-semibold text-zinc-400 mb-8">
-            Your Cart
-          </h1>
+          <h1 className="text-5xl font-semibold text-zinc-400 mb-8">{t("cart:your_cart")}</h1>
           {cart.map((items, i) => (
             <div
               className="w-full my-4 rounded flex flex-col md:flex-row p-4 bg-zinc-700 justify-between items-center"
@@ -73,7 +72,7 @@ const Cart = () => {
             >
               <img
                 src={items.url}
-                alt="/"
+                alt={items.title}
                 className="h-[20vh] md:h-[10vh] object-cover"
               />
               <div className="w-full md:w-auto">
@@ -92,8 +91,7 @@ const Cart = () => {
               </div>
               <div className="flex mt-4 w-full md:w-auto items-center justify-between">
                 <h2 className="text-zinc-100 text-3xl font-semibold flex">
-                  {items.price} EUR
-                </h2>
+                  {items.price}{" "}{currency}</h2>
                 <button
                   className="bg-red-100 text-red-700 border border-red-700 rounded p-2 ms-12"
                   onClick={() => deleteItem(items._id)}
@@ -108,20 +106,16 @@ const Cart = () => {
       {cart && cart.length > 0 && (
         <div className="mt-4 w-full flex items-center justify-end">
           <div className="p-4 bg-zinc-700 rounded">
-            <h1 className="text-3xl text-zinc-200 font-semibold">
-              Total Amount
-            </h1>
+            <h1 className="text-3xl text-zinc-200 font-semibold">{t("cart:total_amount")}</h1>
             <div className="mt-3 flex items-center justify-between text-xl text-zinc-200">
-              <h2>{cart.length} books</h2>
-              <h2>{Total} EUR</h2>
+              <h2>{t("catalog:book_count", { count: cart.length })}</h2>
+              <h2>{Total}{" "}{currency}</h2>
             </div>
             <div className="w-[100%] mt-3">
               <div
                 className="bg-zinc-100 rounded px-4 py-2 flex justify-center w-full font-semibold hover:bg-zinc-200"
                 onClick={PlaceOrder}
-              >
-                Place your order
-              </div>
+              >{t("cart:place_your_order")}</div>
             </div>
           </div>
         </div>

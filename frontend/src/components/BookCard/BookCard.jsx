@@ -1,3 +1,4 @@
+import { t } from '../../i18n/index.js';
 import React from "react";
 import { Link } from "react-router-dom";
 
@@ -11,7 +12,7 @@ const BookCard = ({ data, favourite, handleRemoveBook }) => {
           <div className="bg-zinc-700 rounded flex items-center justify-center h-[25vh] overflow-hidden">
             <img
               src={data.url || fallbackImage}
-              alt={data.title || "Book"}
+              alt={data.title || t("catalog:book")}
               className="h-full w-full object-contain"
               onError={(e) => {
                 e.currentTarget.src = fallbackImage;
@@ -32,9 +33,7 @@ const BookCard = ({ data, favourite, handleRemoveBook }) => {
       </Link>
 
       {favourite && (
-        <button className="bg-yellow-100" onClick={handleRemoveBook}>
-          Remove from favourite
-        </button>
+        <button className="bg-yellow-100" onClick={handleRemoveBook}>{t("catalog:remove_from_favourite")}</button>
       )}
     </div>
   );

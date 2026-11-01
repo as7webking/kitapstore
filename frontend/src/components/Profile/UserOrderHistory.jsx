@@ -1,3 +1,4 @@
+import { t, translateMessage } from '../../i18n/index.js';
 import { API_BASE_URL } from "../../config/api.js";
 import React, { useEffect, useState } from "react"; // ADDED: useState import
 import axios from "axios";
@@ -9,7 +10,7 @@ import { Link } from "react-router-dom"; // ADDED: useNavigate for redirecting
 const Loader = () => (
   <div className="flex flex-col items-center justify-center p-4">
     <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
-    <p className="mt-3 text-sm text-zinc-400">Loading...</p>
+    <p className="mt-3 text-sm text-zinc-400">{t("orders:loading")}</p>
   </div>
 );
 
@@ -54,18 +55,14 @@ const UserOrderHistory = () => {
     return (
       <div className="h-[80vh] p-4 text-white">
         <div className="h-full flex flex-col items-center justify-center bg-zinc-800 rounded-lg shadow-xl">
-          <h1 className="text-5xl font-semibold text-zinc-400 mb-8">
-            No order history
-          </h1>
-          <p className="text-zinc-500">Похоже, вы еще ничего не заказывали.</p>
+          <h1 className="text-5xl font-semibold text-zinc-400 mb-8">{t("orders:no_order_history")}</h1>
+          <p className="text-zinc-500">{t("orders:you_have_not_placed_any_orders_yet")}</p>
           <img 
             src="https://placehold.co/100x100/3F3F46/FFFFFF?text=Book" 
-            alt="No orders" 
+            alt={t("orders:no_orders")}
             className="h-[20vh] mb-8 mt-4 rounded-lg" 
           />
-          <Link to="/" className="mt-4 bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition-all">
-            Начать покупки
-          </Link>
+          <Link to="/" className="mt-4 bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition-all">{t("orders:browse_books")}</Link>
         </div>
       </div>
     );
@@ -74,16 +71,16 @@ const UserOrderHistory = () => {
   // Render order history table
   return (
     <div className="h-[100%] p-0 md:p-4 text-zinc-100">
-      <h1 className="text-4xl font-bold text-white mb-6">All Orders</h1>
+      <h1 className="text-4xl font-bold text-white mb-6">{t("orders:all_orders")}</h1>
       
       {/* Table Header */}
       <div className="bg-zinc-700 w-full rounded py-3 px-4 flex gap-4 text-sm md:text-base font-semibold border-b border-zinc-600">
         <div className="w-[3%] text-center">№</div>
-        <div className="w-[22%]">Books</div>
-        <div className="w-[45%] hidden md:block">Description</div> 
-        <div className="w-[9%] text-right">Price</div>
-        <div className="w-[16%] text-center">Status</div>
-        <div className="w-[5%] hidden md:block text-center">Способ</div>
+        <div className="w-[22%]">{t("orders:books")}</div>
+        <div className="w-[45%] hidden md:block">{t("orders:description")}</div>
+        <div className="w-[9%] text-right">{t("orders:price")}</div>
+        <div className="w-[16%] text-center">{t("orders:status")}</div>
+        <div className="w-[5%] hidden md:block text-center">{t("orders:method")}</div>
       </div>
 
       {/* Order List */}
@@ -104,7 +101,7 @@ const UserOrderHistory = () => {
             </div>
             <div className="w-[45%] hidden md:block text-sm text-zinc-400">
               {/* Using a fallback description */}
-              {items.book.desc ? items.book.desc.substring(0, 100) + '...' : 'Описание отсутствует.'}
+              {items.book.desc ? items.book.desc.substring(0, 100) + '...' : t("orders:no_description_available")}
             </div>
             <div className="w-[9%] text-right font-bold text-lg">
               {items.book.price} €
@@ -114,21 +111,21 @@ const UserOrderHistory = () => {
               {/* FIXED: Corrected ternary operator syntax */}
               {items.status === "Order placed" ? (
                 <div className="font-semibold text-yellow-400 bg-yellow-900/50 p-1 rounded-full text-xs">
-                  {items.status}
+                  {translateMessage(items.status)}
                 </div>
               ) : items.status === "Cancelled" ? (
                 <div className="font-semibold text-red-400 bg-red-900/50 p-1 rounded-full text-xs">
-                  {items.status}
+                  {translateMessage(items.status)}
                 </div>
               ) : ( // Default status (e.g., Delivered)
                 <div className="font-semibold text-green-400 bg-green-900/50 p-1 rounded-full text-xs">
-                  {items.status}
+                  {translateMessage(items.status)}
                 </div>
               )}
             </div>
             
             <div className="w-[5%] hidden md:block text-center">
-              <h1 className="text-sm text-zinc-400">N/A</h1>
+              <h1 className="text-sm text-zinc-400">{t("orders:n_a")}</h1>
             </div>
           </div>
         ))}

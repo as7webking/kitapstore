@@ -1,3 +1,4 @@
+import { t, translateMessage } from '../../i18n/index.js';
 import { API_BASE_URL } from "../../config/api.js";
 import React, { useEffect, useState } from "react";
 import axios from "axios";
@@ -77,7 +78,7 @@ const ViewBookDetails = () => {
         });
       }
       setCookie(GUEST_FAV_COOKIE, JSON.stringify(current), 60 * 60 * 24);
-      alert(exists ? "Already in favourites (guest)" : "Added to favourites for 24 hours");
+      alert(translateMessage(exists ? "catalog:already_in_favourites_guest" : "catalog:added_to_favourites_for_24_hours"));
       return;
     }
 
@@ -86,7 +87,7 @@ const ViewBookDetails = () => {
       {},
       { headers },
     );
-    alert(response.data.message);
+    alert(translateMessage(response.data.message));
   };
 
   const handleCart = async () => {
@@ -95,12 +96,12 @@ const ViewBookDetails = () => {
       {},
       { headers },
     );
-    alert(response.data.message);
+    alert(translateMessage(response.data.message));
   };
 
   const deleteBook = async () => {
     const response = await axios.delete(`${API_BASE_URL}/api/v1/delete-book`, { headers });
-    alert(response.data.message);
+    alert(translateMessage(response.data.message));
     navigate("/all-books");
   };
 
@@ -119,9 +120,7 @@ const ViewBookDetails = () => {
                   onError={() => setImageError(true)}
                 />
               ) : (
-                <div className="w-full h-[300px] rounded bg-zinc-200 flex items-center justify-center text-zinc-500">
-                  Image unavailable
-                </div>
+                <div className="w-full h-[300px] rounded bg-zinc-200 flex items-center justify-center text-zinc-500">{t("catalog:image_unavailable")}</div>
               )}
             </div>
           </div>
@@ -129,10 +128,10 @@ const ViewBookDetails = () => {
           {/* Right Part - Info */}
           <div className="w-full md:w-1/2 flex flex-col bg-zinc-200">
             <h1 className="text-4xl">{Data.title}</h1>
-            <p className="text-zinc-400 mt-1">Author: {Data.author}</p>
-            <p className="text-zinc-500 mt-4 text-xl">Description {Data.desc}</p>
+            <p className="text-zinc-400 mt-1">{t("catalog:author")}{" "}{Data.author}</p>
+            <p className="text-zinc-500 mt-4 text-xl">{t("catalog:description")}{" "}{Data.desc}</p>
             <p className="flex mt-4 items-center justify-start text-zinc-400">
-              <GrLanguage className="me-3" />Languge {Data.language}
+              <GrLanguage className="me-3" />{t("catalog:language")}{" "}{Data.language}
             </p>
             <p className="mt-4 text-zinc-100 text-3xl font-semibold">{Data.price} €</p>
 
@@ -143,7 +142,7 @@ const ViewBookDetails = () => {
                   onClick={handleFavourite}
                 >
                   <FaHeart />
-                  <span className="ms-4 block">Favourites</span>
+                  <span className="ms-4 block">{t("catalog:favourites")}</span>
                 </button>
 
                 {isLoggedIn && (
@@ -152,7 +151,7 @@ const ViewBookDetails = () => {
                     onClick={handleCart}
                   >
                     <FaShoppingCart />
-                    <span className="ms-4 block">Add to cart</span>
+                    <span className="ms-4 block">{t("catalog:add_to_cart")}</span>
                   </button>
                 )}
               </div>
@@ -165,14 +164,14 @@ const ViewBookDetails = () => {
                     className="flex-1 bg-zinc-100 text-zinc-700 px-6 py-4 rounded-sm font-bold hover:bg-zinc-200 transition flex items-center justify-center gap-2 uppercase text-xs tracking-widest"
                   >
                     <FaEdit />
-                    <span className="ms-4 block lg:hidden">Edit Book</span>
+                    <span className="ms-4 block lg:hidden">{t("catalog:edit_book")}</span>
                   </Link>
                   <button
                     className="flex-1 bg-red-50 text-red-600 px-6 py-4 rounded-sm font-bold hover:bg-red-100 transition flex items-center justify-center gap-2 uppercase text-xs tracking-widest"
                     onClick={deleteBook}
                   >
                     <MdOutlineDelete />
-                    <span className="ms-4 block lg:hidden">Delete Book</span>
+                    <span className="ms-4 block lg:hidden">{t("catalog:delete_book")}</span>
                   </button>
                 </div>
               )}

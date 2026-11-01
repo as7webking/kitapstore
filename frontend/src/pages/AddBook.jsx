@@ -1,3 +1,4 @@
+import { t, translateMessage } from '../i18n/index.js';
 import { API_BASE_URL } from "../config/api.js";
 import React, { useState } from "react";
 import axios from "axios";
@@ -40,7 +41,7 @@ const AddBook = () => {
   const handlePdfUpload = async (e) => {
     const file = e.target.files[0];
     if (!file || file.type !== "application/pdf") {
-      alert("Only PDF files allowed");
+      alert(t("catalog:only_pdf_files_allowed"));
       return;
     }
     const base64 = await convertToBase64(file);
@@ -54,15 +55,15 @@ const AddBook = () => {
 
   const submit = async () => {
     if (!Data.title || !Data.author || !Data.price) {
-      return alert("Required fields missing");
+      return alert(t("catalog:required_fields_missing"));
     }
 
     if (Data.type === "digital" && !Data.pdf) {
-      return alert("PDF is required for digital books");
+      return alert(t("catalog:pdf_is_required_for_digital_books"));
     }
 
     if (Data.type === "physical" && !Data.shippingPrice) {
-      return alert("Shipping price required for physical books");
+      return alert(t("catalog:shipping_price_required_for_physical_books"));
     }
 
     try {
@@ -72,7 +73,7 @@ const AddBook = () => {
         { headers },
       );
 
-      alert(response.data.message);
+      alert(translateMessage(response.data.message));
       setData({
         url: "",
         title: "",
@@ -86,34 +87,34 @@ const AddBook = () => {
         shippingPrice: "",
       });
     } catch (error) {
-      alert(error.response?.data?.message || "Error occurred");
+      alert(translateMessage(error.response?.data?.message || "catalog:error_occurred"));
     }
   };
 
   return (
     <div className="max-w-2xl mx-auto p-6 bg-zinc-800 rounded top-[100px]">
-      <h1 className="text-3xl font-semibold text-zinc-300 mb-6">Add Book</h1>
+      <h1 className="text-3xl font-semibold text-zinc-300 mb-6">{t("catalog:add_book")}</h1>
 
       {/* Book Type */}
-      <label className="text-zinc-400">Book Type</label>
+      <label className="text-zinc-400">{t("catalog:book_type")}</label>
       <select
         name="type"
         value={Data.type}
         onChange={change}
         className="w-full mt-2 p-2 bg-zinc-700 text-zinc-100"
       >
-        <option value="physical">Physical Book</option>
-        <option value="digital">Digital (PDF)</option>
+        <option value="physical">{t("catalog:physical_book")}</option>
+        <option value="digital">{t("catalog:digital_pdf")}</option>
       </select>
 
       {/* Image */}
-      <label className="text-zinc-400 mt-4 block">Cover Image</label>
+      <label className="text-zinc-400 mt-4 block">{t("catalog:cover_image")}</label>
       <input type="file" accept="image/*" onChange={handleImageUpload} />
 
       {/* PDF */}
       {Data.type === "digital" && (
         <>
-          <label className="text-zinc-400 mt-4 block">Upload PDF</label>
+          <label className="text-zinc-400 mt-4 block">{t("catalog:upload_pdf")}</label>
           <input
             type="file"
             accept="application/pdf"
@@ -125,7 +126,7 @@ const AddBook = () => {
       {/* Shipping */}
       {Data.type === "physical" && (
         <>
-          <label className="text-zinc-400 mt-4 block">Shipping Price (€)</label>
+          <label className="text-zinc-400 mt-4 block">{t("catalog:shipping_price")}</label>
           <input
             type="number"
             name="shippingPrice"
@@ -143,7 +144,7 @@ const AddBook = () => {
           name={field}
           value={Data[field]}
           onChange={change}
-          placeholder={field}
+          placeholder={t(`catalog:${field}`)}
           className="w-full mt-4 p-2 bg-zinc-700 text-zinc-100"
         />
       ))}
@@ -152,16 +153,14 @@ const AddBook = () => {
         name="desc"
         value={Data.desc}
         onChange={change}
-        placeholder="Description"
+        placeholder={t("catalog:description")}
         className="w-full mt-4 p-2 bg-zinc-700 text-zinc-100"
       />
 
       <button
         onClick={submit}
         className="w-full mt-6 bg-blue-500 hover:bg-blue-600 py-2 rounded text-white"
-      >
-        Add Book
-      </button>
+      >{t("catalog:add_book")}</button>
     </div>
   );
 };

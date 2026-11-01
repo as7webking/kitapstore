@@ -1,3 +1,4 @@
+import { t, translateMessage } from '../i18n/index.js';
 import { API_BASE_URL } from "../config/api.js";
 import React, { useState } from "react";
 import axios from "axios";
@@ -46,7 +47,7 @@ const AddBlog = () => {
 
   const submit = async () => {
     if (!data.title || !data.content) {
-      return alert("Title and content are required");
+      return alert(t("blog:title_and_content_are_required"));
     }
 
     const payload = {
@@ -61,7 +62,7 @@ const AddBlog = () => {
         { headers }
       );
 
-      alert(response.data.message);
+      alert(translateMessage(response.data.message));
 
       setData({
         coverImage: "",
@@ -70,19 +71,17 @@ const AddBlog = () => {
         content: "",
       });
     } catch (error) {
-      alert(error.response?.data?.message || "Error occurred");
+      alert(translateMessage(error.response?.data?.message || "blog:error_occurred"));
     }
   };
 
   return (
     <div className="h-[100%] p-0 md:p-4">
-      <h1 className="text-3xl md:text-5xl font-semibold text-zinc-400 mb-8">
-        Add Blog
-      </h1>
+      <h1 className="text-3xl md:text-5xl font-semibold text-zinc-400 mb-8">{t("blog:add_blog")}</h1>
 
       <div className="p-4 bg-zinc-700 rounded">
         <div className="mt-4">
-          <label className="text-zinc-400">Cover Image</label>
+          <label className="text-zinc-400">{t("blog:cover_image")}</label>
           <input
             type="file"
             accept="image/*"
@@ -92,47 +91,45 @@ const AddBlog = () => {
         </div>
 
         <div className="mt-4">
-          <label className="text-zinc-400">Title</label>
+          <label className="text-zinc-400">{t("blog:title")}</label>
           <input
             type="text"
             name="title"
             value={data.title}
             onChange={change}
             className="w-full mt-2 bg-zinc-800 text-zinc-100 p-2 outline-none"
-            placeholder="Blog title"
+            placeholder={t("blog:blog_title")}
           />
         </div>
 
         <div className="mt-4">
-          <label className="text-zinc-400">Slug (optional)</label>
+          <label className="text-zinc-400">{t("blog:slug_optional")}</label>
           <input
             type="text"
             name="slug"
             value={data.slug}
             onChange={change}
             className="w-full mt-2 bg-zinc-800 text-zinc-100 p-2 outline-none"
-            placeholder="custom-blog-link"
+            placeholder={t("blog:custom_blog_link")}
           />
         </div>
 
         <div className="mt-4">
-          <label className="text-zinc-400">Content</label>
+          <label className="text-zinc-400">{t("blog:content")}</label>
           <textarea
             name="content"
             value={data.content}
             onChange={change}
             className="w-full mt-2 bg-zinc-800 text-zinc-100 p-2 outline-none"
             rows="10"
-            placeholder="Write blog content here"
+            placeholder={t("blog:write_blog_content_here")}
           />
         </div>
 
         <button
           onClick={submit}
           className="w-full bg-blue-400 text-white font-semibold py-2 rounded hover:bg-blue-700 transition-all duration-200 mt-6"
-        >
-          Add Blog
-        </button>
+        >{t("blog:add_blog")}</button>
       </div>
     </div>
   );

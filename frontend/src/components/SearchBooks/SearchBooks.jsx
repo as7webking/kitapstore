@@ -1,3 +1,4 @@
+import { t } from '../../i18n/index.js';
 import { API_BASE_URL } from "../../config/api.js";
 import React, { useEffect, useState } from "react";
 import axios from "axios";
@@ -31,7 +32,7 @@ const SearchBooks = () => {
     <div className="w-full">
       <input
         type="text"
-        placeholder="Search books..."
+        placeholder={t("catalog:search_books")}
         value={query}
         onChange={(e) => setQuery(e.target.value)}
         className="w-full p-3 rounded border outline-none"
@@ -42,7 +43,7 @@ const SearchBooks = () => {
           {results.length > 0 ? (
             results.map((book) => <BookCard key={book._id} data={book} />)
           ) : (
-            <p>No books found</p>
+            <p>{t("catalog:no_books_found")}</p>
           )}
         </div>
       )}

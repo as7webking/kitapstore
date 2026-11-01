@@ -1,3 +1,4 @@
+import { t, translateMessage } from '../../i18n/index.js';
 import { API_BASE_URL } from "../../config/api.js";
 import React, { useEffect, useState } from "react";
 import axios from "axios";
@@ -30,7 +31,7 @@ const Settings = () => {
       Value,
       { headers }
     );
-    alert(response.data.message);
+    alert(translateMessage(response.data.message));
   };
   return (
     <>
@@ -42,11 +43,11 @@ const Settings = () => {
       {ProfileData && (
         <div className="">
           <div className="mt-4">
-            <label htmlFor="">Address</label>
+            <label htmlFor="">{t("profile:address")}</label>
             <textarea
               className="p-2 rounded bg-zinc-700 mt-2 font-semibold"
               rows="5"
-              placeholder="Address"
+              placeholder={t("profile:address")}
               name="address"
               value={Value.address}
               onChange={change}
@@ -56,9 +57,7 @@ const Settings = () => {
             <button
               className="bg-yellow-400 text-zinc-700 font-semibold px-3 py-2 rounded hover:bg-yellow-200"
               onClick={submitAddress}
-            >
-              Update
-            </button>
+            >{t("profile:update")}</button>
           </div>
         </div>
       )}

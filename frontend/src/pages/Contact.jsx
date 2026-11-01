@@ -1,3 +1,4 @@
+import { t, translateMessage } from '../i18n/index.js';
 import { API_BASE_URL } from "../config/api.js";
 import { useState } from "react";
 import axios from "axios";
@@ -13,10 +14,10 @@ export default function Contact() {
     e.preventDefault();
     try {
       await axios.post(`${API_BASE_URL}/api/contact`, form);
-      setStatus("Message sent ✅");
+      setStatus("common:message_sent");
       setForm({ name: "", email: "", message: "" });
     } catch {
-      setStatus("Ошибка ❌");
+      setStatus("common:could_not_send_your_message_please_try_again");
     }
   };
 
@@ -27,11 +28,11 @@ export default function Contact() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
           {/* LEFT */}
           <div className="space-y-4">
-            <h1 className="text-3xl font-bold mb-6">Contact</h1>
+            <h1 className="text-3xl font-bold mb-6">{t("common:contact")}</h1>
 
-            <p>📍 Berlin, Alexanderplatz 1</p>
+            <p>{t("common:berlin_alexanderplatz_1")}</p>
             <p>📞 +49 123 456789</p>
-            <p>🕒 Mo–Sa 10:00–19:00</p>
+            <p>{t("common:mon_sat_10_00_19_00")}</p>
 
             <iframe
               className="w-full h-64 rounded-xl border"
@@ -48,7 +49,7 @@ export default function Contact() {
             <input
               className="w-full border rounded-lg p-3"
               name="name"
-              placeholder="Name"
+              placeholder={t("common:name")}
               value={form.name}
               onChange={handleChange}
               required
@@ -58,7 +59,7 @@ export default function Contact() {
               className="w-full border rounded-lg p-3"
               name="email"
               type="email"
-              placeholder="Email"
+              placeholder={t("common:email")}
               value={form.email}
               onChange={handleChange}
               required
@@ -68,17 +69,15 @@ export default function Contact() {
               className="w-full border rounded-lg p-3"
               name="message"
               rows="5"
-              placeholder="Message"
+              placeholder={t("common:message")}
               value={form.message}
               onChange={handleChange}
               required
             />
 
-            <button className="w-full bg-black text-white py-3 rounded-lg hover:opacity-90">
-              Send
-            </button>
+            <button className="w-full bg-black text-white py-3 rounded-lg hover:opacity-90">{t("common:send")}</button>
 
-            {status && <p className="text-sm">{status}</p>}
+            {status && <p className="text-sm">{translateMessage(status)}</p>}
           </form>
         </div>
       </div>

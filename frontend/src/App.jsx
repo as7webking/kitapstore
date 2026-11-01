@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import React, { useEffect } from "react";
 import Home from "./pages/Home";
 import Navbar from "./components/Navbar/Navbar";
@@ -30,11 +31,12 @@ import SearchResults from "./pages/SearchResults";
 import { useLocation } from "react-router-dom";
 
 const App = () => {
+  const { i18n } = useTranslation();
   const location = useLocation();
   const role = useSelector((state) => state.auth.role);
   useEffect(startSessionLifecycle, []);
   return (
-    <div className=" min-h-screen flex flex-col">
+    <div lang={i18n.resolvedLanguage || 'en'} className=" min-h-screen flex flex-col">
       <Navbar />
       <div
         className={`flex-grow ${location.pathname !== "/" ? "pt-[75px]" : ""}`}

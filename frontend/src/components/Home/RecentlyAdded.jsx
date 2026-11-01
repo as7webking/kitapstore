@@ -1,3 +1,4 @@
+import { t } from '../../i18n/index.js';
 import { API_BASE_URL } from "../../config/api.js";
 import React, { useEffect, useState } from "react";
 import axios from "axios";
@@ -19,7 +20,7 @@ const RecentlyAdded = () => {
     <section className="bg-zinc-700">
       <div className="container w-[90%] max-w-[1200px] mx-auto px-6 py-8">
         <div className="mt-8 px-4">
-          <h4 className="text-3xl text-gray-400">Recently added books</h4>
+          <h4 className="text-3xl text-gray-400">{t("home:recently_added_books")}</h4>
           {!Data && (
             <div className="flex items-center justify-center my-8">
               <Loader />

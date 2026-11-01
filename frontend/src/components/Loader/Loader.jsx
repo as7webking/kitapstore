@@ -1,3 +1,4 @@
+import { t } from '../../i18n/index.js';
 import React from "react";
 
 const Loader = () => {
@@ -19,7 +20,7 @@ const Loader = () => {
           fill="currentFill"
         />
       </svg>
-      <span className="sr-only">Loading...</span>
+      <span className="sr-only">{t("common:loading")}</span>
     </div>
   );
 };

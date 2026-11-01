@@ -1,3 +1,4 @@
+import { t, translateMessage } from '../i18n/index.js';
 import { clearSession } from "../auth/session.js";
 import { API_BASE_URL } from "../config/api.js";
 import React from "react";
@@ -21,7 +22,7 @@ const Profile = () => {
     // Confirmation dialog before proceeding
     if (
       window.confirm(
-        "Are you sure you want to delete your account? This action is permanent!",
+        t("profile:confirm_delete_account"),
       )
     ) {
       try {
@@ -29,14 +30,14 @@ const Profile = () => {
           `${API_BASE_URL}/api/v1/user/delete-account`,
           { headers },
         );
-        alert(response.data.message);
+        alert(translateMessage(response.data.message));
 
         // Log out the user after successful deletion
         clearSession();
         navigate("/");
       } catch (error) {
         console.error("Error deleting account:", error);
-        alert(error.response?.data?.message || "Failed to delete account");
+        alert(translateMessage(error.response?.data?.message || "profile:failed_to_delete_account"));
       }
     }
   };

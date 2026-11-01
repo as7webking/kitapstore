@@ -1,3 +1,4 @@
+import { t } from '../../i18n/index.js';
 import React from "react";
 import { FaArrowRight } from "react-icons/fa";
 import { useSelector } from "react-redux";
@@ -13,9 +14,7 @@ const Sidebar = ({ data, deleteAccount }) => {
         {data.avatar ? (
           <img src={data.avatar} alt="" className="h-[12vh]" />
         ) : (
-          <div className="h-[12vh] w-[12vh] rounded-full bg-zinc-600">
-            Profile 777
-          </div>
+          <div className="h-[12vh] w-[12vh] rounded-full bg-zinc-600">{t("profile:profile")}</div>
         )}
         <p className="mt-3 text-xl text-zinc-100 font-semibold">
           {data.username}
@@ -28,21 +27,15 @@ const Sidebar = ({ data, deleteAccount }) => {
           <Link
             to="/profile"
             className="text-zinc-100 font-semibold w-full py-2 text-center hover:bg-zinc-700 rounded transition-all duration-200"
-          >
-            Favourites
-          </Link>
+          >{t("profile:favourites")}</Link>
           <Link
             to="/profile/orderHistory"
             className="text-zinc-100 font-semibold w-full py-2 mt-4 text-center hover:bg-zinc-700 rounded transition-all duration-200"
-          >
-            Order History
-          </Link>
+          >{t("profile:order_history")}</Link>
           <Link
             to="/profile/settings"
             className="text-zinc-100 font-semibold w-full py-2 mt-4 text-center hover:bg-zinc-700 rounded transition-all duration-200"
-          >
-            Settings
-          </Link>
+          >{t("profile:settings")}</Link>
         </div>
       )}
       {role === "admin" && (
@@ -50,33 +43,27 @@ const Sidebar = ({ data, deleteAccount }) => {
           <Link
             to="/profile"
             className="text-zinc-100 font-semibold w-full py-2 text-center hover:bg-zinc-700 rounded transition-all duration-200"
-          >
-            All Orders
-          </Link>
+          >{t("profile:all_orders")}</Link>
           <Link
             to="/profile/add-blog"
             className="text-zinc-100 font-semibold w-full py-2 mt-4 text-center hover:bg-zinc-700 rounded transition-all duration-200"
-          >
-            Add Blog
-          </Link>
+          >{t("profile:add_blog")}</Link>
         </div>
       )}
       {/* Delete Account Button */}
       <button
         className="bg-red-600 w-full text-white font-semibold flex items-center justify-center py-2 rounded hover:bg-red-700 transition-all duration-200"
         onClick={deleteAccount}
-      >
-        Delete Account <FaTrash className="ms-4" />
+      >{t("profile:delete_account")}<FaTrash className="ms-4" />
       </button>
       {/* Login-Logout Button */}
       <button
         className="bg-zinc-700 text-white font-semibold flex items-center justify-center py-2 rounded hover:bg-white hover:text-zinc-700 transition-all duration-400"
         onClick={async () => {
           try { await logout(); history("/login"); }
-          catch { alert("Could not log out. Check your connection and try again."); }
+          catch { alert(t("profile:could_not_log_out_check_your_connection_and_try_again")); }
         }}
-      >
-        Log Out <FaArrowRight className="ms-4" />
+      >{t("profile:log_out")}<FaArrowRight className="ms-4" />
       </button>
     </div>
   );

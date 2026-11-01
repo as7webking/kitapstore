@@ -1,3 +1,4 @@
+import { t } from '../i18n/index.js';
 import { API_BASE_URL } from "../config/api.js";
 import React, { useEffect, useState } from "react";
 import axios from "axios";
@@ -33,7 +34,7 @@ const BlogDetails = () => {
   if (loading) {
     return (
       <div className="bg-white text-gray-700 min-h-screen w-[90%] max-w-[1200px] mx-auto px-6 py-8">
-        <p>Loading...</p>
+        <p>{t("blog:loading")}</p>
       </div>
     );
   }
@@ -41,24 +42,20 @@ const BlogDetails = () => {
   if (!blog) {
     return (
       <div className="bg-white text-gray-700 min-h-screen w-[90%] max-w-[1200px] mx-auto px-6 py-8">
-        <h1 className="text-3xl font-bold mb-3">Blog not found</h1>
-        <Link to="/blog" className="text-blue-600 hover:text-blue-800">
-          ← Back to all posts
-        </Link>
+        <h1 className="text-3xl font-bold mb-3">{t("blog:blog_not_found")}</h1>
+        <Link to="/blog" className="text-blue-600 hover:text-blue-800">{t("blog:back_to_all_posts")}</Link>
       </div>
     );
   }
 
   return (
     <div className="bg-white text-gray-700 min-h-screen w-[90%] max-w-[1200px] mx-auto px-6 py-8">
-      <Link to="/blog" className="text-blue-600 hover:text-blue-800">
-        ← Back to all posts
-      </Link>
+      <Link to="/blog" className="text-blue-600 hover:text-blue-800">{t("blog:back_to_all_posts")}</Link>
 
       <article className="mt-4">
         <h1 className="text-4xl font-bold leading-tight">{blog.title}</h1>
         <p className="text-sm text-gray-500 mt-3">
-          {new Date(blog.createdAt).toLocaleDateString()} • {blog.author}
+          {new Date(blog.createdAt).toLocaleDateString('en')} • {blog.author}
         </p>
 
         {blog.coverImage && (
@@ -73,10 +70,10 @@ const BlogDetails = () => {
       </article>
 
       <section className="mt-12">
-        <h2 className="text-2xl font-semibold mb-4">Похожие статьи</h2>
+        <h2 className="text-2xl font-semibold mb-4">{t("blog:related_articles")}</h2>
 
         {similar.length === 0 ? (
-          <p className="text-gray-500">Пока нет похожих статей.</p>
+          <p className="text-gray-500">{t("blog:no_related_articles_yet")}</p>
         ) : (
           <div className="grid md:grid-cols-2 gap-4">
             {similar.map((item) => (
@@ -87,7 +84,7 @@ const BlogDetails = () => {
               >
                 <h3 className="font-semibold text-lg">{item.title}</h3>
                 <p className="text-sm text-gray-500 mt-1">
-                  {new Date(item.createdAt).toLocaleDateString()}
+                  {new Date(item.createdAt).toLocaleDateString('en')}
                 </p>
                 <p className="mt-2 text-gray-700 line-clamp-2">{item.excerpt}</p>
               </Link>

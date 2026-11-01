@@ -1,3 +1,4 @@
+import { t } from '../i18n/index.js';
 import { API_BASE_URL } from "../config/api.js";
 import React, { useEffect, useState } from "react";
 import axios from "axios";
@@ -20,11 +21,9 @@ const AllBooks = () => {
 
   return (
     <div className="h-auto  w-[90%] max-w-[1200px] mx-auto px-6 py-8">
-      <h4 className="text-3xl text-gray-400">All books</h4>
+      <h4 className="text-3xl text-gray-400">{t("catalog:all_books")}</h4>
       {!Data && (
-        <div className="w-full h-screen flex items-center justify-center">
-          No matched books
-        </div>
+        <div className="w-full h-screen flex items-center justify-center">{t("catalog:no_matched_books")}</div>
       )}
       <div className="my-8 grid grid-cols-1 sm:grid-cols-3 md:grid-cols-4 gap-8">
         {Data &&
@@ -38,9 +37,7 @@ const AllBooks = () => {
 
       {/* If no books */}
       {Data && Data.length === 0 && (
-        <div className="text-zinc-400 text-center w-full py-10">
-          No books now.
-        </div>
+        <div className="text-zinc-400 text-center w-full py-10">{t("catalog:no_books_now")}</div>
       )}
     </div>
   );
