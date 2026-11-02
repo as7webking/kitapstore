@@ -1,4 +1,4 @@
-const { test, after } = require('node:test');
+const { test } = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
@@ -19,21 +19,22 @@ const result = esbuild.buildSync({
 const compiled = new Module(path.join(root, 'i18n-test.cjs'));
 compiled.filename = path.join(root, 'i18n-test.cjs'); compiled.paths = Module._nodeModulePaths(root);
 compiled._compile(result.outputFiles[0].text, compiled.filename);
-const { i18n, english, changeLanguage, normalizeLanguage, savedLanguage, languageStorageKey, htmlLanguages, translateMessage, AccountForm } = compiled.exports;
+const { i18n, english, translated, formatDate, formatNumber, changeLanguage, normalizeLanguage, savedLanguage, languageStorageKey, htmlLanguages, translateMessage, AccountForm } = compiled.exports;
 const files = (dir) => fs.readdirSync(dir, { withFileTypes: true }).flatMap((entry) => entry.isDirectory() ? files(path.join(dir, entry.name)) : [path.join(dir, entry.name)]);
-after(() => { i18n.removeResourceBundle('de', 'auth'); i18n.removeResourceBundle('de', 'messages'); i18n.removeResourceBundle('de', 'common'); });
-
-test('English is the initial/default language; qt is internal and fallback is explicit', async () => {
-  assert.equal(i18n.language, 'en'); assert.equal(document.documentElement.lang, 'en');
-  assert.equal(normalizeLanguage('crh-Latn'), 'en'); assert.equal(normalizeLanguage('qt'), 'qt');
+test('English is default; all translated languages resolve with correct HTML language', async () => {
+  assert.equal(i18n.language, 'en');
+  assert.equal(normalizeLanguage('crh-Latn'), 'en');
   for (const language of ['de', 'qt', 'ru']) {
     await changeLanguage(language);
-    assert.equal(i18n.language, language); assert.equal(i18n.resolvedLanguage, 'en');
+    assert.equal(i18n.resolvedLanguage, language);
     assert.equal(document.documentElement.lang, htmlLanguages[language]);
-    assert.equal(i18n.t('auth:email'), 'Email');
-    assert.equal(i18n.t('catalog:book_count', { count: 2 }), '2 books');
-    assert.equal(i18n.hasResourceBundle(language, 'auth'), false);
-    assert.match(i18n.t('common:fallback_notice'), /English.*translation coming soon/);
+    assert.equal(i18n.t('auth:email'), translated[language].auth.email);
+    assert.ok(i18n.hasResourceBundle(language, 'auth'));
+    // A genuinely missing entry still falls back to English.
+    const original = i18n.getResource(language, 'common', 'send');
+    delete i18n.getResourceBundle(language, 'common').send;
+    assert.equal(i18n.t('common:send'), english.common.send);
+    i18n.addResource(language, 'common', 'send', original);
   }
   await changeLanguage('en');
 });
@@ -59,20 +60,18 @@ test('stored field errors and legacy API errors translate at render time, not at
   assert.equal(translateMessage(required), 'Email is required.');
   const apiError = 'This email is already registered.';
   assert.equal(translateMessage(apiError), apiError);
-  // Test-only markers; production has no German translations in this stage.
-  i18n.addResourceBundle('de', 'auth', { email: 'TEST EMAIL' });
-  i18n.addResourceBundle('de', 'messages', { this_email_is_already_registered: 'TEST DUPLICATE' });
-  i18n.addResourceBundle('de', 'common', { required: 'TEST REQUIRED {{field}}' });
-  await changeLanguage('de');
-  assert.equal(translateMessage(required), 'TEST REQUIRED TEST EMAIL');
-  assert.equal(translateMessage(apiError), 'TEST DUPLICATE');
-  const markup = renderToStaticMarkup(React.createElement(AccountForm, {
-    fields: [{ name: 'email', label: 'auth:email', type: 'email' }], initialMessage: apiError,
-    submitLabel: 'auth:send_reset_link', pendingLabel: 'auth:requesting_link', onSubmit: async () => {},
-  }));
-  assert.match(markup, /TEST EMAIL/); assert.match(markup, /TEST DUPLICATE/);
-  assert.equal(translateMessage('__proto__'), english.common.unexpected_error);
-  i18n.removeResourceBundle('de', 'auth'); i18n.removeResourceBundle('de', 'messages'); i18n.removeResourceBundle('de', 'common');
+  for (const language of ['de', 'qt', 'ru']) {
+    await changeLanguage(language);
+    assert.equal(translateMessage(required), i18n.t('common:required', { field: i18n.t('auth:email') }));
+    assert.equal(translateMessage(apiError), translated[language].messages.this_email_is_already_registered);
+    const markup = renderToStaticMarkup(React.createElement(AccountForm, {
+      fields: [{ name: 'email', label: 'auth:email', type: 'email' }], initialMessage: apiError,
+      submitLabel: 'auth:send_reset_link', pendingLabel: 'auth:requesting_link', onSubmit: async () => {},
+    }));
+    assert.ok(markup.includes(translated[language].auth.email));
+    assert.ok(markup.includes(translated[language].messages.this_email_is_already_registered));
+    assert.equal(translateMessage('__proto__'), translated[language].common.unexpected_error);
+  }
   await changeLanguage('en');
 });
 
@@ -109,4 +108,36 @@ test('all source keys/aliases have English entries; JSX and English values conta
   for (const field of ['title', 'author', 'language', 'price']) assert.ok(i18n.exists(`catalog:${field}`, { lng: 'en' }));
   assert.equal(i18n.t('catalog:book_count', { count: 1 }), '1 book');
   assert.equal(i18n.t('catalog:book_count', { count: 2 }), '2 books');
+});
+
+test('all catalogs have matching keys and interpolation parameters, including Russian plural forms', () => {
+  const params = (value) => [...value.matchAll(/{{\s*([^}, ]+)(?:,[^}]+)?\s*}}/g)].map((match) => match[1]).sort();
+  for (const [language, namespaces] of Object.entries(translated)) {
+    assert.deepEqual(Object.keys(namespaces).sort(), Object.keys(english).sort());
+    for (const [namespace, original] of Object.entries(english)) {
+      const dict = namespaces[namespace];
+      const extras = language === 'ru' && namespace === 'catalog' ? ['book_count_few', 'book_count_many'] : [];
+      assert.deepEqual(Object.keys(dict).sort(), [...Object.keys(original), ...extras].sort());
+      for (const [key, value] of Object.entries(dict)) {
+        assert.equal(typeof value, 'string'); assert.ok(value.trim());
+        assert.deepEqual(params(value), params(original[key] || original.book_count_other), `${language}:${namespace}:${key}`);
+        if (language === 'qt') assert.doesNotMatch(value, /[А-Яа-яЁё]/);
+      }
+    }
+  }
+});
+
+test('plural forms and localized number/date formatting are deterministic', async () => {
+  for (const [language, expected] of Object.entries({ en: ['1 book', '2 books', '5 books', '21 books'], de: ['1 Buch', '2 Bücher', '5 Bücher', '21 Bücher'], qt: ['1 kitap', '2 kitap', '5 kitap', '21 kitap'], ru: ['1 книга', '2 книги', '5 книг', '21 книга'] })) {
+    await changeLanguage(language);
+    assert.deepEqual([1, 2, 5, 21].map((count) => i18n.t('catalog:book_count', { count })), expected);
+    assert.ok(i18n.t('catalog:books_count', { count: 1234 }).includes(formatNumber(1234)));
+  }
+  assert.equal(formatNumber(1234.5, {}, 'de'), '1.234,5');
+  assert.equal(formatNumber(1234.5, {}, 'ru'), '1\u00a0234,5');
+  assert.equal(formatNumber(1234.5, {}, 'qt'), '1\u00a0234,5');
+  assert.equal(formatDate(new Date(2026, 10, 2), 'qt'), '02.11.2026');
+  assert.equal(formatDate(new Date(2026, 10, 2), 'de'), '2.11.2026');
+  assert.equal(formatDate('invalid', 'ru'), '—');
+  await changeLanguage('en');
 });
