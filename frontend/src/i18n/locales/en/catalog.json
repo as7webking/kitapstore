@@ -46,9 +46,9 @@
   "price_of_book": "price of book",
   "description_of_book": "Description of book",
   "title": "Title",
-  "books_count": "Books ({{count}})",
-  "book_count_one": "{{count}} book",
-  "book_count_other": "{{count}} books",
+  "books_count": "Books ({{count, number}})",
+  "book_count_one": "{{count, number}} book",
+  "book_count_other": "{{count, number}} books",
   "physical": "Physical book",
   "digital": "Digital book"
 }

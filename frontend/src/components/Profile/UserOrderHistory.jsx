@@ -1,4 +1,4 @@
-import { t, translateMessage } from '../../i18n/index.js';
+import { formatNumber, t, translateMessage } from '../../i18n/index.js';
 import { API_BASE_URL } from "../../config/api.js";
 import React, { useEffect, useState } from "react"; // ADDED: useState import
 import axios from "axios";
@@ -90,7 +90,7 @@ const UserOrderHistory = () => {
             key={i} // FIXED: Added unique key prop for list items
             className="bg-zinc-700 w-full rounded py-4 px-4 flex gap-4 transition-all duration-300 hover:bg-zinc-600 shadow-md items-center"
           >
-            <div className="w-[3%] text-center text-zinc-400">{i + 1}</div>
+            <div className="w-[3%] text-center text-zinc-400">{formatNumber(i + 1)}</div>
             <div className="w-[22%]">
               <Link 
                 to={`/view-book-details/${items.book._id}`} 
@@ -104,7 +104,7 @@ const UserOrderHistory = () => {
               {items.book.desc ? items.book.desc.substring(0, 100) + '...' : t("orders:no_description_available")}
             </div>
             <div className="w-[9%] text-right font-bold text-lg">
-              {items.book.price} €
+              {formatNumber(items.book.price)} €
             </div>
             
             <div className="w-[16%] text-center">

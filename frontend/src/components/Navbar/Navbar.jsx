@@ -1,5 +1,5 @@
 import LanguageSwitcher from '../../i18n/LanguageSwitcher.jsx';
-import { t } from '../../i18n/index.js';
+import { t, formatNumber } from '../../i18n/index.js';
 import { API_BASE_URL } from "../../config/api.js";
 import React, { useEffect, useMemo, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
@@ -189,7 +189,7 @@ const Navbar = () => {
                 <FaHeart size={18} />
                 {favouritesCount > 0 && (
                   <span className="absolute -top-2 -right-2 bg-red-500 text-xs rounded-full px-1">
-                    {favouritesCount}
+                    {formatNumber(favouritesCount)}
                   </span>
                 )}
               </button>
@@ -296,7 +296,7 @@ const Navbar = () => {
                 <FaHeart size={18} />
                 {favouritesCount > 0 && (
                   <span className="absolute -top-2 -right-2 bg-red-500 text-xs rounded-full px-1">
-                    {favouritesCount}
+                    {formatNumber(favouritesCount)}
                   </span>
                 )}
               </button>

@@ -1,0 +1,19 @@
+{
+  "loading": "Yüklene…",
+  "no_order_history": "Sımarış keçmişi yoq",
+  "you_have_not_placed_any_orders_yet": "Daa sımarış bermediñiz.",
+  "no_orders": "Sımarış yoq",
+  "browse_books": "Kitaplarnı baq",
+  "all_orders": "Bütün sımarışlar",
+  "books": "Kitaplar",
+  "description": "İzaat",
+  "price": "Fiyat",
+  "status": "Vaziyet",
+  "method": "Usul",
+  "no_description_available": "İzaat yoq.",
+  "n_a": "Bilgi yoq",
+  "placed": "Sımarış berildi",
+  "out_for_delivery": "Teslim etile",
+  "delivered": "Teslim etildi",
+  "canceled": "Lâğu etildi"
+}

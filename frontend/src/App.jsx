@@ -36,7 +36,7 @@ const App = () => {
   const role = useSelector((state) => state.auth.role);
   useEffect(startSessionLifecycle, []);
   return (
-    <div lang={i18n.resolvedLanguage || 'en'} className=" min-h-screen flex flex-col">
+    <div lang={i18n.language === 'qt' ? 'crh-Latn' : i18n.resolvedLanguage || 'en'} className=" min-h-screen flex flex-col">
       <Navbar />
       <div
         className={`flex-grow ${location.pathname !== "/" ? "pt-[75px]" : ""}`}

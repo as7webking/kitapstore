@@ -1,4 +1,4 @@
-import { t } from '../../i18n/index.js';
+import { t, formatNumber } from '../../i18n/index.js';
 import React from "react";
 import { Link } from "react-router-dom";
 
@@ -27,7 +27,7 @@ const BookCard = ({ data, favourite, handleRemoveBook }) => {
             {data.authortitle}
           </p>
           <p className="mt-2 text-xl text-zinc-50 font-semibold">
-            {data.price} €
+            {formatNumber(data.price)} €
           </p>
         </div>
       </Link>

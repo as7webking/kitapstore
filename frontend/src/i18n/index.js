@@ -13,13 +13,53 @@ import cart from './locales/en/cart.json';
 import messages from './locales/en/messages.json';
 import messageAliases from './messageAliases.json';
 
+import de_auth from './locales/de/auth.json';
+import de_blog from './locales/de/blog.json';
+import de_cart from './locales/de/cart.json';
+import de_catalog from './locales/de/catalog.json';
+import de_common from './locales/de/common.json';
+import de_footer from './locales/de/footer.json';
+import de_home from './locales/de/home.json';
+import de_messages from './locales/de/messages.json';
+import de_navigation from './locales/de/navigation.json';
+import de_orders from './locales/de/orders.json';
+import de_profile from './locales/de/profile.json';
+import qt_auth from './locales/qt/auth.json';
+import qt_blog from './locales/qt/blog.json';
+import qt_cart from './locales/qt/cart.json';
+import qt_catalog from './locales/qt/catalog.json';
+import qt_common from './locales/qt/common.json';
+import qt_footer from './locales/qt/footer.json';
+import qt_home from './locales/qt/home.json';
+import qt_messages from './locales/qt/messages.json';
+import qt_navigation from './locales/qt/navigation.json';
+import qt_orders from './locales/qt/orders.json';
+import qt_profile from './locales/qt/profile.json';
+import ru_auth from './locales/ru/auth.json';
+import ru_blog from './locales/ru/blog.json';
+import ru_cart from './locales/ru/cart.json';
+import ru_catalog from './locales/ru/catalog.json';
+import ru_common from './locales/ru/common.json';
+import ru_footer from './locales/ru/footer.json';
+import ru_home from './locales/ru/home.json';
+import ru_messages from './locales/ru/messages.json';
+import ru_navigation from './locales/ru/navigation.json';
+import ru_orders from './locales/ru/orders.json';
+import ru_profile from './locales/ru/profile.json';
+
+export const translated = {
+  de: { auth: de_auth, blog: de_blog, cart: de_cart, catalog: de_catalog, common: de_common, footer: de_footer, home: de_home, messages: de_messages, navigation: de_navigation, orders: de_orders, profile: de_profile },
+  qt: { auth: qt_auth, blog: qt_blog, cart: qt_cart, catalog: qt_catalog, common: qt_common, footer: qt_footer, home: qt_home, messages: qt_messages, navigation: qt_navigation, orders: qt_orders, profile: qt_profile },
+  ru: { auth: ru_auth, blog: ru_blog, cart: ru_cart, catalog: ru_catalog, common: ru_common, footer: ru_footer, home: ru_home, messages: ru_messages, navigation: ru_navigation, orders: ru_orders, profile: ru_profile },
+};
+
 export const languageStorageKey = 'kitapstore.language';
 export const htmlLanguages = { en: 'en', de: 'de', qt: 'crh-Latn', ru: 'ru' };
 export const languages = [
   { code: 'en', label: 'English', complete: true },
-  { code: 'de', label: 'Deutsch', complete: false },
-  { code: 'qt', label: 'Qırımtatarca', complete: false },
-  { code: 'ru', label: 'Русский', complete: false },
+  { code: 'de', label: 'Deutsch', complete: true },
+  { code: 'qt', label: 'Qırımtatarca', complete: true },
+  { code: 'ru', label: 'Русский', complete: true },
 ];
 export const english = { auth, profile, orders, catalog, footer, home, common, navigation, blog, cart, messages };
 export function normalizeLanguage(value) {
@@ -31,12 +71,32 @@ export function savedLanguage() {
 }
 const i18n = i18next.createInstance();
 i18n.use(initReactI18next).init({
-  resources: { en: english, de: {}, qt: {}, ru: {} },
+  resources: { en: english, ...translated },
   lng: savedLanguage(), fallbackLng: 'en', supportedLngs: languages.map(({ code }) => code),
   load: 'currentOnly', ns: Object.keys(english), defaultNS: 'common',
   interpolation: { escapeValue: false }, returnNull: false, returnEmptyString: false,
   initAsync: false, react: { useSuspense: false },
 });
+i18n.services.formatter.add('number', (value, language) => formatNumber(value, {}, language));
+const pluralRule = i18n.services.pluralResolver.getRule.bind(i18n.services.pluralResolver);
+i18n.services.pluralResolver.getRule = (language, options) => language === 'qt'
+  ? { select: () => 'other', resolvedOptions: () => ({ pluralCategories: ['other'] }) }
+  : pluralRule(language, options);
+
+// qt is internal; unsupported Intl crh uses deliberate numeric formats, never Turkish text.
+export function formatNumber(value, options = {}, language = i18n.language) {
+  if (language === 'qt') return new Intl.NumberFormat('en-US', options).format(value)
+    .replaceAll(',', '\u0000').replaceAll('.', ',').replaceAll('\u0000', '\u00a0');
+  return new Intl.NumberFormat({ en: 'en-GB', de: 'de-DE', ru: 'ru-RU' }[language] || 'en-GB', options).format(value);
+}
+export function formatDate(value, language = i18n.language) {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return '—';
+  if (language === 'qt') return [date.getDate(), date.getMonth() + 1, date.getFullYear()]
+    .map((part) => String(part).padStart(2, '0')).join('.');
+  return new Intl.DateTimeFormat({ en: 'en-GB', de: 'de-DE', ru: 'ru-RU' }[language] || 'en-GB').format(date);
+}
+
 function syncLanguage(language) {
   const selected = normalizeLanguage(language);
   try { globalThis.localStorage?.setItem(languageStorageKey, selected); } catch { /* Memory-only selection still works. */ }

@@ -1,0 +1,21 @@
+{
+  "could_not_log_out_check_your_connection_and_try_again": "Abmeldung fehlgeschlagen. Prüfen Sie Ihre Verbindung und versuchen Sie es erneut.",
+  "logo": "Logo",
+  "home": "Startseite",
+  "books": "Bücher",
+  "blog": "Blog",
+  "contact": "Kontakt",
+  "search": "Suche",
+  "favourites": "Favoriten",
+  "admins_cannot_use_favourites": "Administratoren können keine Favoriten verwenden.",
+  "log_in_to_use_favourites": "Melden Sie sich an, um Favoriten zu nutzen.",
+  "no_favourite_books": "Keine Bücher in den Favoriten",
+  "profile": "Profil",
+  "log_in": "Anmelden",
+  "logout": "Abmelden",
+  "search_books": "Bücher suchen…",
+  "submit_search": "Suchen",
+  "close_search": "Suche schließen",
+  "search_2": "Suchen…",
+  "menu": "Menü"
+}

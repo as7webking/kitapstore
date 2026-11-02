@@ -1,0 +1,18 @@
+{
+  "loading": "Загрузка…",
+  "message_sent": "Сообщение отправлено ✅",
+  "could_not_send_your_message_please_try_again": "Не удалось отправить сообщение. Попробуйте снова.",
+  "contact": "Контакты",
+  "berlin_alexanderplatz_1": "📍 Берлин, Alexanderplatz 1",
+  "mon_sat_10_00_19_00": "🕒 Пн–сб 10:00–19:00",
+  "name": "Имя",
+  "email": "Электронная почта",
+  "message": "Сообщение",
+  "send": "Отправить",
+  "site_title": "KitapStore",
+  "unexpected_error": "Что-то пошло не так. Попробуйте снова.",
+  "language": "Язык",
+  "fallback_notice": "Текст на английском — перевод появится позже.",
+  "required": "Заполните поле «{{field}}».",
+  "network_error": "Не удалось подключиться. Проверьте соединение и попробуйте снова."
+}

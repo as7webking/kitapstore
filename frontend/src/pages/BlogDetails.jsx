@@ -1,4 +1,4 @@
-import { t } from '../i18n/index.js';
+import { t, formatDate } from '../i18n/index.js';
 import { API_BASE_URL } from "../config/api.js";
 import React, { useEffect, useState } from "react";
 import axios from "axios";
@@ -55,7 +55,7 @@ const BlogDetails = () => {
       <article className="mt-4">
         <h1 className="text-4xl font-bold leading-tight">{blog.title}</h1>
         <p className="text-sm text-gray-500 mt-3">
-          {new Date(blog.createdAt).toLocaleDateString('en')} • {blog.author}
+          {formatDate(blog.createdAt)} • {blog.author}
         </p>
 
         {blog.coverImage && (
@@ -84,7 +84,7 @@ const BlogDetails = () => {
               >
                 <h3 className="font-semibold text-lg">{item.title}</h3>
                 <p className="text-sm text-gray-500 mt-1">
-                  {new Date(item.createdAt).toLocaleDateString('en')}
+                  {formatDate(item.createdAt)}
                 </p>
                 <p className="mt-2 text-gray-700 line-clamp-2">{item.excerpt}</p>
               </Link>

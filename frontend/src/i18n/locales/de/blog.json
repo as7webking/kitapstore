@@ -1,0 +1,21 @@
+{
+  "title_and_content_are_required": "Titel und Inhalt sind erforderlich.",
+  "error_occurred": "Ein Fehler ist aufgetreten.",
+  "add_blog": "Blogbeitrag hinzufügen",
+  "cover_image": "Titelbild",
+  "title": "Titel",
+  "blog_title": "Titel des Blogbeitrags",
+  "slug_optional": "URL-Kürzel (optional)",
+  "custom_blog_link": "eigener-blog-link",
+  "content": "Inhalt",
+  "write_blog_content_here": "Schreiben Sie hier Ihren Blogbeitrag.",
+  "blog": "Blog",
+  "loading": "Wird geladen…",
+  "no_blog_posts_yet": "Noch keine Blogbeiträge vorhanden.",
+  "read_more": "Weiterlesen →",
+  "blog_not_found": "Blogbeitrag nicht gefunden.",
+  "back_to_all_posts": "← Zurück zu allen Beiträgen",
+  "related_articles": "Ähnliche Artikel",
+  "no_related_articles_yet": "Noch keine ähnlichen Artikel vorhanden.",
+  "posts_count": "Blogbeiträge ({{count, number}})"
+}

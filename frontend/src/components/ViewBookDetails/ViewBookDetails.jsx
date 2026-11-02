@@ -1,4 +1,4 @@
-import { t, translateMessage } from '../../i18n/index.js';
+import { formatNumber, t, translateMessage } from '../../i18n/index.js';
 import { API_BASE_URL } from "../../config/api.js";
 import React, { useEffect, useState } from "react";
 import axios from "axios";
@@ -133,7 +133,7 @@ const ViewBookDetails = () => {
             <p className="flex mt-4 items-center justify-start text-zinc-400">
               <GrLanguage className="me-3" />{t("catalog:language")}{" "}{Data.language}
             </p>
-            <p className="mt-4 text-zinc-100 text-3xl font-semibold">{Data.price} €</p>
+            <p className="mt-4 text-zinc-100 text-3xl font-semibold">{formatNumber(Data.price)} €</p>
 
             {role !== "admin" && (
               <div className="flex flex-row md:flex-col lg:flex-row items-center justify-between lg:justify-start mt-8 lg:mt-0">

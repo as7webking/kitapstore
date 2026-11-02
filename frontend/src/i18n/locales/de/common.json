@@ -1,0 +1,18 @@
+{
+  "loading": "Wird geladen…",
+  "message_sent": "Nachricht gesendet ✅",
+  "could_not_send_your_message_please_try_again": "Ihre Nachricht konnte nicht gesendet werden. Versuchen Sie es erneut.",
+  "contact": "Kontakt",
+  "berlin_alexanderplatz_1": "📍 Berlin, Alexanderplatz 1",
+  "mon_sat_10_00_19_00": "🕒 Mo–Sa 10:00–19:00",
+  "name": "Name",
+  "email": "E-Mail",
+  "message": "Nachricht",
+  "send": "Senden",
+  "site_title": "KitapStore",
+  "unexpected_error": "Etwas ist schiefgelaufen. Versuchen Sie es erneut.",
+  "language": "Sprache",
+  "fallback_notice": "Englischer Inhalt – Übersetzung folgt.",
+  "required": "Bitte füllen Sie das Feld „{{field}}“ aus.",
+  "network_error": "Keine Verbindung möglich. Prüfen Sie Ihre Verbindung und versuchen Sie es erneut."
+}

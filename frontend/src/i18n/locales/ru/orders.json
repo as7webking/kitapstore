@@ -1,0 +1,19 @@
+{
+  "loading": "Загрузка…",
+  "no_order_history": "История заказов пуста",
+  "you_have_not_placed_any_orders_yet": "Вы ещё не сделали ни одного заказа.",
+  "no_orders": "Заказов нет",
+  "browse_books": "Посмотреть книги",
+  "all_orders": "Все заказы",
+  "books": "Книги",
+  "description": "Описание",
+  "price": "Цена",
+  "status": "Статус",
+  "method": "Способ",
+  "no_description_available": "Описания нет.",
+  "n_a": "Нет данных",
+  "placed": "Заказ оформлен",
+  "out_for_delivery": "Передан в доставку",
+  "delivered": "Доставлен",
+  "canceled": "Отменён"
+}

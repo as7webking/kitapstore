@@ -1,0 +1,18 @@
+{
+  "loading": "Yüklene…",
+  "message_sent": "Haber yiberildi ✅",
+  "could_not_send_your_message_please_try_again": "Haberiñizni yibermek mümkün olmadı. Kene deñeñiz.",
+  "contact": "Alâqa",
+  "berlin_alexanderplatz_1": "📍 Berlin, Alexanderplatz 1",
+  "mon_sat_10_00_19_00": "🕒 Bazarertesi–Cumartesi 10:00–19:00",
+  "name": "Ad",
+  "email": "E-poçta",
+  "message": "Haber",
+  "send": "Yiber",
+  "site_title": "KitapStore",
+  "unexpected_error": "Bir hata oldı. Kene deñeñiz.",
+  "language": "Til",
+  "fallback_notice": "İnglizce metin — tercime soñra olacaq.",
+  "required": "«{{field}}» toldurıñız.",
+  "network_error": "Bağlanmaq mümkün olmadı. Bağlantıñıznı teşkerip kene deñeñiz."
+}

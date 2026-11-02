@@ -1,0 +1,21 @@
+{
+  "could_not_log_out_check_your_connection_and_try_again": "Esaptan çıqmaq mümkün olmadı. Bağlantıñıznı teşkerip kene deñeñiz.",
+  "logo": "Tamğa",
+  "home": "Baş saife",
+  "books": "Kitaplar",
+  "blog": "Blog",
+  "contact": "Alâqa",
+  "search": "Qıdıruv",
+  "favourites": "Beğenilgenler",
+  "admins_cannot_use_favourites": "İdareciler beğenilgenlerni qullanıp olamay.",
+  "log_in_to_use_favourites": "Beğenilgenlerni qullanmaq içün kiriñiz.",
+  "no_favourite_books": "Beğenilgen kitap yoq",
+  "profile": "Şahsiy saife",
+  "log_in": "Kir",
+  "logout": "Çıq",
+  "search_books": "Kitap qıdırıñız…",
+  "submit_search": "Qıdır",
+  "close_search": "Qıdıruvnı qapat",
+  "search_2": "Qıdırıñız…",
+  "menu": "Menü"
+}

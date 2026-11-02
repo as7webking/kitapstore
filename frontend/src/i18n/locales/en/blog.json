@@ -17,5 +17,5 @@
   "back_to_all_posts": "← Back to all posts",
   "related_articles": "Related articles",
   "no_related_articles_yet": "No related articles yet.",
-  "posts_count": "Blog posts ({{count}})"
+  "posts_count": "Blog posts ({{count, number}})"
 }

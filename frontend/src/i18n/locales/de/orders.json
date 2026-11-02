@@ -1,0 +1,19 @@
+{
+  "loading": "Wird geladen…",
+  "no_order_history": "Keine Bestellhistorie",
+  "you_have_not_placed_any_orders_yet": "Sie haben noch keine Bestellungen aufgegeben.",
+  "no_orders": "Keine Bestellungen",
+  "browse_books": "Bücher ansehen",
+  "all_orders": "Alle Bestellungen",
+  "books": "Bücher",
+  "description": "Beschreibung",
+  "price": "Preis",
+  "status": "Status",
+  "method": "Methode",
+  "no_description_available": "Keine Beschreibung vorhanden.",
+  "n_a": "Keine Angabe",
+  "placed": "Bestellung aufgegeben",
+  "out_for_delivery": "In Zustellung",
+  "delivered": "Zugestellt",
+  "canceled": "Storniert"
+}

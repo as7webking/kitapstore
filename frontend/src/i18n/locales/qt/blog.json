@@ -1,0 +1,21 @@
+{
+  "title_and_content_are_required": "Serleva ve metin lâzim.",
+  "error_occurred": "Hata oldı.",
+  "add_blog": "Blog yazısını qoş",
+  "cover_image": "Qapaq resmi",
+  "title": "Serleva",
+  "blog_title": "Blog yazısınıñ serlevası",
+  "slug_optional": "Bağlantı adı (mecburiy degil)",
+  "custom_blog_link": "blog-baglantisi",
+  "content": "Metin",
+  "write_blog_content_here": "Blog yazısını mında yazıñız.",
+  "blog": "Blog",
+  "loading": "Yüklene…",
+  "no_blog_posts_yet": "Şimdilik blog yazıları yoq.",
+  "read_more": "Devamını oqu →",
+  "blog_not_found": "Blog yazısı tapılmadı.",
+  "back_to_all_posts": "← Bütün yazılarğa qayt",
+  "related_articles": "Bağlı maqaleler",
+  "no_related_articles_yet": "Şimdilik bağlı maqaleler yoq.",
+  "posts_count": "Blog yazıları ({{count, number}})"
+}

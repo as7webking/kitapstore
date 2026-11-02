@@ -1,0 +1,21 @@
+{
+  "could_not_log_out_check_your_connection_and_try_again": "Не удалось выйти. Проверьте соединение и попробуйте снова.",
+  "logo": "Логотип",
+  "home": "Главная",
+  "books": "Книги",
+  "blog": "Блог",
+  "contact": "Контакты",
+  "search": "Поиск",
+  "favourites": "Избранное",
+  "admins_cannot_use_favourites": "Избранное недоступно администраторам.",
+  "log_in_to_use_favourites": "Войдите, чтобы пользоваться избранным.",
+  "no_favourite_books": "В избранном нет книг",
+  "profile": "Профиль",
+  "log_in": "Войти",
+  "logout": "Выйти",
+  "search_books": "Поиск книг…",
+  "submit_search": "Найти",
+  "close_search": "Закрыть поиск",
+  "search_2": "Поиск…",
+  "menu": "Меню"
+}

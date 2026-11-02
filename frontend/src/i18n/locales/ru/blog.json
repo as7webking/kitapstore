@@ -1,0 +1,21 @@
+{
+  "title_and_content_are_required": "Укажите заголовок и содержание.",
+  "error_occurred": "Произошла ошибка.",
+  "add_blog": "Добавить статью",
+  "cover_image": "Обложка",
+  "title": "Название",
+  "blog_title": "Заголовок статьи",
+  "slug_optional": "Адрес страницы (необязательно)",
+  "custom_blog_link": "adres-stati",
+  "content": "Содержание",
+  "write_blog_content_here": "Напишите текст статьи",
+  "blog": "Блог",
+  "loading": "Загрузка…",
+  "no_blog_posts_yet": "Статей пока нет.",
+  "read_more": "Читать далее →",
+  "blog_not_found": "Статья не найдена.",
+  "back_to_all_posts": "← Ко всем статьям",
+  "related_articles": "Похожие статьи",
+  "no_related_articles_yet": "Похожих статей пока нет.",
+  "posts_count": "Статьи ({{count, number}})"
+}
