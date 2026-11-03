@@ -1,3 +1,4 @@
+import heroImage from '../../assets/hero.png';
 import { t } from '../../i18n/index.js';
 import React from "react";
 import { Link } from "react-router-dom";
@@ -6,7 +7,7 @@ const Hero = () => {
   return (
     <div
       className="hero-section h-screen bg-center bg-cover bg-no-repeat relative"
-      style={{ backgroundImage: "url(/src/assets/hero.png)" }}
+      style={{ backgroundImage: `url(${heroImage})` }}
     >
       <div className="absolute inset-0 bg-black/50" />
 

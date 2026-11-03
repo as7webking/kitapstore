@@ -1,3 +1,4 @@
+import logoImage from '../../assets/logo.png';
 import LanguageSwitcher from '../../i18n/LanguageSwitcher.jsx';
 import { t, formatNumber } from '../../i18n/index.js';
 import { API_BASE_URL } from "../../config/api.js";
@@ -156,7 +157,7 @@ const Navbar = () => {
     >
       <div className="max-w-[1200px] h-full mx-auto px-3 sm:px-6 flex items-center justify-between">
         <Link to="/" className="flex items-center shrink-0">
-          <img src="/src/assets/logo.png" alt={t("navigation:logo")} className="h-10 object-contain" />
+          <img src={logoImage} alt={t("navigation:logo")} className="h-10 object-contain" />
         </Link>
 
         <div className="hidden md:flex items-center justify-center gap-8 text-sm font-medium flex-1">
