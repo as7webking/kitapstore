@@ -4,12 +4,22 @@ const { validateEnv } = require("./config/env");
 const connectDatabase = require("./conn/conn");
 const cors = require("cors");
 const passport = require("passport");
+const mongoose = require("mongoose");
+const { frontendOrigins, validateDeployment } = require("./config/deployment");
+const { drainBackgroundTasks } = require("./utils/backgroundTasks");
 
 const contactRoutes = require("./routes/contact");
 const app = express();
 
 // middlewares
-app.use(cors({ origin: process.env.FRONTEND_URL || "http://localhost:5173", credentials: true }));
+app.set('trust proxy', Number(process.env.TRUST_PROXY_HOPS || 0) || false);
+app.use(cors({ origin(origin, callback) {
+  callback(null, !origin || frontendOrigins().includes(origin));
+}, credentials: true }));
+app.get('/healthz', (req, res) => {
+  const ready = mongoose.connection.readyState === 1;
+  res.status(ready ? 200 : 503).set('Cache-Control', 'no-store').json({ status: ready ? 'ready' : 'unavailable' });
+});
 app.use(require('./middleware/apiMessages').apiMessages);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -62,6 +72,7 @@ app.use((error, req, res, next) => {
 
 async function start() {
   const { port } = validateEnv();
+  app.set("trust proxy", validateDeployment().trustProxy);
   try {
     await connectDatabase();
   } catch {
@@ -71,7 +82,26 @@ async function start() {
 }
 
 if (require.main === module) {
-  start().catch((error) => {
+  start().then((server) => {
+    let stopping = false;
+    const shutdown = () => {
+      if (stopping) return;
+      stopping = true;
+      // Best effort on deploy/restart; this is not a durable mail queue.
+      const deadline = setTimeout(() => process.exit(1), 20000);
+      server.close(async () => {
+        try {
+          await drainBackgroundTasks();
+          await mongoose.disconnect();
+        } catch {
+          console.error('Backend shutdown could not complete cleanly.');
+          process.exitCode = 1;
+        } finally { clearTimeout(deadline); }
+      });
+    };
+    process.once('SIGTERM', shutdown);
+    process.once('SIGINT', shutdown);
+  }).catch((error) => {
     console.error(error.message);
     process.exitCode = 1;
   });

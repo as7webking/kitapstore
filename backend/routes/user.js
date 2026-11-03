@@ -14,6 +14,7 @@ const recoveryLimit = createAuthLimiter({ limit: 5, windowMs: 15 * 60 * 1000 });
 const resetLimit = createAuthLimiter({ limit: 10, windowMs: 15 * 60 * 1000 });
 const { authentificateToken } = require("./userAuth");
 const sendEmail = require("../utils/mailer");
+const { trackBackgroundTask } = require("../utils/backgroundTasks");
 
 const requireOAuthProvider = (provider) => (req, res, next) => {
   if (!passport._strategy(provider)) {
@@ -39,8 +40,8 @@ router.post("/sign-up", signupLimit, async (req, res) => {
     await User.create({ username, email, address, password: await bcrypt.hash(password, 12), role: "user", authProvider: "local" });
     // Notifications are best-effort and do not delay account creation.
     if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
-      sendEmail(email, "Welcome to KitapStore", `Hi ${username}, your account was created!`)
-        .catch(() => console.warn("Registration notification could not be sent"));
+      trackBackgroundTask(sendEmail(email, "Welcome to KitapStore", `Hi ${username}, your account was created!`)
+        .catch(() => console.warn("Registration notification could not be sent")));
     }
     return res.status(201).json({ message: "Account created. You can now log in." });
   } catch (error) {

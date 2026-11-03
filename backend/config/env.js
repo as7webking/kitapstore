@@ -4,6 +4,7 @@ function validateEnv(env = process.env) {
   if (!/^mongodb(?:\+srv)?:\/\//.test(env.URI)) throw new Error("URI must be a MongoDB connection string");
   const port = Number(env.PORT || 1001);
   if (!Number.isInteger(port) || port < 1 || port > 65535) throw new Error("PORT must be between 1 and 65535");
+  require('./deployment').validateDeployment(env);
   return { port };
 }
 

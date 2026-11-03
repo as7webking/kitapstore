@@ -2,6 +2,7 @@ const crypto = require('node:crypto');
 const bcrypt = require('bcryptjs');
 const User = require('../models/user');
 const sendEmail = require('../utils/mailer');
+const { trackBackgroundTask } = require('../utils/backgroundTasks');
 const { passwordResetEmail } = require('../utils/accountEmail');
 const { escapeRegex, passwordError, normalizeEmail, validEmail } = require('../utils/accountValidation');
 
@@ -36,7 +37,7 @@ async function forgotPassword(req, res) {
       url.hash = new URLSearchParams({ token }).toString();
       // Do not expose account existence via delivery errors or SMTP latency.
       const mail = passwordResetEmail(req.body?.language, url.toString(), milliseconds / 60000);
-      void sendEmail(user.email, mail.subject, mail.text)
+      trackBackgroundTask(sendEmail(user.email, mail.subject, mail.text)
         .catch(async () => {
           try {
             // A failed older delivery must not erase a newer request.
@@ -45,7 +46,7 @@ async function forgotPassword(req, res) {
             });
           } catch { /* The expiry still prevents indefinite use. */ }
           console.warn('Password reset email could not be delivered. Check SMTP configuration.');
-        });
+        }));
     }
     return res.status(202).json(accepted);
   } catch {
