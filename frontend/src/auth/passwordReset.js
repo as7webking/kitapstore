@@ -1,3 +1,7 @@
+import axios from 'axios';
+import i18n, { normalizeLanguage } from '../i18n/index.js';
+import { API_BASE_URL } from '../config/api.js';
+
 export const recoveryFields = [
   { name: 'email', label: "auth:email", type: 'email', autoComplete: 'email', maxLength: 254,
     validate: (value) => !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim()) ? "auth:enter_a_valid_email_address" : '' },
@@ -12,4 +16,10 @@ export const newPasswordFields = [
 export function readResetToken(fragment) {
   const token = new URLSearchParams(fragment.replace(/^#/, '')).get('token');
   return typeof token === 'string' && /^[a-f0-9]{64}$/.test(token) ? token : '';
+}
+
+export function requestPasswordReset(values) {
+  return axios.post(`${API_BASE_URL}/api/v1/user/forgot-password`, {
+    ...values, language: normalizeLanguage(i18n.language),
+  });
 }

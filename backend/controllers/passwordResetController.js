@@ -2,6 +2,7 @@ const crypto = require('node:crypto');
 const bcrypt = require('bcryptjs');
 const User = require('../models/user');
 const sendEmail = require('../utils/mailer');
+const { passwordResetEmail } = require('../utils/accountEmail');
 const { escapeRegex, passwordError, normalizeEmail, validEmail } = require('../utils/accountValidation');
 
 const accepted = { message: 'If an account with this email can be recovered, you will receive a password reset link. Check your inbox and spam folder.' };
@@ -34,8 +35,8 @@ async function forgotPassword(req, res) {
       // Fragments are not sent to the frontend server or in HTTP referrers.
       url.hash = new URLSearchParams({ token }).toString();
       // Do not expose account existence via delivery errors or SMTP latency.
-      void sendEmail(user.email, 'Reset your KitapStore password',
-        `Use this link to choose a new password:\n${url.toString()}\n\nThe link expires in ${milliseconds / 60000} minutes and can be used once. If you did not request this, ignore this email.`)
+      const mail = passwordResetEmail(req.body?.language, url.toString(), milliseconds / 60000);
+      void sendEmail(user.email, mail.subject, mail.text)
         .catch(async () => {
           try {
             // A failed older delivery must not erase a newer request.
