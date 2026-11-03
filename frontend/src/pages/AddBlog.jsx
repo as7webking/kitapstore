@@ -62,7 +62,7 @@ const AddBlog = () => {
         { headers }
       );
 
-      alert(translateMessage(response.data.message));
+      alert(translateMessage(response.data));
 
       setData({
         coverImage: "",
@@ -71,7 +71,7 @@ const AddBlog = () => {
         content: "",
       });
     } catch (error) {
-      alert(translateMessage(error.response?.data?.message || "blog:error_occurred"));
+      alert(translateMessage(error.response?.data || "blog:error_occurred"));
     }
   };
 

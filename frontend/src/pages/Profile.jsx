@@ -30,14 +30,14 @@ const Profile = () => {
           `${API_BASE_URL}/api/v1/user/delete-account`,
           { headers },
         );
-        alert(translateMessage(response.data.message));
+        alert(translateMessage(response.data));
 
         // Log out the user after successful deletion
         clearSession();
         navigate("/");
       } catch (error) {
         console.error("Error deleting account:", error);
-        alert(translateMessage(error.response?.data?.message || "profile:failed_to_delete_account"));
+        alert(translateMessage(error.response?.data || "profile:failed_to_delete_account"));
       }
     }
   };

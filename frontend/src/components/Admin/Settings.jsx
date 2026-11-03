@@ -31,7 +31,7 @@ const Settings = () => {
       Value,
       { headers }
     );
-    alert(translateMessage(response.data.message));
+    alert(translateMessage(response.data));
   };
   return (
     <>

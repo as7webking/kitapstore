@@ -71,7 +71,7 @@ test('recovery HTTP: private responses, hashed token, expiry, single use, revoca
   try {
     assert.equal((await post('forgot-password', { email: { $ne: '' } })).status, 400);
     const known = await post('forgot-password', { email: ' READER@example.COM ' });
-    assert.equal(known.status, 202);
+    assert.equal(known.status, 202); assert.equal(known.body.code, 'PASSWORD_RESET_REQUESTED');
     assert.equal(known.headers.get('cache-control'), 'no-store');
     const first = tokenFromMail();
     assert.match(first, /^[a-f0-9]{64}$/);
@@ -86,10 +86,10 @@ test('recovery HTTP: private responses, hashed token, expiry, single use, revoca
     assert.equal((await post('reset-password', payload('invalid'))).status, 400);
     assert.equal((await post('reset-password', { ...payload(first), password: 'short', confirmPassword: 'short' })).status, 400);
     const mismatch = await post('reset-password', { ...payload(first), confirmPassword: 'different-password' });
-    assert.equal(mismatch.status, 400); assert.ok(mismatch.body.errors.confirmPassword);
+    assert.equal(mismatch.status, 400); assert.equal(mismatch.body.fieldCodes.confirmPassword, 'PASSWORD_CONFIRMATION_MISMATCH'); assert.ok(mismatch.body.errors.confirmPassword);
     user.resetPasswordExpires = new Date(Date.now() - 1000);
     const expired = await post('reset-password', payload(first));
-    assert.equal(expired.status, 400); assert.equal(expired.body.invalidToken, true);
+    assert.equal(expired.status, 400); assert.equal(expired.body.code, 'PASSWORD_RESET_TOKEN_INVALID'); assert.equal(expired.body.invalidToken, true);
     assert.equal(user.password, initialPassword);
     user.resetPasswordExpires = new Date(Date.now() + 60000);
     const oldSession = createToken(user);
@@ -112,19 +112,19 @@ test('recovery HTTP: private responses, hashed token, expiry, single use, revoca
     assert.equal((await post('reset-password', payload('e'.repeat(64)))).status, 503);
     databaseFails = false;
     mailFails = true;
-    const failedDelivery = await post('forgot-password', { email: user.email });
+    const failedDelivery = await post('forgot-password', { email: user.email, language: 'qt' });
     assert.equal(failedDelivery.status, known.status); assert.deepEqual(failedDelivery.body, known.body);
     await new Promise((resolve) => setImmediate(resolve));
     assert.equal(user.resetPasswordTokenHash, undefined);
     assert.equal(user.resetPasswordExpires, undefined);
     assert.deepEqual(warnings, ['Password reset email could not be delivered. Check SMTP configuration.']);
     const limited = await post('forgot-password', { email: 'missing@example.com' });
-    assert.equal(limited.status, 429); assert.ok(Number(limited.headers.get('retry-after')) > 0);
+    assert.equal(limited.status, 429); assert.equal(limited.body.code, 'RATE_LIMITED'); assert.ok(Number(limited.headers.get('retry-after')) > 0);
     assert.equal((await post('reset-password', payload(second))).status, 429);
     const malformed = await fetch(`${origin}/reset-password`, {
       method: 'POST', headers: { 'content-type': 'application/json' }, body: '{"password":',
     });
-    assert.equal(malformed.status, 400); assert.deepEqual(await malformed.json(), { message: 'Invalid request.' });
+    assert.equal(malformed.status, 400); assert.deepEqual(await malformed.json(), { message: 'Invalid request.', code: 'INVALID_REQUEST' });
     assert.equal(User.schema.path('resetPasswordTokenHash').options.select, false);
     assert.equal(User.schema.path('resetPasswordExpires').options.select, false);
   } finally {

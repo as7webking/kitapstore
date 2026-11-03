@@ -19,7 +19,7 @@ const result = esbuild.buildSync({
 const compiled = new Module(path.join(root, 'i18n-test.cjs'));
 compiled.filename = path.join(root, 'i18n-test.cjs'); compiled.paths = Module._nodeModulePaths(root);
 compiled._compile(result.outputFiles[0].text, compiled.filename);
-const { i18n, english, translated, formatDate, formatNumber, changeLanguage, normalizeLanguage, savedLanguage, languageStorageKey, htmlLanguages, translateMessage, AccountForm } = compiled.exports;
+const { i18n, english, translated, formatDate, formatNumber, changeLanguage, normalizeLanguage, savedLanguage, languageStorageKey, htmlLanguages, translateMessage, apiMessage, apiFieldErrors, AccountForm } = compiled.exports;
 const files = (dir) => fs.readdirSync(dir, { withFileTypes: true }).flatMap((entry) => entry.isDirectory() ? files(path.join(dir, entry.name)) : [path.join(dir, entry.name)]);
 test('English is default; all translated languages resolve with correct HTML language', async () => {
   assert.equal(i18n.language, 'en');
@@ -139,5 +139,22 @@ test('plural forms and localized number/date formatting are deterministic', asyn
   assert.equal(formatDate(new Date(2026, 10, 2), 'qt'), '02.11.2026');
   assert.equal(formatDate(new Date(2026, 10, 2), 'de'), '2.11.2026');
   assert.equal(formatDate('invalid', 'ru'), '—');
+  await changeLanguage('en');
+});
+
+test('API codes take priority over legacy wording, field codes and stored errors follow language', async () => {
+  const codes = JSON.parse(fs.readFileSync(path.join(root, '../shared/apiCodes.json'), 'utf8'));
+  const error = apiMessage({ code: 'EMAIL_INVALID', message: 'changed server wording' });
+  const fields = apiFieldErrors({ fieldCodes: { password: 'PASSWORD_CONFIRMATION_MISMATCH' }, errors: { email: 'Enter a valid email address.' } });
+  for (const language of ['en', 'de', 'qt', 'ru']) {
+    await changeLanguage(language);
+    for (const key of Object.values(codes)) assert.ok(i18n.exists(key, { lng: language, fallbackLng: false }), `${language}:${key}`);
+    assert.equal(translateMessage(error), i18n.t('messages:enter_a_valid_email_address'));
+    assert.equal(translateMessage(fields.password), i18n.t('messages:passwords_must_match'));
+    assert.equal(translateMessage(fields.email), translateMessage(error));
+    assert.equal(translateMessage({ code: 'EMAIL_INVALID', message: 'wrong wording' }), translateMessage(error));
+    assert.equal(translateMessage(apiMessage({ code: 'FUTURE_CODE', message: 'Enter a valid email address.' })), translateMessage(error));
+    assert.equal(translateMessage({ code: '__proto__' }), i18n.t('common:unexpected_error'));
+  }
   await changeLanguage('en');
 });

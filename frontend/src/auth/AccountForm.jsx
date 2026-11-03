@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next';
-import { translateMessage } from '../i18n/index.js';
+import { translateMessage, apiMessage, apiFieldErrors } from '../i18n/index.js';
 import { useRef, useState } from 'react';
 
 export default function AccountForm({ fields, submitLabel, pendingLabel, onSubmit, initialMessage = '' }) {
@@ -35,9 +35,9 @@ export default function AccountForm({ fields, submitLabel, pendingLabel, onSubmi
       await onSubmit(values);
     } catch (error) {
       const data = error.response?.data;
-      const fieldErrors = data?.errors || {};
+      const fieldErrors = apiFieldErrors(data);
       setErrors(fieldErrors);
-      setMessage(data?.message || 'common:network_error');
+      setMessage(apiMessage(data, 'common:network_error'));
       focusError(fieldErrors);
     } finally {
       busy.current = false;

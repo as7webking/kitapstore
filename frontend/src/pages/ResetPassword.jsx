@@ -1,4 +1,4 @@
-import { t, translateMessage } from '../i18n/index.js';
+import { t, translateMessage, apiMessage } from '../i18n/index.js';
 import { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import axios from 'axios';
@@ -25,7 +25,7 @@ function ResetPasswordForm({ location }) {
             try {
               const { data } = await axios.post(`${API_BASE_URL}/api/v1/user/reset-password`, { token, ...values });
               clearSession();
-              setMessage(data.message);
+              setMessage(apiMessage(data));
             } catch (error) {
               if (error.response?.data?.invalidToken) setInvalid(true);
               else throw error;

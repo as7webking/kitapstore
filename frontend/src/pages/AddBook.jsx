@@ -73,7 +73,7 @@ const AddBook = () => {
         { headers },
       );
 
-      alert(translateMessage(response.data.message));
+      alert(translateMessage(response.data));
       setData({
         url: "",
         title: "",
@@ -87,7 +87,7 @@ const AddBook = () => {
         shippingPrice: "",
       });
     } catch (error) {
-      alert(translateMessage(error.response?.data?.message || "catalog:error_occurred"));
+      alert(translateMessage(error.response?.data || "catalog:error_occurred"));
     }
   };
 

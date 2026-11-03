@@ -12,6 +12,7 @@ import blog from './locales/en/blog.json';
 import cart from './locales/en/cart.json';
 import messages from './locales/en/messages.json';
 import messageAliases from './messageAliases.json';
+import apiMessages from '../../../shared/apiCodes.json';
 
 import de_auth from './locales/de/auth.json';
 import de_blog from './locales/de/blog.json';
@@ -117,9 +118,10 @@ export function changeLanguage(language) { return i18n.changeLanguage(normalizeL
 export function t(key, options) { return i18n.t(key, options); }
 
 // Store message keys/options, not rendered translations, so existing errors update.
-// Legacy English API messages are adapted here until the API gains stable codes.
+// Prefer stable API codes; legacy English messages remain supported for older servers.
 export function translateMessage(message) {
   if (!message) return '';
+  if (typeof message === 'object' && !message.key) return translateMessage(apiMessage(message));
   if (typeof message === 'object' && message.key) {
     const options = { ...message.values };
     if (options.fieldKey) { options.field = translateMessage(options.fieldKey); delete options.fieldKey; }
@@ -130,3 +132,18 @@ export function translateMessage(message) {
   return i18n.exists(key) ? t(key) : t('common:unexpected_error');
 }
 export default i18n;
+
+// Store descriptors rather than rendered text so errors follow language changes.
+export function apiMessage(data, fallback = 'common:unexpected_error') {
+  if (data && typeof data.code === 'string' && Object.hasOwn(apiMessages, data.code)) {
+    return { key: apiMessages[data.code] };
+  }
+  return typeof data?.message === 'string' ? data.message
+    : typeof data?.error === 'string' ? data.error : fallback;
+}
+export function apiFieldErrors(data) {
+  const errors = data?.errors && typeof data.errors === 'object' ? data.errors : {};
+  const fieldCodes = data?.fieldCodes && typeof data.fieldCodes === 'object' ? data.fieldCodes : {};
+  return Object.fromEntries([...new Set([...Object.keys(errors), ...Object.keys(fieldCodes)])]
+    .map((field) => [field, apiMessage({ code: fieldCodes[field], message: errors[field] })]));
+}

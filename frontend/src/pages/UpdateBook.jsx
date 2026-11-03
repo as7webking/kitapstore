@@ -49,11 +49,11 @@ const UpdateBook = () => {
           desc: "",
           language: "",
         });
-        alert(translateMessage(response.data.message));
+        alert(translateMessage(response.data));
         navigate(`/view-book-details/${Data.slug || id}`);
       }
     } catch (error) {
-      alert(translateMessage(error.response.data.message));
+      alert(translateMessage(error.response.data));
     }
   };
   useEffect(() => {

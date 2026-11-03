@@ -32,7 +32,7 @@ const Cart = () => {
       { headers }
     );
     setCart((current) => current.filter((book) => book._id !== bookid));
-    alert(translateMessage(response.data.message));
+    alert(translateMessage(response.data));
   };
   const PlaceOrder = async () => {
     try {
@@ -41,7 +41,7 @@ const Cart = () => {
         { order: cart },
         { headers }
       );
-      alert(translateMessage(response.data.message));
+      alert(translateMessage(response.data));
       navigate("/profile/orderHistory");
     } catch (error) {
       console.log(error);

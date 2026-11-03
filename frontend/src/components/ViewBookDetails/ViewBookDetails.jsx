@@ -87,7 +87,7 @@ const ViewBookDetails = () => {
       {},
       { headers },
     );
-    alert(translateMessage(response.data.message));
+    alert(translateMessage(response.data));
   };
 
   const handleCart = async () => {
@@ -96,12 +96,12 @@ const ViewBookDetails = () => {
       {},
       { headers },
     );
-    alert(translateMessage(response.data.message));
+    alert(translateMessage(response.data));
   };
 
   const deleteBook = async () => {
     const response = await axios.delete(`${API_BASE_URL}/api/v1/delete-book`, { headers });
-    alert(translateMessage(response.data.message));
+    alert(translateMessage(response.data));
     navigate("/all-books");
   };
 
