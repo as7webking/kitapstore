@@ -15,5 +15,6 @@
   "placed": "Bestellung aufgegeben",
   "out_for_delivery": "In Zustellung",
   "delivered": "Zugestellt",
-  "canceled": "Storniert"
+  "canceled": "Storniert",
+  "quantity": "Anzahl: {{count, number}}"
 }

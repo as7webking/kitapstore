@@ -15,5 +15,6 @@
   "placed": "Заказ оформлен",
   "out_for_delivery": "Передан в доставку",
   "delivered": "Доставлен",
-  "canceled": "Отменён"
+  "canceled": "Отменён",
+  "quantity": "Количество: {{count, number}}"
 }

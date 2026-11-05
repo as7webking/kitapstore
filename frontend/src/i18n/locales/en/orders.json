@@ -15,5 +15,6 @@
   "placed": "Order Placed",
   "out_for_delivery": "Out for delivery",
   "delivered": "Delivered",
-  "canceled": "Canceled"
+  "canceled": "Canceled",
+  "quantity": "Quantity: {{count, number}}"
 }

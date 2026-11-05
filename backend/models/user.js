@@ -45,6 +45,7 @@ const user = new mongoose.Schema(
             ref: "Book",
         },
     ],
+    cartVersion: { type: Number, default: 0 },
     orders: [
         {
             type: mongoose.Types.ObjectId,

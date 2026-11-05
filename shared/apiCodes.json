@@ -57,5 +57,20 @@
   "INVALID_REQUEST": "messages:invalid_request",
   "REQUEST_IS_TOO_LARGE": "messages:request_is_too_large",
   "API_ERROR": "common:unexpected_error",
-  "OAUTH_UNAVAILABLE": "common:unexpected_error"
+  "OAUTH_UNAVAILABLE": "common:unexpected_error",
+  "ORDER_CREATED": "cart:created",
+  "ORDER_ITEMS_INVALID": "cart:items_invalid",
+  "ORDER_QUANTITY_INVALID": "cart:quantity_invalid",
+  "ORDER_PRICE_INVALID": "cart:price_invalid",
+  "ORDER_BOOK_UNAVAILABLE": "cart:book_unavailable",
+  "ORDER_KEY_INVALID": "cart:key_invalid",
+  "ORDER_KEY_CONFLICT": "cart:key_conflict",
+  "ORDER_CUSTOMER_REQUIRED": "cart:customer_required",
+  "ORDER_CART_EMPTY": "cart:cart_empty",
+  "ORDER_CART_CHANGED": "cart:cart_changed",
+  "ORDER_ADDRESS_REQUIRED": "cart:address_required",
+  "ORDER_UNAVAILABLE": "cart:unavailable",
+  "ORDER_STATUS_INVALID": "cart:status_invalid",
+  "ORDER_NOT_FOUND": "cart:not_found",
+  "ORDER_SESSION_INVALID": "auth:please_log_in_again"
 }

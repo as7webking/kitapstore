@@ -15,5 +15,6 @@
   "placed": "Sımarış berildi",
   "out_for_delivery": "Teslim etile",
   "delivered": "Teslim etildi",
-  "canceled": "Lâğu etildi"
+  "canceled": "Lâğu etildi",
+  "quantity": "Miqdar: {{count, number}}"
 }
