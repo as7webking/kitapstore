@@ -9,7 +9,8 @@ import { IoOpenOutline } from "react-icons/io5";
 import { FaCheck } from "react-icons/fa6";
 import SeeUserData from "./SeeUserData";
 const AllOrders = () => {
-  const [AllOrders, setAllOrders] = useState([]);
+  const [loadError, setLoadError] = useState('');
+  const [AllOrders, setAllOrders] = useState(null);
   const [Options] = useState(-1);
   const [Values] = useState({ status: "" });
   const [userDiv, setuserDiv] = useState("hidden");
@@ -27,20 +28,23 @@ const AllOrders = () => {
         );
         setAllOrders(response.data.data);
       } catch (error) {
-        console.error(error);
+        setAllOrders([]);
+        setLoadError(error.response?.data || 'common:network_error');
       }
     };
     fetchOrders();
   }, []);
 
+  if (loadError) return <p role="alert" className="p-4 text-zinc-100">{translateMessage(loadError)}</p>;
   return (
     <>
-      {AllOrders.length === 0 && (
+      {AllOrders === null && (
         <div className="flex justify-center">
           <Loader />
         </div>
       )}
 
+      {AllOrders?.length === 0 && <p>{t('orders:no_orders')}</p>}
       {AllOrders && AllOrders.length > 0 && (
         <div className="h-[100%] p-0 md:p-4 text-zinc-100">
           <h1 className="text-3xl md:text-5xl font-semibold text-zinc-400 mb-8">{t("orders:all_orders")}</h1>
@@ -59,16 +63,16 @@ const AllOrders = () => {
           <div className="space-y-2 mt-2">
             {AllOrders.map((items, i) => (
               <div
-                key={i} // FIXED: Added unique key prop for list items
+                key={items.lineId || items._id}
                 className="bg-zinc-700 w-full rounded py-4 px-4 flex gap-4 transition-all duration-300 hover:bg-zinc-600 shadow-md items-center"
               >
                 <div className="w-[3%] text-center text-zinc-400">{formatNumber(i + 1)}</div>
                 <div className="w-[22%]">
                   <Link
-                    to={`/view-book-details/${items.book.slug || items.book._id}`}
+                    to={`/view-book-details/${items.book.slug || items.book.slug || items.book._id}`}
                     className="hover:text-blue-400 font-medium line-clamp-2"
                   >
-                    {items.book.title}
+                    {items.book.title || t('cart:unavailable_item')}
                   </Link>
                 </div>
                 <div className="w-[45%] hidden md:block text-sm text-zinc-400">
@@ -78,16 +82,17 @@ const AllOrders = () => {
                     : t("orders:no_description_available")}
                 </div>
                 <div className="w-[9%] text-right font-bold text-lg">
-                  {formatNumber(items.book.price)} €
+                  {items.book.price == null ? t('orders:n_a') : `${formatNumber(items.lineTotalCents !== undefined ? items.lineTotalCents / 100 : items.book.price)} €`}
+              {items.quantity > 1 && <span className="block text-xs">{t('orders:quantity', { count: items.quantity })}</span>}
                 </div>
 
                 <div className="w-[16%] text-center">
                   {/* FIXED: Corrected ternary operator syntax */}
-                  {items.status === "Order placed" ? (
+                  {items.status === "Order Placed" ? (
                     <div className="font-semibold text-yellow-400 bg-yellow-900/50 p-1 rounded-full text-xs">
                       {translateMessage(items.status)}
                     </div>
-                  ) : items.status === "Cancelled" ? (
+                  ) : items.status === "Canceled" ? (
                     <div className="font-semibold text-red-400 bg-red-900/50 p-1 rounded-full text-xs">
                       {translateMessage(items.status)}
                     </div>

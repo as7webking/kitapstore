@@ -2,7 +2,7 @@ import { formatNumber, t, translateMessage } from '../../i18n/index.js';
 import { API_BASE_URL } from "../../config/api.js";
 import React, { useEffect, useState } from "react"; // ADDED: useState import
 import axios from "axios";
-import { Link } from "react-router-dom"; // ADDED: useNavigate for redirecting
+import { Link, useLocation } from "react-router-dom"; // ADDED: useNavigate for redirecting
 // FIXED: Removed problematic relative import and defined Loader locally for compilation
 // import Loader from "../Loader/Loader"; 
 
@@ -15,6 +15,8 @@ const Loader = () => (
 );
 
 const UserOrderHistory = () => {
+  const location = useLocation();
+  const [loadError, setLoadError] = useState('');
   const [orderHistory, setOrderHistory] = useState(null); // RENAMED: to camelCase, initialized to null
 
   const headers = {
@@ -32,7 +34,7 @@ const UserOrderHistory = () => {
         // Assuming data is located in response.data.data
         setOrderHistory(response.data.data);
       } catch (error) {
-        console.error("Error fetching order history:", error);
+        setLoadError(error.response?.data || 'common:network_error');
         
         // Session failures are handled by the shared Axios interceptor and route guard.
         setOrderHistory([]); // Set to empty array on general failure to stop the Loader
@@ -49,6 +51,8 @@ const UserOrderHistory = () => {
       </div>
     );
   }
+
+  if (loadError) return <p role="alert" className="p-4 text-zinc-100">{translateMessage(loadError)}</p>;
 
   // Show empty state if no history is found
   if (orderHistory.length === 0) {
@@ -71,6 +75,7 @@ const UserOrderHistory = () => {
   // Render order history table
   return (
     <div className="h-[100%] p-0 md:p-4 text-zinc-100">
+      {location.state?.message && <p role="status" className="mb-4">{translateMessage(location.state.message)}</p>}
       <h1 className="text-4xl font-bold text-white mb-6">{t("orders:all_orders")}</h1>
       
       {/* Table Header */}
@@ -87,16 +92,16 @@ const UserOrderHistory = () => {
       <div className="space-y-2 mt-2">
         {orderHistory.map((items, i) => (
           <div 
-            key={i} // FIXED: Added unique key prop for list items
+            key={items.lineId || items._id}
             className="bg-zinc-700 w-full rounded py-4 px-4 flex gap-4 transition-all duration-300 hover:bg-zinc-600 shadow-md items-center"
           >
             <div className="w-[3%] text-center text-zinc-400">{formatNumber(i + 1)}</div>
             <div className="w-[22%]">
               <Link 
-                to={`/view-book-details/${items.book._id}`} 
+                to={`/view-book-details/${items.book.slug || items.book._id}`}
                 className="hover:text-blue-400 font-medium line-clamp-2"
               >
-                {items.book.title}
+                {items.book.title || t('cart:unavailable_item')}
               </Link>
             </div>
             <div className="w-[45%] hidden md:block text-sm text-zinc-400">
@@ -104,16 +109,17 @@ const UserOrderHistory = () => {
               {items.book.desc ? items.book.desc.substring(0, 100) + '...' : t("orders:no_description_available")}
             </div>
             <div className="w-[9%] text-right font-bold text-lg">
-              {formatNumber(items.book.price)} €
+              {items.book.price == null ? t('orders:n_a') : `${formatNumber(items.lineTotalCents !== undefined ? items.lineTotalCents / 100 : items.book.price)} €`}
+              {items.quantity > 1 && <span className="block text-xs">{t('orders:quantity', { count: items.quantity })}</span>}
             </div>
             
             <div className="w-[16%] text-center">
               {/* FIXED: Corrected ternary operator syntax */}
-              {items.status === "Order placed" ? (
+              {items.status === "Order Placed" ? (
                 <div className="font-semibold text-yellow-400 bg-yellow-900/50 p-1 rounded-full text-xs">
                   {translateMessage(items.status)}
                 </div>
-              ) : items.status === "Cancelled" ? (
+              ) : items.status === "Canceled" ? (
                 <div className="font-semibold text-red-400 bg-red-900/50 p-1 rounded-full text-xs">
                   {translateMessage(items.status)}
                 </div>
