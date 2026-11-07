@@ -56,5 +56,6 @@
   "administrator_access_required": "Administrator access required",
   "this_username_or_email_is_already_registered": "This username or email is already registered.",
   "invalid_request": "Invalid request.",
-  "request_is_too_large": "Request is too large."
+  "request_is_too_large": "Request is too large.",
+  "rate_limit_unavailable": "Request checking is unavailable. Please try again later."
 }

@@ -1,4 +1,4 @@
-const { test } = require('node:test');
+const { test, after } = require('node:test');
 const assert = require('node:assert/strict');
 const { spawnSync } = require('node:child_process');
 const path = require('node:path');
@@ -9,6 +9,8 @@ const { validateEnv } = require('../config/env');
 const { validateDeployment, frontendOrigins } = require('../config/deployment');
 const { apiMessages } = require('../middleware/apiMessages');
 const { createAuthLimiter } = require('../middleware/authRateLimit');
+const fakeRateLimits = require('./helpers/rateLimitStore').installFakeRateLimits();
+after(() => fakeRateLimits.restore());
 const { trackBackgroundTask, drainBackgroundTasks } = require('../utils/backgroundTasks');
 const { forgotPassword } = require('../controllers/passwordResetController');
 const User = require('../models/user');
@@ -41,9 +43,9 @@ test('real CLI stops safely on an unreachable synthetic test database before ope
   assert.doesNotMatch(result.stdout, /Server running/);
 });
 
-test('proxy IP limits ignore spoofed leftmost forwarding and remain process-local', async () => {
+test('shared proxy IP limits ignore spoofed leftmost forwarding', async () => {
   const app = express(); app.set('trust proxy', 1); app.use(apiMessages);
-  app.use(createAuthLimiter({ limit: 1, windowMs: 60000 })); app.get('/', (req, res) => res.json({ ok: true }));
+  app.use(createAuthLimiter({ scope: 'proxy-test', limit: 1, windowMs: 60000 })); app.get('/', (req, res) => res.json({ ok: true }));
   const server = app.listen(0, '127.0.0.1');
   await new Promise((resolve, reject) => { server.once('listening', resolve); server.once('error', reject); });
   try {

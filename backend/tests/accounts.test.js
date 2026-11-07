@@ -10,6 +10,8 @@ process.env.GOOGLE_CLIENT_SECRET = '';
 process.env.EMAIL_USER = '';
 process.env.EMAIL_PASS = '';
 const { app } = require('../app');
+const fakeRateLimits = require('./helpers/rateLimitStore').installFakeRateLimits();
+after(() => fakeRateLimits.restore());
 const User = require('../models/user');
 const { createToken } = require('../utils/jwt');
 const { registration } = require('../utils/accountValidation');
@@ -28,16 +30,16 @@ test('registration validates types, email, Unicode byte limits and trims values'
   assert.ok(registration({ ...valid, username: '<script>' }).errors.username);
 });
 
-test('rate limit counts attempts per IP, provides retry time and resets after its window', () => {
-  let now = 0;
-  const limit = createAuthLimiter({ limit: 2, windowMs: 1000, now: () => now });
+test('rate limit counts attempts per IP, provides retry time and resets after its window', async () => {
+  fakeRateLimits.setNow(0);
+  const limit = createAuthLimiter({ scope: 'unit-accounts', limit: 2, windowMs: 1000 });
   let allowed = 0, code, retry;
   const res = { set(_, value) { retry = value; }, status(value) { code = value; return this; }, json() {} };
   const request = (ip) => limit({ ip }, res, () => { allowed++; });
-  request('a'); request('a'); request('a');
+  await request('a'); await request('a'); await request('a');
   assert.equal(allowed, 2); assert.equal(code, 429); assert.equal(retry, '1');
-  request('b'); assert.equal(allowed, 3);
-  now = 1001; request('a'); assert.equal(allowed, 4);
+  await request('b'); assert.equal(allowed, 3);
+  fakeRateLimits.setNow(1001); await request('a'); assert.equal(allowed, 4);
 });
 
 test('HTTP account lifecycle: normalized signup, duplicate races, login, permissions and revocation', async () => {

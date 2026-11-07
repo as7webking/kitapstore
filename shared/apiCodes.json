@@ -72,5 +72,6 @@
   "ORDER_UNAVAILABLE": "cart:unavailable",
   "ORDER_STATUS_INVALID": "cart:status_invalid",
   "ORDER_NOT_FOUND": "cart:not_found",
-  "ORDER_SESSION_INVALID": "auth:please_log_in_again"
+  "ORDER_SESSION_INVALID": "auth:please_log_in_again",
+  "RATE_LIMIT_UNAVAILABLE": "messages:rate_limit_unavailable"
 }

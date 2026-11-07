@@ -56,5 +56,6 @@
   "administrator_access_required": "Administratorrechte erforderlich.",
   "this_username_or_email_is_already_registered": "Dieser Benutzername oder diese E-Mail-Adresse ist bereits registriert.",
   "invalid_request": "Ungültige Anfrage.",
-  "request_is_too_large": "Die Anfrage ist zu groß."
+  "request_is_too_large": "Die Anfrage ist zu groß.",
+  "rate_limit_unavailable": "Die Anfrageprüfung ist nicht verfügbar. Versuchen Sie es später erneut."
 }

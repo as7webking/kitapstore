@@ -56,5 +56,6 @@
   "administrator_access_required": "İdareci aqqı lâzim.",
   "this_username_or_email_is_already_registered": "Bu qullanıcı adı ya da e-poçta adresinen qayd bar.",
   "invalid_request": "Keçersiz istek.",
-  "request_is_too_large": "İstek pek büyük."
+  "request_is_too_large": "İstek pek büyük.",
+  "rate_limit_unavailable": "İstekni teşkermek şimdilik mümkün degil. Soñra kene deñeñiz."
 }

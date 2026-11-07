@@ -1,4 +1,4 @@
-const { test } = require('node:test');
+const { test, after } = require('node:test');
 const assert = require('node:assert/strict');
 const crypto = require('node:crypto');
 const bcrypt = require('bcryptjs');
@@ -15,6 +15,8 @@ process.env.EMAIL_USER = 'test@example.test';
 process.env.EMAIL_PASS = 'synthetic-smtp-password';
 process.env.EMAIL_FROM = 'KitapStore <test@example.test>';
 const { app } = require('../app');
+const fakeRateLimits = require('./helpers/rateLimitStore').installFakeRateLimits();
+after(() => fakeRateLimits.restore());
 const User = require('../models/user');
 const { createToken } = require('../utils/jwt');
 
