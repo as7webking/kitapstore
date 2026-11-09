@@ -1,4 +1,4 @@
-import heroImage from '../../assets/hero.png';
+import heroImage from '../../assets/hero.jpg';
 import { t } from '../../i18n/index.js';
 import React from "react";
 import { Link } from "react-router-dom";
