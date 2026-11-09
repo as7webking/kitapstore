@@ -1,37 +1,37 @@
 import { useTranslation } from 'react-i18next';
-import React, { useEffect } from "react";
-import Home from "./pages/Home";
+import React, { lazy, Suspense, useEffect } from "react";
 import Navbar from "./components/Navbar/Navbar";
 import Footer from "./components/Footer/Footer";
 import { Routes, Route } from "react-router-dom";
-import AllBooks from "./pages/AllBooks";
-import AddBook from "./pages/AddBook";
-import Login from "./pages/Login";
-import ForgotPassword from "./pages/ForgotPassword";
-import ResetPassword from "./pages/ResetPassword";
-import SignUp from "./pages/SignUp";
-import Cart from "./pages/Cart";
-import Profile from "./pages/Profile";
-import ViewBookDetails from "./components/ViewBookDetails/ViewBookDetails";
 import { startSessionLifecycle } from "./auth/session.js";
 import RequireAuth from "./auth/RequireAuth.jsx";
 import { useSelector } from "react-redux";
-import Favourites from "./components/Profile/Favourites";
-import UserOrderHistory from "./components/Profile/UserOrderHistory";
-import Settings from "./components/Profile/Settings";
-import AllOrders from "./pages/AllOrders";
-import UpdateBook from "./pages/UpdateBook";
-import RecentlyAdded from "./components/Home/RecentlyAdded";
-import Popular from "./components/Home/Popular";
-import Blog from "./pages/Blog";
-import BlogDetails from "./pages/BlogDetails";
-import AddBlog from "./pages/AddBlog";
-import Contact from "./pages/Contact";
-import SearchResults from "./pages/SearchResults";
 import { useLocation } from "react-router-dom";
 
+const Home = lazy(() => import("./pages/Home"));
+const AllBooks = lazy(() => import("./pages/AllBooks"));
+const AddBook = lazy(() => import("./pages/AddBook"));
+const Login = lazy(() => import("./pages/Login"));
+const ForgotPassword = lazy(() => import("./pages/ForgotPassword"));
+const ResetPassword = lazy(() => import("./pages/ResetPassword"));
+const SignUp = lazy(() => import("./pages/SignUp"));
+const Cart = lazy(() => import("./pages/Cart"));
+const Profile = lazy(() => import("./pages/Profile"));
+const ViewBookDetails = lazy(() => import("./components/ViewBookDetails/ViewBookDetails"));
+const Favourites = lazy(() => import("./components/Profile/Favourites"));
+const UserOrderHistory = lazy(() => import("./components/Profile/UserOrderHistory"));
+const Settings = lazy(() => import("./components/Profile/Settings"));
+const AllOrders = lazy(() => import("./pages/AllOrders"));
+const UpdateBook = lazy(() => import("./pages/UpdateBook"));
+const Popular = lazy(() => import("./components/Home/Popular"));
+const Blog = lazy(() => import("./pages/Blog"));
+const BlogDetails = lazy(() => import("./pages/BlogDetails"));
+const AddBlog = lazy(() => import("./pages/AddBlog"));
+const Contact = lazy(() => import("./pages/Contact"));
+const SearchResults = lazy(() => import("./pages/SearchResults"));
+
 const App = () => {
-  const { i18n } = useTranslation();
+  const { i18n, t } = useTranslation();
   const location = useLocation();
   const role = useSelector((state) => state.auth.role);
   useEffect(startSessionLifecycle, []);
@@ -41,6 +41,7 @@ const App = () => {
       <div
         className={`flex-grow ${location.pathname !== "/" ? "pt-[75px]" : ""}`}
       >
+        <Suspense fallback={<div role="status" className="py-16 text-center">{t("common:loading")}</div>}>
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/all-books" element={<AllBooks />} />
@@ -78,6 +79,7 @@ const App = () => {
             element={<ViewBookDetails />}
           />
         </Routes>
+        </Suspense>
       </div>
       <Footer />
     </div>
