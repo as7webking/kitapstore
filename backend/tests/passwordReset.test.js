@@ -19,6 +19,9 @@ const fakeRateLimits = require('./helpers/rateLimitStore').installFakeRateLimits
 after(() => fakeRateLimits.restore());
 const User = require('../models/user');
 const { createToken } = require('../utils/jwt');
+const { createResetMailWorker } = require('../services/resetMailWorker');
+const { installFakeResetMailQueue } = require('./helpers/resetMailQueue');
+process.env.RESET_MAIL_ENCRYPTION_KEY = Buffer.alloc(32, 7).toString('base64');
 
 test('recovery HTTP: private responses, hashed token, expiry, single use, revocation, races, SMTP failure and limits', async () => {
   const keys = ['findOne', 'findById', 'updateOne', 'findOneAndUpdate'];
@@ -27,6 +30,8 @@ test('recovery HTTP: private responses, hashed token, expiry, single use, revoca
   const originalWarning = console.warn;
   const warnings = [], mail = [], options = [];
   let mailFails = false, databaseFails = false;
+  const queue = installFakeResetMailQueue();
+  const worker = createResetMailWorker();
   const initialPassword = await bcrypt.hash('original-password', 12);
   const user = { _id: '507f1f77bcf86cd799439011', email: 'Reader@Example.com', username: 'Reader', password: initialPassword, role: 'user', authProvider: 'local', sessionVersion: 0 };
   const matches = (query) => Object.entries(query).every(([key, value]) => {
@@ -41,7 +46,7 @@ test('recovery HTTP: private responses, hashed token, expiry, single use, revoca
     for (const key of Object.keys(update.$unset || {})) delete user[key];
     for (const [key, value] of Object.entries(update.$inc || {})) user[key] = (user[key] || 0) + value;
   };
-  User.findOne = (query) => ({ select: async () => matches(query) ? { ...user } : null });
+  User.findOne = (query) => ({ session() { return this; }, select: async () => matches(query) ? { ...user } : null });
   User.findById = (id) => ({ select: async () => id === user._id ? { ...user } : null });
   User.updateOne = async (query, update) => { if (matches(query)) apply(update); return { modifiedCount: 1 }; };
   User.findOneAndUpdate = (query, update) => ({ select: async () => {
@@ -75,6 +80,8 @@ test('recovery HTTP: private responses, hashed token, expiry, single use, revoca
     const known = await post('forgot-password', { email: ' READER@example.COM ' });
     assert.equal(known.status, 202); assert.equal(known.body.code, 'PASSWORD_RESET_REQUESTED');
     assert.equal(known.headers.get('cache-control'), 'no-store');
+    assert.equal(mail.length, 0);
+    await worker.runOne();
     const first = tokenFromMail();
     assert.match(first, /^[a-f0-9]{64}$/);
     assert.equal(user.resetPasswordTokenHash, crypto.createHash('sha256').update(first).digest('hex'));
@@ -106,6 +113,8 @@ test('recovery HTTP: private responses, hashed token, expiry, single use, revoca
     assert.equal((await post('reset-password', payload('f'.repeat(64)))).status, 400);
     // A new email invalidates older requests; two submissions may consume the new token only once.
     assert.equal((await post('forgot-password', { email: user.email })).status, 202);
+    await worker.runOne(); // Unknown-email job is discarded.
+    await worker.runOne();
     const second = tokenFromMail();
     const results = await Promise.all([post('reset-password', payload(second)), post('reset-password', payload(second))]);
     assert.deepEqual(results.map((result) => result.status).sort(), [200, 400]);
@@ -116,10 +125,10 @@ test('recovery HTTP: private responses, hashed token, expiry, single use, revoca
     mailFails = true;
     const failedDelivery = await post('forgot-password', { email: user.email, language: 'qt' });
     assert.equal(failedDelivery.status, known.status); assert.deepEqual(failedDelivery.body, known.body);
-    await new Promise((resolve) => setImmediate(resolve));
-    assert.equal(user.resetPasswordTokenHash, undefined);
-    assert.equal(user.resetPasswordExpires, undefined);
-    assert.deepEqual(warnings, ['Password reset email could not be delivered. Check SMTP configuration.']);
+    await worker.runOne();
+    assert.ok(user.resetPasswordTokenHash); // Retry keeps the same valid token.
+    assert.equal(queue.records.at(-1).status, 'pending');
+    assert.deepEqual(warnings, []);
     const limited = await post('forgot-password', { email: 'missing@example.com' });
     assert.equal(limited.status, 429); assert.equal(limited.body.code, 'RATE_LIMITED'); assert.ok(Number(limited.headers.get('retry-after')) > 0);
     assert.equal((await post('reset-password', payload(second))).status, 429);
@@ -130,6 +139,7 @@ test('recovery HTTP: private responses, hashed token, expiry, single use, revoca
     assert.equal(User.schema.path('resetPasswordTokenHash').options.select, false);
     assert.equal(User.schema.path('resetPasswordExpires').options.select, false);
   } finally {
+    queue.restore();
     Object.assign(User, originals); nodemailer.createTransport = originalTransport; console.warn = originalWarning;
     await new Promise((resolve) => server.close(resolve));
   }

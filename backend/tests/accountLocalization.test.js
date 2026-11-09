@@ -7,6 +7,9 @@ const { apiMessages, withMessageCodes } = require('../middleware/apiMessages');
 const { forgotPassword } = require('../controllers/passwordResetController');
 const { accountLanguage, passwordResetEmail } = require('../utils/accountEmail');
 const catalog = require('../../shared/apiCodes.json');
+const { createResetMailWorker } = require('../services/resetMailWorker');
+const { installFakeResetMailQueue, matches, apply } = require('./helpers/resetMailQueue');
+process.env.RESET_MAIL_ENCRYPTION_KEY = Buffer.alloc(32, 7).toString('base64');
 const legacyCodes = require('../utils/legacyApiCodes.json');
 
 test('API codes are additive, stable for messages and field errors, with explicit-code priority', () => {
@@ -51,8 +54,11 @@ test('HTTP recovery carries language to mocked mail and keeps identical public r
   process.env.FRONTEND_URL = 'https://shop.example.test'; process.env.PASSWORD_RESET_TTL_MINUTES = '30';
   Object.assign(process.env, { EMAIL_HOST: 'smtp.example.test', EMAIL_USER: 'test@example.test', EMAIL_PASS: 'synthetic' });
   const deliveries = [], updates = [];
-  User.findOne = (query) => ({ select: async () => new RegExp(query.email.$regex, 'i').test('reader@example.test') ? { _id: 'synthetic', email: 'reader@example.test' } : null });
-  User.updateOne = async (query, update) => { updates.push(update); };
+  const account = { _id: 'synthetic', email: 'reader@example.test', authProvider: 'local', password: 'synthetic' };
+  const queue = installFakeResetMailQueue();
+  const worker = createResetMailWorker();
+  User.findOne = (filter) => ({ session() { return this; }, select: async () => matches(account, filter) ? { ...account } : null });
+  User.updateOne = async (filter, update) => { updates.push(update); if (matches(account, filter)) apply(account, update); return { matchedCount: 1 }; };
   nodemailer.createTransport = () => ({ sendMail: async (mail) => { deliveries.push(mail); } });
   const app = express(); app.use(apiMessages); app.use(express.json()); app.post('/forgot-password', forgotPassword);
   const server = app.listen(0, '127.0.0.1');
@@ -67,9 +73,11 @@ test('HTTP recovery carries language to mocked mail and keeps identical public r
       const known = await post({ email: 'reader@example.test', language });
       const unknown = await post({ email: 'missing@example.test', language });
       assert.equal(known.status, 202); assert.deepEqual(known, unknown);
-      assert.equal(known.body.code, 'PASSWORD_RESET_REQUESTED'); assert.equal(deliveries.length, before + 1);
+      assert.equal(known.body.code, 'PASSWORD_RESET_REQUESTED'); assert.equal(deliveries.length, before);
+      await worker.runOne(); await worker.runOne();
+      assert.equal(deliveries.length, before + 1);
       const delivered = deliveries.at(-1), link = delivered.text.match(/https:\/\/[^\s]+/)[0];
-      const expected = passwordResetEmail(language, link, 30);
+      const expected = passwordResetEmail(language, link, 0, queue.records.at(-2).expiresAt);
       assert.equal(delivered.subject, expected.subject); assert.equal(delivered.text, expected.text);
       const token = new URLSearchParams(new URL(link).hash.slice(1)).get('token');
       assert.match(token, /^[a-f0-9]{64}$/);
@@ -79,6 +87,7 @@ test('HTTP recovery carries language to mocked mail and keeps identical public r
     assert.equal(invalid.status, 400); assert.equal(invalid.body.code, 'VALIDATION_FAILED');
     assert.equal(invalid.body.fieldCodes.email, 'EMAIL_INVALID');
   } finally {
+    queue.restore();
     User.findOne = originalFind; User.updateOne = originalUpdate; nodemailer.createTransport = originalTransport;
     for (const [key, value] of Object.entries({ ...env, FRONTEND_URL: originalUrl, PASSWORD_RESET_TTL_MINUTES: originalTtl })) {
       if (value === undefined) delete process.env[key]; else process.env[key] = value;

@@ -1,7 +1,7 @@
 const nodemailer = require("nodemailer");
 
 // Support account notifications and the existing contact-form call signature.
-async function sendEmail(recipient, subject, text) {
+async function sendEmail(recipient, subject, text, options = {}) {
   if (!process.env.EMAIL_HOST || !process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
     throw new Error("Email transport is not configured");
   }
@@ -16,6 +16,7 @@ async function sendEmail(recipient, subject, text) {
     socketTimeout: 15000,
     logger: false,
     debug: false,
+    transactionLog: false,
     auth: { user: process.env.EMAIL_USER, pass: process.env.EMAIL_PASS },
   });
   await transporter.sendMail({
@@ -23,6 +24,7 @@ async function sendEmail(recipient, subject, text) {
     to: contact ? process.env.EMAIL_TO : recipient,
     replyTo: contact?.email,
     subject: contact ? "New contact form message" : subject,
+    messageId: contact ? undefined : options.messageId,
     text: contact ? `Name: ${contact.name}\nEmail: ${contact.email}\n\n${contact.message}` : text,
   });
 }

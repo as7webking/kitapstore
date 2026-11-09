@@ -4,7 +4,6 @@ const { spawnSync } = require('node:child_process');
 const path = require('node:path');
 const express = require('express');
 const mongoose = require('mongoose');
-const nodemailer = require('nodemailer');
 const { validateEnv } = require('../config/env');
 const { validateDeployment, frontendOrigins } = require('../config/deployment');
 const { apiMessages } = require('../middleware/apiMessages');
@@ -13,7 +12,6 @@ const fakeRateLimits = require('./helpers/rateLimitStore').installFakeRateLimits
 after(() => fakeRateLimits.restore());
 const { trackBackgroundTask, drainBackgroundTasks } = require('../utils/backgroundTasks');
 const { forgotPassword } = require('../controllers/passwordResetController');
-const User = require('../models/user');
 const staging = {
   APP_ENV: 'staging', URI: 'mongodb://127.0.0.1:1/kitapstore_test', MONGODB_DB_NAME: 'kitapstore_test',
   JWT_SECRET: 'synthetic-staging-secret-32-characters', FRONTEND_URL: 'https://shop.example.test',
@@ -57,33 +55,20 @@ test('shared proxy IP limits ignore spoofed leftmost forwarding', async () => {
   } finally { await new Promise((resolve) => server.close(resolve)); }
 });
 
-test('recovery responds before SMTP completes; shutdown drain waits for mocked delivery', async () => {
-  const envKeys = ['FRONTEND_URL', 'EMAIL_HOST', 'EMAIL_USER', 'EMAIL_PASS'];
-  const previousEnv = Object.fromEntries(envKeys.map((key) => [key, process.env[key]]));
-  Object.assign(process.env, { FRONTEND_URL: staging.FRONTEND_URL, EMAIL_HOST: staging.EMAIL_HOST, EMAIL_USER: 'synthetic', EMAIL_PASS: 'synthetic' });
-  const oldFind = User.findOne, oldUpdate = User.updateOne, oldTransport = nodemailer.createTransport;
-  let finish, delivered = false;
-  const delivery = new Promise((resolve) => { finish = () => { delivered = true; resolve(); }; });
-  User.findOne = () => ({ select: async () => ({ _id: 'synthetic', email: 'reader@example.test' }) });
-  User.updateOne = async () => ({});
-  nodemailer.createTransport = () => ({ sendMail: () => delivery });
+test('recovery responds after durable enqueue without HTTP-process SMTP', async () => {
+  const queue = require('../services/resetMailQueue');
+  const original = queue.enqueuePasswordReset;
+  let committed = false;
+  queue.enqueuePasswordReset = async () => { committed = true; };
   const app = express(); app.use(express.json()); app.post('/', forgotPassword);
   const server = app.listen(0, '127.0.0.1');
   await new Promise((resolve, reject) => { server.once('listening', resolve); server.once('error', reject); });
   try {
-    const response = await fetch(`http://127.0.0.1:${server.address().port}/`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ email: 'reader@example.test' }), signal: AbortSignal.timeout(2000) });
-    assert.equal(response.status, 202); assert.equal(delivered, false);
-    let drained = false; const drain = drainBackgroundTasks().then(() => { drained = true; });
-    await new Promise((resolve) => setImmediate(resolve)); assert.equal(drained, false);
-    finish(); await drain; assert.equal(drained, true);
+    const response = await fetch(`http://127.0.0.1:${server.address().port}/`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ email: 'reader@example.test' }) });
+    assert.equal(response.status, 202); assert.equal(committed, true);
     trackBackgroundTask(Promise.reject(new Error('synthetic failure')));
-    await drainBackgroundTasks(); // Rejected background jobs do not cause unhandled rejections.
-  } finally {
-    finish(); await drainBackgroundTasks();
-    User.findOne = oldFind; User.updateOne = oldUpdate; nodemailer.createTransport = oldTransport;
-    for (const [key, value] of Object.entries(previousEnv)) { if (value === undefined) delete process.env[key]; else process.env[key] = value; }
-    await new Promise((resolve) => server.close(resolve));
-  }
+    await drainBackgroundTasks();
+  } finally { queue.enqueuePasswordReset = original; await new Promise((resolve) => server.close(resolve)); }
 });
 
 test('CORS allows only exact configured origins; readiness follows database connectivity', async () => {

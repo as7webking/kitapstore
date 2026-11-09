@@ -32,11 +32,19 @@ const templates = {
 function accountLanguage(value) {
   return typeof value === 'string' && Object.hasOwn(templates, value) ? value : 'en';
 }
-function passwordResetEmail(language, link, minutes) {
+function passwordResetEmail(language, link, minutes, expiresAt) {
   const selected = accountLanguage(language);
   const template = templates[selected];
   const category = selected === 'qt' ? 'other' : new Intl.PluralRules(selected).select(minutes);
-  const expiration = template[`expires${category[0].toUpperCase()}${category.slice(1)}`] || template.expiresOther;
+  let expiration = template[`expires${category[0].toUpperCase()}${category.slice(1)}`] || template.expiresOther;
+  if (expiresAt) {
+    const deadline = new Date(expiresAt).toISOString().slice(0, 19).replace('T', ' ') + ' UTC';
+    expiration = { en: 'This link expires at {{minutes}} and can be used once.',
+      de: 'Dieser Link läuft am {{minutes}} ab und kann nur einmal verwendet werden.',
+      qt: 'Bu bağlantı {{minutes}} tarihinde keçersiz ola ve yalıñız bir kere qullanıla bile.',
+      ru: 'Ссылка действует до {{minutes}} и может быть использована один раз.' }[selected];
+    minutes = deadline;
+  }
   return { subject: template.subject,
     text: `${template.introduction}\n${link}\n\n${expiration.replace('{{minutes}}', String(minutes))} ${template.ignore}` };
 }
