@@ -1,8 +1,9 @@
+const { configurationError } = require('./startupErrors');
 const crypto = require('node:crypto');
 function encryptionKey(env = process.env) {
   const value = env.RESET_MAIL_ENCRYPTION_KEY;
-  if (typeof value !== 'string' || !/^[A-Za-z0-9+/]{43}=$/.test(value)) throw new Error('Set RESET_MAIL_ENCRYPTION_KEY to a separate base64-encoded 32-byte key');
-  if (value === env.JWT_SECRET) throw new Error('Recovery mail encryption requires a separate key');
+  if (typeof value !== 'string' || !/^[A-Za-z0-9+/]{43}=$/.test(value)) throw configurationError('Set RESET_MAIL_ENCRYPTION_KEY to a separate base64-encoded 32-byte key');
+  if (value === env.JWT_SECRET) throw configurationError('Recovery mail encryption requires a separate key');
   return Buffer.from(value, 'base64');
 }
 function encryptPayload(value, jobId) {

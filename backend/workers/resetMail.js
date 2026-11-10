@@ -1,16 +1,26 @@
 require('dotenv').config({ path: require('node:path').join(__dirname, '../.env'), quiet: true });
 const mongoose = require('mongoose');
-const { validateEnv } = require('../config/env');
-const { encryptionKey } = require('../utils/resetMailCrypto');
-const { resetSettings } = require('../services/resetMailQueue');
+const { validateWorkerEnv } = require('../config/env');
 const connectDatabase = require('../conn/conn');
 const Jobs = require('../models/resetMailJob');
 const { createResetMailWorker } = require('../services/resetMailWorker');
+const { startupError, startupMessage } = require('../utils/startupErrors');
+async function prepareWorker({ validate = validateWorkerEnv, connect = connectDatabase,
+  initialize = () => Jobs.init(), disconnect = () => mongoose.disconnect() } = {}) {
+  validate();
+  try { await connect(); }
+  catch {
+    await Promise.resolve().then(disconnect).catch(() => {});
+    throw startupError('STARTUP_DATABASE', 'MongoDB connection failed. Check URI, database credentials and network access.');
+  }
+  try { await initialize(); }
+  catch {
+    await Promise.resolve().then(disconnect).catch(() => {});
+    throw startupError('STARTUP_QUEUE', 'Recovery queue preparation failed. Check database permissions and queue indexes.');
+  }
+}
 async function startWorker() {
-  validateEnv(); encryptionKey(); resetSettings();
-  if (!process.env.EMAIL_HOST || !process.env.EMAIL_USER || !process.env.EMAIL_PASS) throw new Error('Worker requires configured email transport');
-  try { await connectDatabase(); await Jobs.init(); }
-  catch (error) { await mongoose.disconnect(); throw error; }
+  await prepareWorker();
   let stopping = false;
   const stop = () => { stopping = true; };
   process.once('SIGTERM', stop); process.once('SIGINT', stop);
@@ -27,5 +37,5 @@ async function startWorker() {
     await mongoose.disconnect();
   }
 }
-if (require.main === module) startWorker().catch(() => { console.error('Recovery mail worker could not start. Check configuration and database access.'); process.exitCode = 1; });
-module.exports = { startWorker };
+if (require.main === module) startWorker().catch((error) => { console.error('Recovery mail worker could not start. ' + startupMessage(error)); process.exitCode = 1; });
+module.exports = { startWorker, prepareWorker };

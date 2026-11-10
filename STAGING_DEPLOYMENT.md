@@ -80,6 +80,7 @@ EMAIL_PASS=<ethereal-test-password>
 EMAIL_FROM=KitapStore Test <no-reply@example.test>
 EMAIL_TO=contact@example.test
 PASSWORD_RESET_TTL_MINUTES=30
+RESET_MAIL_ENCRYPTION_KEY=<separate-base64-encoded-32-byte-test-key>
 GOOGLE_CLIENT_ID=
 GOOGLE_CLIENT_SECRET=
 FACEBOOK_CLIENT_ID=
@@ -132,8 +133,17 @@ CLI-загрузке; Git-публикация также не должна со
    команды/Node/health из раздела выше. Выбрать план с исходящим SMTP и один
    экземпляр. Добавить все тестовые переменные, FRONTEND_URL из шага 4.
    Пока не включать автоматическую публикацию каждого коммита.
+5a. Создать отдельный Render Background Worker из той же версии репозитория.
+    Root Directory — корень, Build: `npm ci --prefix backend`, Start:
+    `npm run worker:reset-mail --prefix backend`, Node 24. Worker не слушает HTTP.
+    API и worker должны использовать одинаковые URI/MONGODB_DB_NAME,
+    RESET_MAIL_ENCRYPTION_KEY, FRONTEND_URL и PASSWORD_RESET_TTL_MINUTES.
+    Worker также требует JWT_SECRET и тестовые EMAIL_*; SMTP 587 должен быть доступен.
+    Ключ очереди — отдельные 32 случайных байта в base64, не JWT_SECRET.
+    Его можно создать локально через `openssl rand -base64 32`; результат хранить
+    только в секретах окружения API/worker, не во frontend или Git.
 6. В Render Connect → Outbound скопировать все CIDR-диапазоны сервиса и добавить
-   их в Network Access ТЕСТОВОГО Atlas-проекта. Не открывать 0.0.0.0/0 и не
+   их в Network Access ТЕСТОВОГО Atlas-проекта. Добавить также outbound CIDR worker. Не открывать 0.0.0.0/0 и не
    менять Network Access рабочей базы. Выполнить Render deployment; проверить
    /healthz → 200 и /api/v1/test → API OK. До готовности базы HTTP не стартует.
 7. Скопировать выданный HTTPS API-домен Render в VITE_API_URL тестового Vercel
@@ -238,3 +248,27 @@ Render-плана и корректная конфигурация довере�
 Все коммиты локальные; push и deployment не выполнялись.
 
 Текущая инструкция worker и новой переменной окружения: [RESET_MAIL_QUEUE.md](RESET_MAIL_QUEUE.md).
+
+
+## Безопасная диагностика запуска
+
+API: `npm start --prefix backend`. Worker: `npm run worker:reset-mail --prefix backend`.
+Команды выполняются отдельно из корня репозитория.
+
+- `STARTUP_CONFIGURATION`: указаны имена отсутствующих переменных либо правила
+  формата. Значения переменных не выводятся. Исправить конфигурацию сервиса.
+- `STARTUP_DATABASE`: подключение MongoDB не удалось. Проверить URI, права,
+  доступ сети и состояние тестового Atlas вручную. Причина драйвера скрыта.
+- `STARTUP_QUEUE`: MongoDB подключена, но подготовка коллекции/индексов очереди
+  не удалась. Проверить права и конфликты индексов в тестовой базе; автоматически
+  удалять индексы или данные не следует.
+- `STARTUP_FAILED`: непредвиденная ошибка запуска. Исходный текст и stack скрыты,
+  поскольку могут содержать реквизиты. Этот код не доказывает ошибку настроек.
+
+Сообщения не подтверждают доступность SMTP, работоспособность транзакций или
+доставку письма. После успешного запуска всё ещё нужен внешний smoke-test
+на отдельной базе с Ethereal. Отсутствие ключа очереди не блокирует обычный
+вход API, но блокирует worker и восстановление пароля.
+
+Проверки диагностики выполняются с подменёнными подключением MongoDB и
+инициализацией очереди, включая ошибку cleanup. Настоящие .env не читаются.

@@ -1,3 +1,4 @@
+const { startupError, startupMessage } = require('./utils/startupErrors');
 require("dotenv").config({ path: require("path").join(__dirname, ".env"), quiet: true });
 const express = require("express");
 const { validateEnv } = require("./config/env");
@@ -76,7 +77,7 @@ async function start() {
   try {
     await connectDatabase();
   } catch {
-    throw new Error("MongoDB connection failed. Check URI, database credentials and network access.");
+    throw startupError("STARTUP_DATABASE", "MongoDB connection failed. Check URI, database credentials and network access.");
   }
   return app.listen(port, () => console.log(`Server running on port ${port}`));
 }
@@ -102,7 +103,7 @@ if (require.main === module) {
     process.once('SIGTERM', shutdown);
     process.once('SIGINT', shutdown);
   }).catch((error) => {
-    console.error(error.message);
+    console.error(startupMessage(error));
     process.exitCode = 1;
   });
 }
