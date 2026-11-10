@@ -6,9 +6,9 @@ const BookCard = ({ data, favourite, handleRemoveBook }) => {
   const fallbackImage = "https://img.freepik.com/free-vector/illustration-gallery-icon_53876-27002.jpg";
 
   return (
-    <div>
+    <div className="min-w-0">
       <Link to={`/view-book-details/${data.slug}`}>
-        <div className="bg-zinc-400 rounded p-4 flex flex-col">
+        <div className="min-w-0 bg-zinc-400 rounded p-4 flex flex-col">
           <div className="bg-zinc-700 rounded flex items-center justify-center h-[25vh] overflow-hidden">
             <img
               src={data.url || fallbackImage}
@@ -33,7 +33,7 @@ const BookCard = ({ data, favourite, handleRemoveBook }) => {
       </Link>
 
       {favourite && (
-        <button className="bg-yellow-100" onClick={handleRemoveBook}>{t("catalog:remove_from_favourite")}</button>
+        <button className="min-h-11 w-full rounded bg-yellow-100 px-3 py-2" onClick={handleRemoveBook}>{t("catalog:remove_from_favourite")}</button>
       )}
     </div>
   );

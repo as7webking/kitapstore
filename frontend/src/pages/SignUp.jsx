@@ -21,7 +21,7 @@ export default function SignUp() {
   if (isLoggedIn) return <Navigate to="/profile" replace />;
   return (
     <section className="flex min-h-[80vh] items-center justify-center bg-zinc-700 px-4 py-8 sm:px-8">
-      <div className="w-full max-w-md rounded-lg bg-gray-700 px-5 py-6 sm:px-8">
+      <div className="min-w-0 w-full max-w-md rounded-lg bg-gray-700 px-5 py-6 sm:px-8">
         <h1 className="text-xl text-zinc-100">{t("auth:sign_up_2")}</h1>
         <AccountForm fields={fields} submitLabel="auth:sign_up_2" pendingLabel="auth:creating_account" onSubmit={async (values) => {
           await axios.post(`${API_BASE_URL}/api/v1/user/sign-up`, values);

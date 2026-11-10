@@ -17,7 +17,7 @@ function ResetPasswordForm({ location }) {
   }, [location.hash, location.pathname, location.search]);
   return (
     <section className="flex min-h-[80vh] items-center justify-center bg-zinc-700 px-4 py-8 sm:px-8">
-      <div className="w-full max-w-md rounded-lg bg-gray-700 px-5 py-6 sm:px-8">
+      <div className="min-w-0 w-full max-w-md rounded-lg bg-gray-700 px-5 py-6 sm:px-8">
         <h1 className="text-xl text-zinc-100">{t("auth:choose_a_new_password")}</h1>
         {message ? <p role="status" aria-live="polite" className="mt-4 text-zinc-200">{translateMessage(message)}</p> : invalid ?
           <p role="alert" className="mt-4 text-red-200">{t("auth:this_reset_link_is_invalid_or_has_expired_please_request_a_new_one")}</p> :

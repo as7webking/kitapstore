@@ -8,7 +8,7 @@ export default function ForgotPassword() {
   const [message, setMessage] = useState('');
   return (
     <section className="flex min-h-[80vh] items-center justify-center bg-zinc-700 px-4 py-8 sm:px-8">
-      <div className="w-full max-w-md rounded-lg bg-gray-700 px-5 py-6 sm:px-8">
+      <div className="min-w-0 w-full max-w-md rounded-lg bg-gray-700 px-5 py-6 sm:px-8">
         <h1 className="text-xl text-zinc-100">{t("auth:forgot_password")}</h1>
         {message ? <p role="status" aria-live="polite" className="mt-4 text-zinc-200">{translateMessage(message)}</p> : <>
           <p className="mt-3 text-sm text-zinc-300">{t("auth:enter_your_account_email_to_request_a_password_reset_link")}</p>

@@ -5,7 +5,7 @@ export default function LanguageSwitcher() {
   const { t, i18n } = useTranslation('common');
   const selected = languages.find(({ code }) => code === i18n.language) || languages[0];
   return (
-    <div className="relative ml-2 shrink-0 text-xs" lang={htmlLanguages[selected.code]}>
+    <div className="relative shrink-0 text-xs" lang={htmlLanguages[selected.code]}>
       <label className="sr-only" htmlFor="site-language">{t('language')}</label>
       <select id="site-language" value={selected.code} onChange={(event) => { void changeLanguage(event.target.value); }}
         aria-describedby={!selected.complete ? 'language-fallback' : undefined}

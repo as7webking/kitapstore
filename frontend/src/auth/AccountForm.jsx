@@ -45,12 +45,14 @@ export default function AccountForm({ fields, submitLabel, pendingLabel, onSubmi
     }
   };
   return (
-    <form ref={formRef} onSubmit={submit} noValidate aria-busy={pending} className="mt-4 space-y-4">
+    <form ref={formRef} onSubmit={submit} noValidate aria-busy={pending} className="mt-4 min-w-0 space-y-4">
       {message && <p role="status" aria-live="polite" className="text-sm text-zinc-100">{translateMessage(message)}</p>}
       {fields.map(({ name, label, type = 'text', autoComplete, hint, maxLength }) => (
         <div key={name}>
           <label htmlFor={`account-${name}`} className="block text-zinc-300">{translateMessage(label)}</label>
           <input id={`account-${name}`} name={name} type={type} autoComplete={autoComplete}
+            autoCapitalize={type === 'email' || name === 'username' ? 'none' : undefined}
+            spellCheck={type === 'email' || type === 'password' || name === 'username' ? false : undefined}
             value={values[name]} maxLength={maxLength} required readOnly={pending}
             aria-invalid={Boolean(errors[name])} aria-describedby={errors[name] ? `${name}-error` : hint ? `${name}-hint` : undefined}
             onChange={(event) => { setValues({ ...values, [name]: event.target.value }); setErrors({ ...errors, [name]: undefined }); }}

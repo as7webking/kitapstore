@@ -71,10 +71,10 @@ const SearchResults = () => {
             ) : (
               <div className="grid md:grid-cols-2 gap-4 mt-4">
                 {books.map((book) => (
-                  <Link key={book._id} to={`/view-book-details/${book.slug}`} className="border rounded-xl p-4 hover:shadow-md">
+                  <Link key={book._id} to={`/view-book-details/${book.slug}`} className="min-w-0 border rounded-xl p-4 hover:shadow-md">
                     <div className="flex gap-3">
-                      {book.url && <img src={book.url} alt={book.title} className="h-20 w-16 object-cover rounded" />}
-                      <div>
+                      {book.url && <img src={book.url} alt={book.title} className="shrink-0 h-20 w-16 object-cover rounded" />}
+                      <div className="min-w-0">
                         <h3 className="font-semibold">{book.title}</h3>
                         <p className="text-sm text-gray-500">{book.author}</p>
                         <p className="text-sm text-gray-600 line-clamp-2 mt-1">{book.desc}</p>
@@ -93,7 +93,7 @@ const SearchResults = () => {
             ) : (
               <div className="grid md:grid-cols-2 gap-4 mt-4">
                 {blogs.map((blog) => (
-                  <Link key={blog._id} to={`/blog/${blog.slug}`} className="border rounded-xl p-4 hover:shadow-md">
+                  <Link key={blog._id} to={`/blog/${blog.slug}`} className="min-w-0 border rounded-xl p-4 hover:shadow-md">
                     <h3 className="font-semibold">{blog.title}</h3>
                     <p className="text-sm text-gray-600 line-clamp-2 mt-2">{blog.excerpt || blog.content}</p>
                   </Link>

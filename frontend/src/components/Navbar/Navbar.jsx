@@ -2,7 +2,7 @@ import logoImage from '../../assets/logo.png';
 import LanguageSwitcher from '../../i18n/LanguageSwitcher.jsx';
 import { t, formatNumber } from '../../i18n/index.js';
 import { API_BASE_URL } from "../../config/api.js";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState, useRef } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { FaSearch, FaHeart, FaUserCircle, FaBars, FaTimes } from "react-icons/fa";
 import { useSelector } from "react-redux";
@@ -11,6 +11,7 @@ import axios from "axios";
 
 const Navbar = () => {
   const navigate = useNavigate();
+  const triggerRef = useRef(null);
   const location = useLocation();
 
   const isLoggedIn = useSelector((state) => state.auth.isLoggedIn);
@@ -40,7 +41,8 @@ const Navbar = () => {
     setMobileMenuOpen(false);
   };
 
-  const toggleProfile = () => {
+  const toggleProfile = (event) => {
+    triggerRef.current = event.currentTarget;
     setProfileOpen((v) => {
       const next = !v;
       if (next) {
@@ -52,7 +54,8 @@ const Navbar = () => {
     });
   };
 
-  const toggleFav = () => {
+  const toggleFav = (event) => {
+    if (event) triggerRef.current = event.currentTarget;
     setFavOpen((v) => {
       const next = !v;
       if (next) {
@@ -64,7 +67,8 @@ const Navbar = () => {
     });
   };
 
-  const toggleSearchDesktop = () => {
+  const toggleSearchDesktop = (event) => {
+    triggerRef.current = event.currentTarget;
     setSearchOpen((v) => {
       const next = !v;
       if (next) {
@@ -76,7 +80,8 @@ const Navbar = () => {
     });
   };
 
-  const toggleMobileMenu = () => {
+  const toggleMobileMenu = (event) => {
+    triggerRef.current = event.currentTarget;
     setMobileMenuOpen((v) => {
       const next = !v;
       if (next) {
@@ -117,6 +122,18 @@ const Navbar = () => {
     fetchFavourites();
   }, [isLoggedIn, user?.role, user?.id, token]);
 
+  useEffect(() => {
+    if (!profileOpen && !favOpen && !searchOpen && !mobileMenuOpen) return;
+    const onKeyDown = (event) => {
+      if (event.key !== 'Escape') return;
+      event.preventDefault();
+      setProfileOpen(false); setFavOpen(false); setSearchOpen(false); setMobileMenuOpen(false);
+      triggerRef.current?.focus();
+    };
+    document.addEventListener('keydown', onKeyDown);
+    return () => document.removeEventListener('keydown', onKeyDown);
+  }, [profileOpen, favOpen, searchOpen, mobileMenuOpen]);
+
   const favouritesCount = isLoggedIn && user?.role !== "admin" ? favourites.length : 0;
 
   const handleLogout = async () => {
@@ -133,18 +150,18 @@ const Navbar = () => {
     setSearchOpen(false);
   };
 
-  const onFavClickDesktop = () => {
+  const onFavClickDesktop = (event) => {
     if (!isLoggedIn || user?.role === "admin" || favouritesCount === 0) {
-      toggleFav();
+      toggleFav(event);
       return;
     }
     closeAll();
     navigate("/profile/favourites");
   };
 
-  const onFavClickMobile = () => {
+  const onFavClickMobile = (event) => {
     if (!isLoggedIn || user?.role === "admin" || favouritesCount === 0) {
-      toggleFav();
+      toggleFav(event);
       return;
     }
     closeAll();
@@ -160,22 +177,23 @@ const Navbar = () => {
           <img src={logoImage} alt={t("navigation:logo")} className="h-10 object-contain" />
         </Link>
 
-        <div className="hidden md:flex items-center justify-center gap-8 text-sm font-medium flex-1">
-          <Link to="/" className="hover:text-blue-300">{t("navigation:home")}</Link>
-          <Link to="/all-books" className="hover:text-blue-300">{t("navigation:books")}</Link>
-          <Link to="/blog" className="hover:text-blue-300">{t("navigation:blog")}</Link>
-          <Link to="/contact" className="hover:text-blue-300">{t("navigation:contact")}</Link>
+        <div className="hidden lg:flex items-center justify-center gap-8 text-sm font-medium flex-1">
+          <Link to="/" onClick={closeAll} className="hover:text-blue-300">{t("navigation:home")}</Link>
+          <Link to="/all-books" onClick={closeAll} className="hover:text-blue-300">{t("navigation:books")}</Link>
+          <Link to="/blog" onClick={closeAll} className="hover:text-blue-300">{t("navigation:blog")}</Link>
+          <Link to="/contact" onClick={closeAll} className="hover:text-blue-300">{t("navigation:contact")}</Link>
         </div>
 
         <div className="flex items-center justify-center gap-2 sm:gap-4 shrink-0 relative">
           <LanguageSwitcher />
           {/* Desktop / Tablet */}
-          <div className="hidden md:flex items-center gap-4 relative">
+          <div className="hidden lg:flex items-center gap-4 relative">
             <button
               type="button"
               onClick={toggleSearchDesktop}
-              className="text-white"
+              className="text-white inline-flex min-h-9 min-w-9 items-center justify-center"
               aria-label={t("navigation:search")}
+              aria-expanded={searchOpen}
             >
               <FaSearch size={18} />
             </button>
@@ -184,7 +202,7 @@ const Navbar = () => {
               <button
                 type="button"
                 onClick={onFavClickDesktop}
-                className="text-white relative"
+                className="text-white relative inline-flex min-h-9 min-w-9 items-center justify-center"
                 aria-label={t("navigation:favourites")}
               >
                 <FaHeart size={18} />
@@ -212,8 +230,9 @@ const Navbar = () => {
               <button
                 type="button"
                 onClick={toggleProfile}
-                className="text-white"
+                className="text-white inline-flex min-h-9 min-w-9 items-center justify-center"
                 aria-label={t("navigation:profile")}
+                aria-expanded={profileOpen}
               >
                 <FaUserCircle size={22} />
               </button>
@@ -248,7 +267,7 @@ const Navbar = () => {
               )}
             </div>
 
-            <form
+            {searchOpen && <form
               onSubmit={handleSearchSubmit}
               className={`absolute right-0 top-1/2 -translate-y-1/2 flex items-center gap-2 overflow-hidden
               bg-zinc-700 rounded transition-all duration-300
@@ -256,9 +275,11 @@ const Navbar = () => {
               style={{ zIndex: 60 }}
             >
               <input
+                autoFocus
+                aria-label={t("navigation:search_books")}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className={`bg-transparent outline-none text-sm w-full ${
+                className={`bg-transparent outline-none text-sm min-w-0 w-full focus-visible:ring-2 focus-visible:ring-blue-400 ${
                   searchOpen ? "opacity-100" : "opacity-0"
                 } transition-opacity duration-200`}
                 placeholder={t("navigation:search_books")}
@@ -274,7 +295,7 @@ const Navbar = () => {
               </button>
               <button
                 type="button"
-                onClick={() => setSearchOpen(false)}
+                onClick={() => { setSearchOpen(false); triggerRef.current?.focus(); }}
                 className={`${
                   searchOpen ? "opacity-100" : "opacity-0"
                 } transition-opacity duration-200`}
@@ -282,16 +303,16 @@ const Navbar = () => {
               >
                 <FaTimes size={16} />
               </button>
-            </form>
+            </form>}
           </div>
 
           {/* Mobile */}
-          <div className="md:hidden flex items-center gap-2 sm:gap-4 relative">
+          <div className="lg:hidden flex items-center gap-2 sm:gap-4 relative">
             <div className="relative flex items-center gap-2 sm:gap-4">
               <button
                 type="button"
                 onClick={onFavClickMobile}
-                className="text-white relative"
+                className="text-white relative inline-flex min-h-9 min-w-9 items-center justify-center"
                 aria-label={t("navigation:favourites")}
               >
                 <FaHeart size={18} />
@@ -305,14 +326,15 @@ const Navbar = () => {
               <button
                 type="button"
                 onClick={toggleProfile}
-                className="text-white"
+                className="text-white inline-flex min-h-9 min-w-9 items-center justify-center"
                 aria-label={t("navigation:profile")}
+                aria-expanded={profileOpen}
               >
                 <FaUserCircle size={22} />
               </button>
 
               {favOpen && (
-                <div className="absolute left-0 mt-12 w-56 bg-zinc-800 rounded shadow-lg px-4 py-3 text-sm text-zinc-200">
+                <div className="fixed right-3 top-[75px] mt-2 w-56 max-w-[calc(100vw-24px)] bg-zinc-800 rounded shadow-lg px-4 py-3 text-sm text-zinc-200">
                   {user?.role === "admin"
                     ? t("navigation:admins_cannot_use_favourites")
                     : !isLoggedIn
@@ -324,7 +346,7 @@ const Navbar = () => {
               )}
 
               {profileOpen && (
-                <div className="absolute left-12 mt-12 w-40 bg-zinc-800 rounded shadow-lg overflow-hidden">
+                <div className="fixed right-3 top-[75px] mt-2 w-48 max-w-[calc(100vw-24px)] bg-zinc-800 rounded shadow-lg overflow-hidden">
                   {!isLoggedIn ? (
                     <button
                       onClick={() => {
@@ -357,23 +379,26 @@ const Navbar = () => {
               <button
                 type="button"
                 onClick={toggleSearchDesktop}
-                className="text-white"
+                className="text-white inline-flex min-h-9 min-w-9 items-center justify-center"
                 aria-label={t("navigation:search")}
+                aria-expanded={searchOpen}
               >
                 <FaSearch size={18} />
               </button>
 
-              <form
+              {searchOpen && <form
                 onSubmit={handleSearchSubmit}
-                className={`absolute right-full mr-3 top-1/2 -translate-y-1/2 flex items-center gap-2 overflow-hidden
+                className={`fixed left-3 right-3 top-[83px] flex items-center gap-2 overflow-hidden
                 bg-zinc-800 rounded transition-all duration-300
-                ${searchOpen ? "w-[240px] px-3 py-2" : "w-0 px-0 py-0"}`}
+                ${searchOpen ? "w-auto px-3 py-2" : "w-0 px-0 py-0"}`}
                 style={{ zIndex: 60 }}
               >
                 <input
+                  autoFocus
+                  aria-label={t("navigation:search_books")}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className={`bg-transparent outline-none text-sm w-full ${
+                  className={`bg-transparent outline-none text-sm min-w-0 w-full focus-visible:ring-2 focus-visible:ring-blue-400 ${
                     searchOpen ? "opacity-100" : "opacity-0"
                   } transition-opacity duration-200`}
                   placeholder={t("navigation:search_2")}
@@ -387,14 +412,19 @@ const Navbar = () => {
                 >
                   <FaSearch size={16} />
                 </button>
-              </form>
+                <button type="button" className="min-h-9 min-w-9 inline-flex items-center justify-center"
+                  onClick={() => { setSearchOpen(false); triggerRef.current?.focus(); }}
+                  aria-label={t("navigation:close_search")}><FaTimes size={16} /></button>
+              </form>}
             </div>
 
             <button
               type="button"
-              className="text-white"
+              className="text-white inline-flex min-h-9 min-w-9 items-center justify-center"
               onClick={toggleMobileMenu}
               aria-label={t("navigation:menu")}
+              aria-expanded={mobileMenuOpen}
+              aria-controls="mobile-navigation"
             >
               <FaBars size={18} />
             </button>
@@ -403,15 +433,18 @@ const Navbar = () => {
       </div>
 
       <div
-        className={`md:hidden bg-zinc-800 overflow-hidden transition-all duration-300 ${
-          mobileMenuOpen ? "max-h-64" : "max-h-0"
+        id="mobile-navigation"
+        inert={!mobileMenuOpen}
+        aria-hidden={!mobileMenuOpen}
+        className={`lg:hidden bg-zinc-800 overflow-hidden transition-all duration-300 ${
+          mobileMenuOpen ? "max-h-[calc(100dvh-75px)] overflow-y-auto" : "max-h-0"
         }`}
       >
         <div className="px-6 py-4 flex flex-col items-center gap-3 text-sm">
-          <Link to="/" className="hover:text-blue-300">{t("navigation:home")}</Link>
-          <Link to="/all-books" className="hover:text-blue-300">{t("navigation:books")}</Link>
-          <Link to="/blog" className="hover:text-blue-300">{t("navigation:blog")}</Link>
-          <Link to="/contact" className="hover:text-blue-300">{t("navigation:contact")}</Link>
+          <Link to="/" onClick={closeAll} className="hover:text-blue-300">{t("navigation:home")}</Link>
+          <Link to="/all-books" onClick={closeAll} className="hover:text-blue-300">{t("navigation:books")}</Link>
+          <Link to="/blog" onClick={closeAll} className="hover:text-blue-300">{t("navigation:blog")}</Link>
+          <Link to="/contact" onClick={closeAll} className="hover:text-blue-300">{t("navigation:contact")}</Link>
         </div>
       </div>
     </nav>

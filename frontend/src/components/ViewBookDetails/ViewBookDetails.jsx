@@ -110,13 +110,13 @@ const ViewBookDetails = () => {
       {Data && (
         <div className="w-[90%] max-w-[1200px] mx-auto px-6 py-8 flex flex-col lg:flex-row gap-8 items-start">
           {/* Left Part - Image */}
-          <div className="w-full md:w-1/2">
+          <div className="min-w-0 w-full lg:w-1/2">
             <div className="border border-gray-100 shadow-sm bg-white flex items-center justify-center p-8 transition-all hover:shadow-md">
               {!imageError && imageSrc ? (
                 <img
                   src={imageSrc}
                   alt={Data.title}
-                  className="max-h-[550px] w-auto object-contain"
+                  className="max-h-[550px] max-w-full w-auto object-contain"
                   onError={() => setImageError(true)}
                 />
               ) : (
@@ -126,7 +126,7 @@ const ViewBookDetails = () => {
           </div>
 
           {/* Right Part - Info */}
-          <div className="w-full md:w-1/2 flex flex-col bg-zinc-200">
+          <div className="min-w-0 w-full lg:w-1/2 flex flex-col bg-zinc-200">
             <h1 className="text-4xl">{Data.title}</h1>
             <p className="text-zinc-400 mt-1">{t("catalog:author")}{" "}{Data.author}</p>
             <p className="text-zinc-500 mt-4 text-xl">{t("catalog:description")}{" "}{Data.desc}</p>
@@ -136,22 +136,22 @@ const ViewBookDetails = () => {
             <p className="mt-4 text-zinc-100 text-3xl font-semibold">{formatNumber(Data.price)} €</p>
 
             {role !== "admin" && (
-              <div className="flex flex-row md:flex-col lg:flex-row items-center justify-between lg:justify-start mt-8 lg:mt-0">
+              <div className="flex flex-col xl:flex-row gap-3 items-stretch mt-8">
                 <button
-                  className="bg-white rounded lg:rounded-full text-3xl md:p-3 text-red-400 flex items-center justify-center"
+                  className="bg-white rounded lg:rounded-full min-h-11 text-xl sm:text-3xl p-3 text-red-400 flex items-center justify-center"
                   onClick={handleFavourite}
                 >
                   <FaHeart />
-                  <span className="ms-4 block">{t("catalog:favourites")}</span>
+                  <span className="ms-4 min-w-0 block">{t("catalog:favourites")}</span>
                 </button>
 
                 {isLoggedIn && (
                   <button
-                    className="bg-white rounded mt-8 md:mt-0 lg:rounded-full text-3xl p-3 lg:mt-8 text-blue-400 flex items-center justify-center"
+                    className="bg-white rounded min-h-11 lg:rounded-full text-xl sm:text-3xl p-3 text-blue-400 flex items-center justify-center"
                     onClick={handleCart}
                   >
                     <FaShoppingCart />
-                    <span className="ms-4 block">{t("catalog:add_to_cart")}</span>
+                    <span className="ms-4 min-w-0 block">{t("catalog:add_to_cart")}</span>
                   </button>
                 )}
               </div>
@@ -164,14 +164,14 @@ const ViewBookDetails = () => {
                     className="flex-1 bg-zinc-100 text-zinc-700 px-6 py-4 rounded-sm font-bold hover:bg-zinc-200 transition flex items-center justify-center gap-2 uppercase text-xs tracking-widest"
                   >
                     <FaEdit />
-                    <span className="ms-4 block lg:hidden">{t("catalog:edit_book")}</span>
+                    <span className="ms-4 min-w-0 block lg:hidden">{t("catalog:edit_book")}</span>
                   </Link>
                   <button
                     className="flex-1 bg-red-50 text-red-600 px-6 py-4 rounded-sm font-bold hover:bg-red-100 transition flex items-center justify-center gap-2 uppercase text-xs tracking-widest"
                     onClick={deleteBook}
                   >
                     <MdOutlineDelete />
-                    <span className="ms-4 block lg:hidden">{t("catalog:delete_book")}</span>
+                    <span className="ms-4 min-w-0 block lg:hidden">{t("catalog:delete_book")}</span>
                   </button>
                 </div>
               )}

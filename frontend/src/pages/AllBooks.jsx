@@ -25,11 +25,11 @@ const AllBooks = () => {
       {!Data && (
         <div className="w-full h-screen flex items-center justify-center">{t("catalog:no_matched_books")}</div>
       )}
-      <div className="my-8 grid grid-cols-1 sm:grid-cols-3 md:grid-cols-4 gap-8">
+      <div className="mt-6"><SearchBooks /></div>
+      <div className="my-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
         {Data &&
           Data.map((item, i) => (
             <div key={i}>
-              <SearchBooks />
               <BookCard data={item} />
             </div>
           ))}

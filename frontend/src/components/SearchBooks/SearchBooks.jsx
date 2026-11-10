@@ -31,11 +31,12 @@ const SearchBooks = () => {
   return (
     <div className="w-full">
       <input
-        type="text"
+        type="search"
+        aria-label={t("catalog:search_books")}
         placeholder={t("catalog:search_books")}
         value={query}
         onChange={(e) => setQuery(e.target.value)}
-        className="w-full p-3 rounded border outline-none"
+        className="min-w-0 w-full p-3 rounded border focus-visible:ring-2 focus-visible:ring-blue-400"
       />
 
       {query && (
