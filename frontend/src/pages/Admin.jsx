@@ -1,7 +1,9 @@
+import FailureState from '../errors/FailureState.jsx';
+import { useApiResource } from '../errors/useApiResource.js';
 import { t, translateMessage } from '../i18n/index.js';
 import { clearSession } from "../auth/session.js";
 import { API_BASE_URL } from "../config/api.js";
-import React, { useEffect, useState } from "react";
+import React from "react";
 import Sidebar from "../components/Profile/Sidebar";
 import { Outlet, useNavigate } from "react-router-dom";
 import axios from "axios";
@@ -10,7 +12,7 @@ import MobileNav from "../components/Profile/MobileNav";
 const Admin = () => {
   //const isLoggedIn = useSelector((state) => state.auth.isLoggedIn);
   const navigate = useNavigate();
-  const [Profile, setProfile] = useState();
+  const { data: Profile, error, retry } = useApiResource(`${API_BASE_URL}/api/v1/user/get-user-information`, false);
   const headers = {
     id: localStorage.getItem("id"),
     authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -41,20 +43,7 @@ const Admin = () => {
     }
   };
 
-  useEffect(() => {
-    const fetch = async () => {
-      try {
-        const response = await axios.get(
-          `${API_BASE_URL}/api/v1/user/get-user-information`,
-          { headers },
-        );
-        setProfile(response.data);
-      } catch (error) {
-        console.error("Error fetching user data:", error);
-      }
-    };
-    fetch();
-  }, []);
+  if (error) return <FailureState kind={error} onRetry={retry} />;
 
   return (
     <section className="bg-zinc-700">

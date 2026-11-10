@@ -64,3 +64,26 @@ test('render and chunk errors use safe localized fallbacks and reload only on ex
   }
   await changeLanguage('en');
 });
+
+
+test('effect cleanup cancels StrictMode replay and obsolete failures cannot replace new data', async () => {
+  const results = [];
+  const requests = [];
+  const request = (url, { signal }) => new Promise((resolve, reject) => requests.push({ url, signal, resolve, reject }));
+  // StrictMode setup -> cleanup -> setup before the deferred GET is dispatched.
+  const discard = readResource('/profile', false, (value) => results.push(value), request);
+  discard();
+  const cleanup = readResource('/profile', false, (value) => results.push(value), request);
+  await flush();
+  assert.equal(requests.length, 1);
+  cleanup();
+  assert.equal(requests[0].signal.aborted, true);
+  const closeNext = readResource('/books/new', true, (value) => results.push(value), request);
+  await flush();
+  requests[1].resolve({ data: { data: { title: 'Current book' } } });
+  await flush();
+  requests[0].reject(new Error('late failure from old request'));
+  await flush();
+  assert.deepEqual(results, [{ data: { title: 'Current book' }, loading: false, error: null }]);
+  closeNext();
+});

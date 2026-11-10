@@ -1,3 +1,4 @@
+import { readResource } from '../../errors/readResource.js';
 import FailureState from '../../errors/FailureState.jsx';
 import { t, translateMessage } from '../../i18n/index.js';
 import { API_BASE_URL } from "../../config/api.js";
@@ -18,21 +19,13 @@ const Settings = () => {
     const { name, value } = e.target;
     setValue({ ...Value, [name]: value });
   };
-  useEffect(() => {
-    let active = true;
-    const fetch = async () => {
-      try {
-        const response = await axios.get(`${API_BASE_URL}/api/v1/user/get-user-information`);
-        if (!active) return;
-        const profile = response.data.data || response.data;
-        setProfileData(profile);
-        setValue({ address: profile.address || '' });
-        setLoadError(false);
-      } catch { if (active) setLoadError(true); }
-    };
-    fetch();
-    return () => { active = false; };
-  }, [loadAttempt]);
+  useEffect(() => readResource(`${API_BASE_URL}/api/v1/user/get-user-information`, false, (result) => {
+    if (result.error) { setLoadError(true); return; }
+    const profile = result.data.data || result.data;
+    setProfileData(profile);
+    setValue({ address: profile.address || '' });
+    setLoadError(false);
+  }), [loadAttempt]);
   const submitAddress = async () => {
     setSaveError('');
     try {

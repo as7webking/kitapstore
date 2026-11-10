@@ -1,19 +1,23 @@
+import FailureState from '../errors/FailureState.jsx';
+import { useApiResource } from '../errors/useApiResource.js';
+import Loader from '../components/Loader/Loader.jsx';
 import { t, translateMessage } from '../i18n/index.js';
 import { API_BASE_URL } from "../config/api.js";
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import axios from "axios";
 import { useParams, useNavigate } from "react-router-dom";
 const UpdateBook = () => {
-  const [Data, setData] = useState({
-    url: "",
-    title: "",
-    author: "",
-    price: "",
-    desc: "",
-    language: "",
-  });
-
   const { id } = useParams();
+  const { data, loading, error, retry } = useApiResource(`${API_BASE_URL}/api/v1/get-book-by-id/${id}`);
+  if (error) return <FailureState kind={error} onRetry={retry} />;
+  if (loading) return <Loader />;
+  if (!data) return <FailureState kind="not_found" />;
+  // Only changing the book resets the draft; rerenders and language changes keep it.
+  return <UpdateBookForm key={id} id={id} initialData={data} />;
+};
+
+const UpdateBookForm = ({ id, initialData }) => {
+  const [Data, setData] = useState(initialData);
   const navigate = useNavigate();
   const headers = {
     id: localStorage.getItem("id"),
@@ -53,18 +57,9 @@ const UpdateBook = () => {
         navigate(`/view-book-details/${Data.slug || id}`);
       }
     } catch (error) {
-      alert(translateMessage(error.response.data));
+      alert(translateMessage(error.response?.data || 'common:network_error'));
     }
   };
-  useEffect(() => {
-    const fetch = async () => {
-      const response = await axios.get(
-        `${API_BASE_URL}/api/v1/get-book-by-id/${id}`
-      );
-      setData(response.data.data);
-    };
-    fetch();
-  }, []);
   return (
     <div className="bg-zinc-700 h-[100%] p-0 md:p-4">
       <h1 className="text-3xl md:text-5xl font-semibold text-zinc-400 mb-8">{t("catalog:update_book")}</h1>
