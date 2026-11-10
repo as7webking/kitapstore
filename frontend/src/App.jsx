@@ -1,3 +1,5 @@
+import RouteErrorBoundary from './errors/ErrorBoundary.jsx';
+import FailureState from './errors/FailureState.jsx';
 import { useTranslation } from 'react-i18next';
 import React, { lazy, Suspense, useEffect } from "react";
 import Navbar from "./components/Navbar/Navbar";
@@ -41,6 +43,7 @@ const App = () => {
       <div
         className={`flex-grow ${location.pathname !== "/" ? "pt-[75px]" : ""}`}
       >
+        <RouteErrorBoundary>
         <Suspense fallback={<div role="status" className="py-16 text-center">{t("common:loading")}</div>}>
         <Routes>
           <Route path="/" element={<Home />} />
@@ -78,8 +81,10 @@ const App = () => {
             path="/view-book-details/:slug"
             element={<ViewBookDetails />}
           />
+          <Route path="*" element={<FailureState kind="not_found" />} />
         </Routes>
         </Suspense>
+        </RouteErrorBoundary>
       </div>
       <Footer />
     </div>

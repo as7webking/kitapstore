@@ -14,5 +14,16 @@
   "language": "Language",
   "fallback_notice": "English content — translation coming soon.",
   "required": "{{field}} is required.",
-  "network_error": "Could not connect. Check your connection and try again."
+  "network_error": "Could not connect. Check your connection and try again.",
+  "not_found_title": "Page not found",
+  "not_found_description": "The page you requested is unavailable.",
+  "network_title": "Unable to load data",
+  "network_description": "Check your connection and try again.",
+  "application_title": "Something went wrong",
+  "application_description": "The page could not be displayed. Reload it to try again.",
+  "chunk_title": "Unable to load this page",
+  "chunk_description": "A required file could not be loaded. Check your connection and reload the page.",
+  "retry": "Try again",
+  "reload_page": "Reload page",
+  "back_home": "Back to home"
 }

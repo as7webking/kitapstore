@@ -14,5 +14,16 @@
   "language": "Sprache",
   "fallback_notice": "Englischer Inhalt – Übersetzung folgt.",
   "required": "Bitte füllen Sie das Feld „{{field}}“ aus.",
-  "network_error": "Keine Verbindung möglich. Prüfen Sie Ihre Verbindung und versuchen Sie es erneut."
+  "network_error": "Keine Verbindung möglich. Prüfen Sie Ihre Verbindung und versuchen Sie es erneut.",
+  "not_found_title": "Seite nicht gefunden",
+  "not_found_description": "Die angeforderte Seite ist nicht verfügbar.",
+  "network_title": "Daten konnten nicht geladen werden",
+  "network_description": "Prüfen Sie Ihre Verbindung und versuchen Sie es erneut.",
+  "application_title": "Ein Fehler ist aufgetreten",
+  "application_description": "Die Seite konnte nicht angezeigt werden. Laden Sie sie erneut.",
+  "chunk_title": "Seite konnte nicht geladen werden",
+  "chunk_description": "Eine benötigte Datei konnte nicht geladen werden. Prüfen Sie Ihre Verbindung und laden Sie die Seite erneut.",
+  "retry": "Erneut versuchen",
+  "reload_page": "Seite neu laden",
+  "back_home": "Zur Startseite"
 }

@@ -14,5 +14,16 @@
   "language": "Til",
   "fallback_notice": "İnglizce metin — tercime soñra olacaq.",
   "required": "«{{field}}» toldurıñız.",
-  "network_error": "Bağlanmaq mümkün olmadı. Bağlantıñıznı teşkerip kene deñeñiz."
+  "network_error": "Bağlanmaq mümkün olmadı. Bağlantıñıznı teşkerip kene deñeñiz.",
+  "not_found_title": "Saife tapılmadı",
+  "not_found_description": "İstegen saifeñiz mevcut degil.",
+  "network_title": "Malümat yüklenip olamadı",
+  "network_description": "Bağlantıñıznı teşkerip, bir daa deñeñiz.",
+  "application_title": "Bir hata oldı",
+  "application_description": "Saife kösterilip olamadı. Tekrar yükleñiz.",
+  "chunk_title": "Saife yüklenip olamadı",
+  "chunk_description": "Kerekli fayl yüklenip olamadı. Bağlantıñıznı teşkerip, saifeni tekrar yükleñiz.",
+  "retry": "Bir daa deñeñiz",
+  "reload_page": "Saifeni tekrar yükleñiz",
+  "back_home": "Baş saifege qayt"
 }
