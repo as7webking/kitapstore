@@ -1,7 +1,8 @@
+import FailureState from '../../errors/FailureState.jsx';
+import { useApiResource } from '../../errors/useApiResource.js';
 import { formatNumber, t, translateMessage } from '../../i18n/index.js';
 import { API_BASE_URL } from "../../config/api.js";
-import React, { useEffect, useState } from "react"; // ADDED: useState import
-import axios from "axios";
+import React from "react"; // ADDED: useState import
 import { Link, useLocation } from "react-router-dom"; // ADDED: useNavigate for redirecting
 // FIXED: Removed problematic relative import and defined Loader locally for compilation
 // import Loader from "../Loader/Loader"; 
@@ -16,33 +17,12 @@ const Loader = () => (
 
 const UserOrderHistory = () => {
   const location = useLocation();
-  const [loadError, setLoadError] = useState('');
-  const [orderHistory, setOrderHistory] = useState(null); // RENAMED: to camelCase, initialized to null
+  const { data: orderHistory, error, retry } = useApiResource(`${API_BASE_URL}/api/v1/get-order-history`);
 
-  const headers = {
-    id: localStorage.getItem("id"),
-    authorization: `Bearer ${localStorage.getItem("token")}`,
-  };
 
-  useEffect(() => {
-    const fetchOrderHistory = async () => {
-      try {
-        const response = await axios.get(
-          `${API_BASE_URL}/api/v1/get-order-history`,
-          { headers }
-        );
-        // Assuming data is located in response.data.data
-        setOrderHistory(response.data.data);
-      } catch (error) {
-        setLoadError(error.response?.data || 'common:network_error');
-        
-        // Session failures are handled by the shared Axios interceptor and route guard.
-        setOrderHistory([]); // Set to empty array on general failure to stop the Loader
-      }
-    };
-    fetchOrderHistory();
-  }, []);
 
+
+  if (error) return <FailureState kind={error} onRetry={retry} />;
   // Show Loader while fetching data
   if (orderHistory === null) {
     return (
@@ -52,7 +32,6 @@ const UserOrderHistory = () => {
     );
   }
 
-  if (loadError) return <p role="alert" className="p-4 text-zinc-100">{translateMessage(loadError)}</p>;
 
   // Show empty state if no history is found
   if (orderHistory.length === 0) {

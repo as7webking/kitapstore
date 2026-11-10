@@ -1,3 +1,4 @@
+import FailureState from '../../errors/FailureState.jsx';
 import { t, translateMessage } from '../../i18n/index.js';
 import { API_BASE_URL } from "../../config/api.js";
 import React, { useEffect, useState } from "react";
@@ -5,6 +6,9 @@ import axios from "axios";
 import Loader from "../Loader/Loader";
 const Settings = () => {
   const [Value, setValue] = useState({ address: "" });
+  const [loadError, setLoadError] = useState(false);
+  const [loadAttempt, setLoadAttempt] = useState(0);
+  const [saveError, setSaveError] = useState('');
   const [ProfileData, setProfileData] = useState();
   const headers = {
     id: localStorage.getItem("id"),
@@ -15,26 +19,35 @@ const Settings = () => {
     setValue({ ...Value, [name]: value });
   };
   useEffect(() => {
+    let active = true;
     const fetch = async () => {
-      const response = await axios.get(
-        `${API_BASE_URL}/api/v1/user/get-user-information`,
-        { headers }
-      );
-      setProfileData(response.data.data);
-      setValue({ address: response.data.address });
+      try {
+        const response = await axios.get(`${API_BASE_URL}/api/v1/user/get-user-information`);
+        if (!active) return;
+        const profile = response.data.data || response.data;
+        setProfileData(profile);
+        setValue({ address: profile.address || '' });
+        setLoadError(false);
+      } catch { if (active) setLoadError(true); }
     };
     fetch();
-  }, []);
+    return () => { active = false; };
+  }, [loadAttempt]);
   const submitAddress = async () => {
+    setSaveError('');
+    try {
     const response = await axios.put(
       `${API_BASE_URL}/api/v1/user/get-user-information`,
       Value,
       { headers }
     );
     alert(translateMessage(response.data));
+    } catch (error) { setSaveError(error.response?.data || 'common:network_error'); }
   };
+  if (loadError) return <FailureState onRetry={() => setLoadAttempt((value) => value + 1)} />;
   return (
     <>
+      {saveError && <p role="alert">{translateMessage(saveError)}</p>}
       {!ProfileData && (
         <div className="w-full h-[100%] flex items-center justify-center">
           <Loader />

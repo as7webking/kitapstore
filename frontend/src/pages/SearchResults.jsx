@@ -1,3 +1,4 @@
+import FailureState from '../errors/FailureState.jsx';
 import { t } from '../i18n/index.js';
 import { API_BASE_URL } from "../config/api.js";
 import React, { useEffect, useMemo, useState } from "react";
@@ -10,13 +11,18 @@ const SearchResults = () => {
 
   const [books, setBooks] = useState([]);
   const [blogs, setBlogs] = useState([]);
+  const [loadError, setLoadError] = useState(false);
+  const [attempt, setAttempt] = useState(0);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
+    let active = true;
+    setLoadError(false);
     const fetchData = async () => {
       if (!query) {
         setBooks([]);
         setBlogs([]);
+        setLoading(false);
         return;
       }
 
@@ -27,6 +33,7 @@ const SearchResults = () => {
           axios.get(`${API_BASE_URL}/api/v1/blog/get-all-blogs`),
         ]);
 
+        if (!active) return;
         const q = query.toLowerCase();
 
         const filteredBooks = (booksRes.data?.data || []).filter((book) =>
@@ -44,16 +51,17 @@ const SearchResults = () => {
         setBooks(filteredBooks);
         setBlogs(filteredBlogs);
       } catch {
-        setBooks([]);
-        setBlogs([]);
+        if (active) setLoadError(true);
       } finally {
-        setLoading(false);
+        if (active) setLoading(false);
       }
     };
 
     fetchData();
-  }, [query]);
+    return () => { active = false; };
+  }, [query, attempt]);
 
+  if (loadError) return <FailureState onRetry={() => setAttempt((value) => value + 1)} />;
   return (
     <div className="bg-white text-gray-700 min-h-screen w-[90%] max-w-[1200px] mx-auto px-6 py-8">
       <h1 className="text-3xl font-bold">{t("catalog:search")}</h1>

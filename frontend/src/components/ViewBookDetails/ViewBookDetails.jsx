@@ -1,6 +1,8 @@
+import FailureState from '../../errors/FailureState.jsx';
+import { useApiResource } from '../../errors/useApiResource.js';
 import { formatNumber, t, translateMessage } from '../../i18n/index.js';
 import { API_BASE_URL } from "../../config/api.js";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import axios from "axios";
 import Loader from "../Loader/Loader";
 import { Link, useNavigate, useParams } from "react-router-dom";
@@ -35,23 +37,10 @@ const ViewBookDetails = () => {
   const { slug } = useParams();
   
   const navigate = useNavigate();
-  const [Data, setData] = useState();
+  const { data: Data, loading, error, retry } = useApiResource(`${API_BASE_URL}/api/v1/get-book-by-slug/${slug}`, false);
   const [imageError, setImageError] = useState(false);
   const isLoggedIn = useSelector((state) => state.auth.isLoggedIn);
   const role = useSelector((state) => state.auth.role);
-  useEffect(() => {
-    const fetchBook = async () => {
-      try {
-        const response = await axios.get(
-          `${API_BASE_URL}/api/v1/get-book-by-slug/${slug}`,
-        );
-        setData(response.data);
-      } catch (error) {
-        console.error("Book load Error:", error);
-      }
-    };
-    fetchBook();
-  }, [slug]);
 
   const headers = {
     id: localStorage.getItem("id"),
@@ -105,6 +94,8 @@ const ViewBookDetails = () => {
     navigate("/all-books");
   };
 
+  if (error) return <FailureState kind={error} onRetry={retry} />;
+  if (!loading && !Data) return <FailureState kind="not_found" />;
   return (
     <>
       {Data && (

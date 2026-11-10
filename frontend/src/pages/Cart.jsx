@@ -1,3 +1,4 @@
+import FailureState from '../errors/FailureState.jsx';
 import { formatNumber, t, translateMessage } from '../i18n/index.js';
 import { API_BASE_URL } from "../config/api.js";
 import React, { useEffect, useState, useRef } from "react";
@@ -10,6 +11,8 @@ import { useNavigate } from "react-router-dom";
 const currency = 'EUR';
 const Cart = () => {
   const navigate = useNavigate();
+  const [loadError, setLoadError] = useState(false);
+  const [loadAttempt, setLoadAttempt] = useState(0);
   const [cart, setCart] = useState(null);
   const [message, setMessage] = useState('');
   const [pending, setPending] = useState(false);
@@ -21,14 +24,17 @@ const Cart = () => {
     authorization: `Bearer ${localStorage.getItem("token")}`,
   };
   useEffect(() => {
+    let active = true;
+    setLoadError(false);
     const fetchCart = async () => {
       try {
         const res = await axios.get(`${API_BASE_URL}/api/v1/get-user-cart`);
-        setCart(res.data.data);
-      } catch { setMessage('common:network_error'); setCart([]); }
+        if (active) setCart(res.data.data);
+      } catch { if (active) setLoadError(true); }
     };
     fetchCart();
-  }, []);
+    return () => { active = false; };
+  }, [loadAttempt]);
   const deleteItem = async (bookid) => {
     if (busy.current) return;
     busy.current = true; setPending(true);
@@ -60,6 +66,7 @@ const Cart = () => {
       setMessage(error.response?.data || 'common:network_error');
     } finally { busy.current = false; setPending(false); }
   };
+  if (loadError) return <FailureState onRetry={() => setLoadAttempt((value) => value + 1)} />;
   return (
     <div className="bg-zinc-700 px-4 sm:px-12 min-h-screen p-8">
       {message && <p role="status" className="text-zinc-100">{translateMessage(message)}</p>}

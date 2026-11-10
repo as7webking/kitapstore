@@ -1,27 +1,14 @@
+import FailureState from '../errors/FailureState.jsx';
+import { useApiResource } from '../errors/useApiResource.js';
 import { t, formatDate } from '../i18n/index.js';
 import { API_BASE_URL } from "../config/api.js";
-import React, { useEffect, useState } from "react";
-import axios from "axios";
+import React from "react";
 import { Link } from "react-router-dom";
 
 const Blog = () => {
-  const [blogs, setBlogs] = useState([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const fetchBlogs = async () => {
-      try {
-        const res = await axios.get(`${API_BASE_URL}/api/v1/blog/get-all-blogs`);
-        setBlogs(res.data.data || []);
-      } catch {
-        setBlogs([]);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchBlogs();
-  }, []);
+  const { data, loading, error, retry } = useApiResource(`${API_BASE_URL}/api/v1/blog/get-all-blogs`);
+  const blogs = data || [];
+  if (error) return <FailureState kind={error} onRetry={retry} />;
 
   return (
     <div className="bg-white text-gray-700 min-h-screen w-[90%] max-w-[1200px] mx-auto px-6 py-8">

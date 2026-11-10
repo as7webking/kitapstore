@@ -1,35 +1,16 @@
+import FailureState from '../errors/FailureState.jsx';
+import { useApiResource } from '../errors/useApiResource.js';
 import { t, formatDate } from '../i18n/index.js';
 import { API_BASE_URL } from "../config/api.js";
-import React, { useEffect, useState } from "react";
-import axios from "axios";
+import React from "react";
 import { Link, useParams } from "react-router-dom";
 
 const BlogDetails = () => {
   const { slug } = useParams();
-  const [blog, setBlog] = useState(null);
-  const [similar, setSimilar] = useState([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const fetchBlog = async () => {
-      setLoading(true);
-      try {
-        const res = await axios.get(
-          `${API_BASE_URL}/api/v1/blog/get-blog-by-slug/${slug}`,
-        );
-
-        setBlog(res.data.data || null);
-        setSimilar(res.data.similar || []);
-      } catch {
-        setBlog(null);
-        setSimilar([]);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchBlog();
-  }, [slug]);
+  const { data, loading, error, retry } = useApiResource(`${API_BASE_URL}/api/v1/blog/get-blog-by-slug/${slug}`, false);
+  const blog = data?.data || null;
+  const similar = data?.similar || [];
+  if (error) return <FailureState kind={error} onRetry={retry} />;
 
   if (loading) {
     return (

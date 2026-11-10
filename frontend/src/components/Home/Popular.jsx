@@ -1,29 +1,15 @@
+import FailureState from '../../errors/FailureState.jsx';
+import { useApiResource } from '../../errors/useApiResource.js';
 import { t } from '../../i18n/index.js';
 import { API_BASE_URL } from "../../config/api.js";
-import React, { useEffect, useState } from "react";
-import axios from "axios";
+import React from "react";
 import BookCard from "../BookCard/BookCard";
 import Loader from "../Loader/Loader";
 import { Link } from "react-router-dom";
 
 const Popular = () => {
-  const [books, setBooks] = useState(null);
-
-  useEffect(() => {
-    const fetchPopular = async () => {
-      try {
-        const res = await axios.get(
-          `${API_BASE_URL}/api/v1/get-popular-books`
-        );
-        setBooks(res.data.data);
-      } catch (error) {
-        console.error("Error loading popular books:", error);
-        setBooks([]);
-      }
-    };
-
-    fetchPopular();
-  }, []);
+  const { data: books, loading, error, retry } = useApiResource(`${API_BASE_URL}/api/v1/get-popular-books`);
+  if (error) return <FailureState kind={error} onRetry={retry} />;
 
   return (
     <section className="py-20 bg-gray-50">
@@ -36,7 +22,7 @@ const Popular = () => {
           >{t("home:view_all")}</Link>
         </div>
 
-        {!books && (
+        {loading && (
           <div className="flex justify-center py-12">
             <Loader />
           </div>

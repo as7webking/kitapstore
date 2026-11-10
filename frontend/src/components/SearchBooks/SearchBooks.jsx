@@ -1,3 +1,4 @@
+import FailureState from '../../errors/FailureState.jsx';
 import { t } from '../../i18n/index.js';
 import { API_BASE_URL } from "../../config/api.js";
 import React, { useEffect, useState } from "react";
@@ -6,9 +7,15 @@ import BookCard from "../BookCard/BookCard";
 
 const SearchBooks = () => {
   const [query, setQuery] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [failed, setFailed] = useState(false);
+  const [attempt, setAttempt] = useState(0);
   const [results, setResults] = useState([]);
 
   useEffect(() => {
+    let active = true;
+    setFailed(false);
+    setLoading(Boolean(query.trim()));
     const delay = setTimeout(async () => {
       if (!query.trim()) {
         setResults([]);
@@ -19,14 +26,14 @@ const SearchBooks = () => {
         const res = await axios.get(
           `${API_BASE_URL}/api/v1/books/search?q=${encodeURIComponent(query)}`
         );
-        setResults(res.data);
-      } catch (error) {
-        console.error("Search error:", error);
-      }
+        if (active) setResults(res.data);
+      } catch {
+        if (active) setFailed(true);
+      } finally { if (active) setLoading(false); }
     }, 400);
 
-    return () => clearTimeout(delay);
-  }, [query]);
+    return () => { active = false; clearTimeout(delay); };
+  }, [query, attempt]);
 
   return (
     <div className="w-full">
@@ -39,9 +46,9 @@ const SearchBooks = () => {
         className="min-w-0 w-full p-3 rounded border focus-visible:ring-2 focus-visible:ring-blue-400"
       />
 
-      {query && (
+      {query.trim() && (
         <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-          {results.length > 0 ? (
+          {failed ? <FailureState onRetry={() => setAttempt((value) => value + 1)} /> : loading ? <p role="status">{t("common:loading")}</p> : results.length > 0 ? (
             results.map((book) => <BookCard key={book._id} data={book} />)
           ) : (
             <p>{t("catalog:no_books_found")}</p>

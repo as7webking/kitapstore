@@ -10,7 +10,7 @@ global.localStorage = { getItem: (key) => memory.get(key) ?? null, setItem: (key
 global.window = new EventTarget();
 window.location = { origin: 'http://frontend.test', pathname: '/', search: '' };
 const output = esbuild.buildSync({
-  stdin: { contents: "export * from './src/auth/session.js'; export { default as store } from './src/store/index.js';", resolveDir: root },
+  stdin: { contents: "export { checkoutAttempt } from './src/cart/checkout.js'; export * from './src/auth/session.js'; export { default as store } from './src/store/index.js';", resolveDir: root },
   bundle: true, write: false, platform: 'node', format: 'cjs', packages: 'external',
   define: { 'import.meta.env': '{"VITE_API_URL":"http://api.test"}' },
 });
@@ -44,7 +44,14 @@ test('browser session lifecycle: server role, reload, expiry, network failure, r
   assert.equal(session.store.getState().auth.user.id, user._id);
   assert.equal(captured.headers.get('Authorization'), `Bearer ${activeToken}`);
   assert.equal(captured.headers.get('id'), undefined);
+  const checkoutStorage = new Map();
+  const storage = { getItem: (key) => checkoutStorage.get(key) || null, setItem: (key, value) => checkoutStorage.set(key, value) };
+  const cart = [{ _id: 'book-one', quantity: 2 }];
+  const checkout = session.checkoutAttempt(cart, user._id, storage);
   mode = 'offline';
+  await assert.rejects(axios.get('http://api.test/api/v1/get-user-cart'));
+  assert.equal(localStorage.getItem('token'), activeToken);
+  assert.deepEqual(session.checkoutAttempt(cart, user._id, storage), checkout);
   await session.restoreSession();
   assert.equal(session.store.getState().auth.status, 'error');
   assert.equal(localStorage.getItem('token'), activeToken);

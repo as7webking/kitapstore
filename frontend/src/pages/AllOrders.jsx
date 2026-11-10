@@ -1,41 +1,23 @@
+import FailureState from '../errors/FailureState.jsx';
+import { useApiResource } from '../errors/useApiResource.js';
 import { formatNumber, t, translateMessage } from '../i18n/index.js';
 import { API_BASE_URL } from "../config/api.js";
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import Loader from "../components/Loader/Loader";
 import { FaUserLarge } from "react-icons/fa6";
-import axios from "axios";
 import { Link } from "react-router-dom";
 import { IoOpenOutline } from "react-icons/io5";
 import { FaCheck } from "react-icons/fa6";
 import SeeUserData from "./SeeUserData";
 const AllOrders = () => {
-  const [loadError, setLoadError] = useState('');
-  const [AllOrders, setAllOrders] = useState(null);
+  const { data: AllOrders, error, retry } = useApiResource(`${API_BASE_URL}/api/v1/get-all-orders`);
   const [Options] = useState(-1);
   const [Values] = useState({ status: "" });
   const [userDiv, setuserDiv] = useState("hidden");
   const [userDivData] = useState();
-  const headers = {
-    id: localStorage.getItem("id"),
-    authorization: `Bearer ${localStorage.getItem("token")}`,
-  };
-  useEffect(() => {
-    const fetchOrders = async () => {
-      try {
-        const response = await axios.get(
-          `${API_BASE_URL}/api/v1/get-all-orders`,
-          { headers },
-        );
-        setAllOrders(response.data.data);
-      } catch (error) {
-        setAllOrders([]);
-        setLoadError(error.response?.data || 'common:network_error');
-      }
-    };
-    fetchOrders();
-  }, []);
 
-  if (loadError) return <p role="alert" className="p-4 text-zinc-100">{translateMessage(loadError)}</p>;
+
+  if (error) return <FailureState kind={error} onRetry={retry} />;
   return (
     <>
       {AllOrders === null && (
