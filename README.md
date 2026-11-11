@@ -396,3 +396,6 @@ MongoDB. Пороги и ответ 429 сохранены; отказ хран�
 и команда npm run worker:reset-mail --prefix backend. Ключ не должен попадать
 во frontend/Vercel. Точные настройки, защита payload, TTL, повторы и сценарии
 отказов: [RESET_MAIL_QUEUE.md](RESET_MAIL_QUEUE.md). Другие письма пока вне очереди.
+
+Проверки GitHub Actions и подготовка frontend к Vercel описаны в [CI.md](CI.md).
+Workflow выполняет тесты и сборку с синтетическими настройками, без deployment.
