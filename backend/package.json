@@ -7,7 +7,8 @@
     "dev": "node app.js",
     "test": "node --test tests/*.test.js",
     "worker:reset-mail": "node workers/resetMail.js",
-    "seed:catalog": "node scripts/seedCatalog.js"
+    "seed:catalog": "node scripts/seedCatalog.js",
+    "smoke:staging": "node scripts/smokeStaging.js"
   },
   "keywords": [],
   "author": "",
