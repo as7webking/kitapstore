@@ -79,7 +79,7 @@ router.delete("/delete-book", authentificateToken, requireAdmin, async (req, res
 //get all books
 router.get("/get-all-books", async (req, res) => {
   try {
-    const books = await Book.find().sort({ createdAt: -1 });
+    const books = await Book.find().select("-pdf").sort({ createdAt: -1 });
     return res.json({
       status: "Success",
       data: books,
@@ -92,7 +92,7 @@ router.get("/get-all-books", async (req, res) => {
 //get recently added books - limit 7
 router.get("/get-recent-books/", async (req, res) => {
   try {
-    const books = await Book.find().sort({ createdAt: -1 }).limit(4);
+    const books = await Book.find().select("-pdf").sort({ createdAt: -1 }).limit(4);
     return res.json({
       status: "Success",
       data: books,
@@ -106,7 +106,7 @@ router.get("/get-recent-books/", async (req, res) => {
 // get popular books
 router.get("/get-popular-books", async (req, res) => {
   try {
-    const books = await Book.find().sort({ views: -1, createdAt: -1 }).limit(6);
+    const books = await Book.find().select("-pdf").sort({ views: -1, createdAt: -1 }).limit(6);
 
     res.json({ status: "Success", data: books });
   } catch (error) {
@@ -118,7 +118,7 @@ router.get("/get-popular-books", async (req, res) => {
 router.get("/get-book-by-id/:id", async (req, res) => {
   try {
     const { id } = req.params;
-    const books = await Book.findById(id);
+    const books = await Book.findById(id).select("-pdf");
     return res.json({
       status: "Success",
       data: books,
@@ -134,7 +134,7 @@ router.get("/get-book-by-slug/:slug", async (req, res) => {
   try {
     // Searching in database slug, not ID
     const { slug } = req.params;
-    const book = await Book.findOne({ slug: slug });
+    const book = await Book.findOne({ slug: slug }).select("-pdf");
 
     if (!book) return res.status(404).send("Book not found");
     return res.json(book);
@@ -160,7 +160,7 @@ router.get("/search", async (req, res) => {
         { authortitle: { $regex: safeQuery, $options: "i" } },
         { category: { $regex: safeQuery, $options: "i" } },
       ],
-    }).limit(20);
+    }).select("-pdf").limit(20);
 
     res.status(200).json(books);
   } catch (error) {

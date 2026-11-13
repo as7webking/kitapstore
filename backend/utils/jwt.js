@@ -18,6 +18,7 @@ const createToken = (user) => {
 
 // Verify JWT middleware
 const verifyToken = async (req, res, next) => {
+  res.set("Cache-Control", "no-store");
   try {
     const authHeader = req.headers.authorization;
 

@@ -38,7 +38,7 @@ router.put("/remove-book-from-favourite", authentificateToken, async (req, res) 
 router.get("/get-favourite-books", authentificateToken, async (req, res) => {
   try {
     const { id } = req.headers;
-    const userData = await User.findById(id).populate("favourites");
+    const userData = await User.findById(id).populate("favourites", "-pdf");
     const favouriteBooks = userData.favourites;
     return res.json({
         status: "Success",

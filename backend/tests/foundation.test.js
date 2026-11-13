@@ -46,7 +46,7 @@ test('JWT creation and verification share identity, secret and expiry', async ()
     assert.equal(decoded.exp - decoded.iat, 7 * 24 * 60 * 60);
     const req = { headers: { authorization: `Bearer ${token}` } };
     let next = false;
-    const res = { status() { return this; }, json() { return this; } };
+    const res = { set() { return this; }, status() { return this; }, json() { return this; } };
     await verifyToken(req, res, () => { next = true; });
     assert.equal(next, true);
     assert.equal(req.headers.id, user._id);
