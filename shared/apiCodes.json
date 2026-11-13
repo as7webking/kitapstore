@@ -73,5 +73,10 @@
   "ORDER_STATUS_INVALID": "cart:status_invalid",
   "ORDER_NOT_FOUND": "cart:not_found",
   "ORDER_SESSION_INVALID": "auth:please_log_in_again",
-  "RATE_LIMIT_UNAVAILABLE": "messages:rate_limit_unavailable"
+  "RATE_LIMIT_UNAVAILABLE": "messages:rate_limit_unavailable",
+  "PROFILE_ADDRESS_UPDATED": "profile:address_updated",
+  "PROFILE_ADDRESS_INVALID": "profile:address_invalid",
+  "PROFILE_FIELDS_INVALID": "profile:fields_invalid",
+  "PROFILE_UPDATE_UNAVAILABLE": "profile:update_unavailable",
+  "PROFILE_SESSION_INVALID": "auth:please_log_in_again"
 }

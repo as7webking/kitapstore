@@ -41,7 +41,7 @@ test('HTTP access matrix scopes private operations to session and protects every
     return fetch(base + path, { method, headers: { ...(auth ? { authorization: `Bearer ${auth}` } : {}), 'content-type': 'application/json', ...headers }, body: body === undefined ? undefined : JSON.stringify(body) });
   }
   const privateRoutes = [
-    ['GET', '/api/v1/user/get-user-information'], ['DELETE', '/api/v1/user/delete-account'], ['POST', '/api/v1/user/sign-out'],
+    ['GET', '/api/v1/user/get-user-information'], ['PUT', '/api/v1/user/get-user-information'], ['DELETE', '/api/v1/user/delete-account'], ['POST', '/api/v1/user/sign-out'],
     ...['/api/v1', '/api/v1/cart'].flatMap((prefix) => [['GET', `${prefix}/get-user-cart`], ['PUT', `${prefix}/add-to-cart`], ['PUT', `${prefix}/remove-from-cart/${b}`]]),
     ...['/api/v1', '/api/v1/favourites'].flatMap((prefix) => [['GET', `${prefix}/get-favourite-books`], ['PUT', `${prefix}/add-book-to-favourite`], ['PUT', `${prefix}/remove-book-from-favourite`]]),
     ...['/api/v1', '/api/v1/orders'].flatMap((prefix) => [['GET', `${prefix}/get-order-history`], ['POST', `${prefix}/place-order`]]),

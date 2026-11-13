@@ -20,5 +20,10 @@
   "username": "Username",
   "email": "Email",
   "no_address_provided": "No address provided",
-  "confirm_delete_account": "Are you sure you want to delete your account? This action is permanent!"
+  "confirm_delete_account": "Are you sure you want to delete your account? This action is permanent!",
+  "saving_address": "Saving…",
+  "address_updated": "Address updated successfully.",
+  "address_invalid": "Enter an address (up to 500 characters).",
+  "fields_invalid": "Only the address field can be updated.",
+  "update_unavailable": "Could not update address. Please try again."
 }

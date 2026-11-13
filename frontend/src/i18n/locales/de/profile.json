@@ -20,5 +20,10 @@
   "username": "Benutzername",
   "email": "E-Mail",
   "no_address_provided": "Keine Adresse angegeben",
-  "confirm_delete_account": "Möchten Sie Ihr Konto wirklich löschen? Diese Aktion kann nicht rückgängig gemacht werden!"
+  "confirm_delete_account": "Möchten Sie Ihr Konto wirklich löschen? Diese Aktion kann nicht rückgängig gemacht werden!",
+  "saving_address": "Wird gespeichert…",
+  "address_updated": "Adresse erfolgreich aktualisiert.",
+  "address_invalid": "Geben Sie eine Adresse mit höchstens 500 Zeichen ein.",
+  "fields_invalid": "Nur die Adresse kann geändert werden.",
+  "update_unavailable": "Die Adresse konnte nicht aktualisiert werden. Bitte versuchen Sie es erneut."
 }

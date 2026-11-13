@@ -20,5 +20,10 @@
   "username": "Qullanıcı adı",
   "email": "E-poçta",
   "no_address_provided": "Adres kirsetilmedi",
-  "confirm_delete_account": "Esabıñıznı silmege eminsiñizmi? Bu amelni keri qaytarmaq mümkün degil!"
+  "confirm_delete_account": "Esabıñıznı silmege eminsiñizmi? Bu amelni keri qaytarmaq mümkün degil!",
+  "saving_address": "Saqlanmaqta…",
+  "address_updated": "Adres muvafaqiyetnen yañartıldı.",
+  "address_invalid": "Adresni yazıñız (eñ çoq 500 işaret).",
+  "fields_invalid": "Yalıñız adresni deñiştirmek mümkün.",
+  "update_unavailable": "Adres yañartılıp olamadı. Bir daa deñeñiz."
 }

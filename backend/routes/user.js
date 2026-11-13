@@ -126,6 +126,26 @@ router.get("/get-user-information", authentificateToken, (req, res) => {
   return res.json({ _id, username, email, address, avatar, role });
 });
 
+// Only the verified session identifies the owner. Reject mass-assignment fields.
+router.put("/get-user-information", authentificateToken, async (req, res) => {
+  const body = req.body;
+  if (!body || typeof body !== "object" || Array.isArray(body) || Object.keys(body).some((key) => key !== "address")) {
+    return res.status(400).json({ code: "PROFILE_FIELDS_INVALID", message: "Only the address field can be updated." });
+  }
+  const address = typeof body.address === "string" ? body.address.trim() : "";
+  if (!address || address.length > 500 || /[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f]/.test(address)) {
+    return res.status(400).json({ code: "PROFILE_ADDRESS_INVALID", message: "Enter an address (up to 500 characters).",
+      errors: { address: "Enter an address (up to 500 characters)." }, fieldCodes: { address: "PROFILE_ADDRESS_INVALID" } });
+  }
+  try {
+    const result = await User.updateOne({ _id: req.user.id }, { $set: { address } }, { runValidators: true });
+    if (!result.matchedCount) return res.status(401).json({ code: "PROFILE_SESSION_INVALID", message: "Please sign in again" });
+    return res.json({ code: "PROFILE_ADDRESS_UPDATED", message: "Address updated successfully.", address });
+  } catch {
+    return res.status(503).json({ code: "PROFILE_UPDATE_UNAVAILABLE", message: "Could not update address. Please try again." });
+  }
+});
+
 // Tokens are sent in the request body, never in API URLs.
 router.post("/forgot-password", recoveryLimit, forgotPassword);
 router.post("/reset-password", resetLimit, resetPassword);
