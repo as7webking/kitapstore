@@ -19,3 +19,7 @@ backend/dist/
 # Logs
 *.log
 npm-debug.log*
+# Browser test outputs
+frontend/test-results/
+frontend/playwright-report/
+frontend/blob-report/
