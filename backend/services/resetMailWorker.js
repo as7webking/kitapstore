@@ -7,7 +7,7 @@ const { resetSettings, RETENTION_MS } = require('./resetMailQueue');
 const { passwordResetEmail } = require('../utils/accountEmail');
 const MAX_ATTEMPTS = 3, LEASE_MS = 300000, SAFETY_MS = 30000;
 function createResetMailWorker({ jobs = Jobs, users = User, send = sendEmail, now = Date.now } = {}) {
-  const owner = (job) => ({ _id: job._id, status: 'processing', leaseId: job.leaseId });
+  const owner = (job) => ({ _id: job._id, status: 'processing', leaseId: job.leaseId, leaseUntil: { $gt: new Date(now()) } });
   async function finish(job, status, clearToken = false) {
     const result = await jobs.updateOne(owner(job), { $set: { status, deleteAt: new Date(now() + RETENTION_MS) }, $unset: { payload: '', tokenHash: '', leaseId: '', leaseUntil: '' } });
     if (clearToken && result.matchedCount && job.user && /^[a-f0-9]{64}$/.test(job.tokenHash || '')) {
@@ -24,11 +24,16 @@ function createResetMailWorker({ jobs = Jobs, users = User, send = sendEmail, no
       { status: 'processing', leaseUntil: { $lte: new Date(now()) } },
     ] }, { $set: { status: 'processing', leaseId: crypto.randomUUID(), leaseUntil: new Date(now() + LEASE_MS) }, $inc: { attempts: 1 } }, { new: true, sort: { availableAt: 1, _id: 1 } }).select('+payload +tokenHash');
     if (!job) return false;
-    let leaseLost = false, renewing = false;
+    let leaseLost = false, renewing = false, leaseUntil = job.leaseUntil.getTime();
     const heartbeat = setInterval(async () => {
       if (renewing) return;
       renewing = true;
-      try { const updated = await jobs.updateOne(owner(job), { $set: { leaseUntil: new Date(now() + LEASE_MS) } }); if (!updated.matchedCount) leaseLost = true; }
+      try {
+        const until = new Date(now() + LEASE_MS);
+        const updated = await jobs.updateOne(owner(job), { $set: { leaseUntil: until } });
+        if (!updated.matchedCount) leaseLost = true;
+        else leaseUntil = until.getTime();
+      }
       catch { leaseLost = true; }
       finally { renewing = false; }
     }, 30000);
@@ -50,8 +55,11 @@ function createResetMailWorker({ jobs = Jobs, users = User, send = sendEmail, no
       url.hash = new URLSearchParams({ token: payload.token }).toString();
       const mail = passwordResetEmail(job.language, url.toString(), 0, job.expiresAt);
       // Recheck after decryption/template work, immediately before starting SMTP.
-      const currentUser = await validUser();
-      if (leaseLost || !await jobs.exists({ ...owner(job), leaseUntil: { $gt: new Date(now()) } }) || !currentUser || currentUser.email !== payload.email || job.expiresAt.getTime() <= now() + SAFETY_MS) {
+      const ownsLease = !leaseLost && await jobs.exists(owner(job));
+      // User state is the last database check: consuming/replacing the token while
+      // checking the lease must not dispatch a stale link. SMTP itself is not transactional.
+      const currentUser = ownsLease ? await validUser() : null;
+      if (leaseLost || leaseUntil <= now() || !ownsLease || !currentUser || currentUser.email !== payload.email || job.expiresAt.getTime() <= now() + SAFETY_MS) {
         await finish(job, 'cancelled', true); return true;
       }
       try {
