@@ -78,5 +78,7 @@
   "PROFILE_ADDRESS_INVALID": "profile:address_invalid",
   "PROFILE_FIELDS_INVALID": "profile:fields_invalid",
   "PROFILE_UPDATE_UNAVAILABLE": "profile:update_unavailable",
-  "PROFILE_SESSION_INVALID": "auth:please_log_in_again"
+  "PROFILE_SESSION_INVALID": "auth:please_log_in_again",
+  "CATALOG_PARAMETERS_INVALID": "catalog:parameters_invalid",
+  "CATALOG_UNAVAILABLE": "catalog:catalog_error"
 }
