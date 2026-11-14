@@ -13,7 +13,7 @@ const { app } = require('../app');
 
 function query(value, observe = () => {}) {
   const result = { select(fields) { observe('select', fields); return this; }, populate(...args) { observe('populate', args); return this; },
-    lean() { return this; }, sort() { return this; }, limit() { return this; },
+    lean() { return this; }, skip() { return this; }, sort() { return this; }, limit() { return this; },
     then(resolve, reject) { return Promise.resolve(value).then(resolve, reject); } };
   return result;
 }

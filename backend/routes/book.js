@@ -7,8 +7,14 @@ const User = require("../models/user");
 const Book = require("../models/book");
 const { authentificateToken } = require("./userAuth");
 
-function escapeRegex(text) {
-  return text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+const { catalogOptions, catalogPage } = require('../services/catalog');
+
+function catalogFailure(res, error) {
+  const invalid = error.status === 400 && error.code === 'CATALOG_PARAMETERS_INVALID';
+  return res.status(invalid ? 400 : 503).json({
+    code: invalid ? 'CATALOG_PARAMETERS_INVALID' : 'CATALOG_UNAVAILABLE',
+    message: invalid ? 'Invalid catalog parameters.' : 'Could not load catalog. Please try again.',
+  });
 }
 
 //add book --admin
@@ -76,23 +82,30 @@ router.delete("/delete-book", authentificateToken, requireAdmin, async (req, res
   }
 });
 
+// Additive paginated endpoint. Legacy list/search keep their existing shapes.
+router.get('/catalog', async (req, res) => {
+  try { return res.json({ status: 'Success', ...await catalogPage(Book, req.query) }); }
+  catch (error) { return catalogFailure(res, error); }
+});
+
 //get all books
 router.get("/get-all-books", async (req, res) => {
   try {
-    const books = await Book.find().select("-pdf").sort({ createdAt: -1 });
+    if (Object.keys(req.query).length) return res.json({ status: 'Success', ...await catalogPage(Book, req.query) });
+    const books = await Book.find({ isDeleted: { $ne: true } }).select("-pdf").sort({ createdAt: -1, _id: -1 });
     return res.json({
       status: "Success",
       data: books,
     });
   } catch (error) {
-    res.status(500).json({ message: "An error occured" });
+    return catalogFailure(res, error);
   }
 });
 
 //get recently added books - limit 7
 router.get("/get-recent-books/", async (req, res) => {
   try {
-    const books = await Book.find().select("-pdf").sort({ createdAt: -1 }).limit(4);
+    const books = await Book.find({ isDeleted: { $ne: true } }).select("-pdf").sort({ createdAt: -1 }).limit(4);
     return res.json({
       status: "Success",
       data: books,
@@ -106,7 +119,7 @@ router.get("/get-recent-books/", async (req, res) => {
 // get popular books
 router.get("/get-popular-books", async (req, res) => {
   try {
-    const books = await Book.find().select("-pdf").sort({ views: -1, createdAt: -1 }).limit(6);
+    const books = await Book.find({ isDeleted: { $ne: true } }).select("-pdf").sort({ views: -1, createdAt: -1 }).limit(6);
 
     res.json({ status: "Success", data: books });
   } catch (error) {
@@ -118,7 +131,7 @@ router.get("/get-popular-books", async (req, res) => {
 router.get("/get-book-by-id/:id", async (req, res) => {
   try {
     const { id } = req.params;
-    const books = await Book.findById(id).select("-pdf");
+    const books = await Book.findOne({ _id: id, isDeleted: { $ne: true } }).select("-pdf");
     return res.json({
       status: "Success",
       data: books,
@@ -134,7 +147,7 @@ router.get("/get-book-by-slug/:slug", async (req, res) => {
   try {
     // Searching in database slug, not ID
     const { slug } = req.params;
-    const book = await Book.findOne({ slug: slug }).select("-pdf");
+    const book = await Book.findOne({ slug: slug, isDeleted: { $ne: true } }).select("-pdf");
 
     if (!book) return res.status(404).send("Book not found");
     return res.json(book);
@@ -143,29 +156,17 @@ router.get("/get-book-by-slug/:slug", async (req, res) => {
   }
 });
 
-//book searching
+// Legacy search still returns an array and caps results at 20 by default.
 router.get("/search", async (req, res) => {
   try {
-    const q = req.query.q?.trim();
-
-    if (!q) {
-      return res.status(200).json([]);
-    }
-
-    const safeQuery = escapeRegex(q);
-
-    const books = await Book.find({
-      $or: [
-        { title: { $regex: safeQuery, $options: "i" } },
-        { authortitle: { $regex: safeQuery, $options: "i" } },
-        { category: { $regex: safeQuery, $options: "i" } },
-      ],
-    }).select("-pdf").limit(20);
-
-    res.status(200).json(books);
+    const options = catalogOptions(req.query);
+    if (!(req.query.q || '').trim()) return res.json([]);
+    const pageSize = req.query.pageSize === undefined ? 20 : options.pageSize;
+    const books = await Book.find(options.filter).select('-pdf').sort(options.sort)
+      .skip((options.page - 1) * pageSize).limit(pageSize);
+    return res.json(books);
   } catch (error) {
-    console.error("Search error:", error);
-    res.status(500).json({ message: "Server error" });
+    return catalogFailure(res, error);
   }
 });
 
